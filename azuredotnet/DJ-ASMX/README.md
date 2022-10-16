@@ -1,4 +1,5 @@
-> One of the humankind worst mistakes was WCF. It is especially tragic since at the time of succumbing to WPF there was better components architecture: ASMX. By the time WCF was recognized as the epitomy of a slow-train-crash in a components world, the time has passed, REST exploded in popularity and nobody was in a mood to understand the WCF precursor strangled in  cot. HINT: ASMX can be made and happily used without SOAP.
+
+> One of the humankind worst mistakes was WCF. It is especially tragic since at the time of succumbing to WCF there was better components architecture: ASMX, already in use. By the time WCF was recognized as the epitomy of a slow-train-crash in a components world, the time has passed, REST exploded in popularity and nobody was in a mood to understand the WCF precursor strangled in the cot. Hint: ASMX can be made and happily used without SOAP.
 
 <h1> DJ-ASMX  </h1>
 
