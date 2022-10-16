@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- This is an commentar to check XML reading works properly -->
+<styles>
+  <categories>
+    <category name="#BACKGROUND" color="WindowText" />
+    <category name="#FOREGROUND" color="Window" fontName="Courier New" fontSize="+1"/>
+    
+    <category name="#CARET" color="DarkRed" />
+    <category name="#SEARCH" color="DodgerBlue" />
+    <category name="#INFO" color="BlueViolet" />
+
+    <category name="#HIGHLIGTH" color="Highlight" />
+    <category name="#SELECTION" color="ActiveCaption" />
+
+    <category name="COMMENT" color="Gray" fontStyle="Regular" />
+    <category name="KEYWORD" color="DarkOrange" fontStyle="Bold" fontSize="+1" />
+    <category name="NUMBER" color="CornflowerBlue" fontStyle="Italic" />
+    <category name="LITERAL" color="LawnGreen" fontStyle="Italic" />
+    <category name="COMMAND" color="Crimson" fontStyle="Bold" />
+
+  </categories>
+  <patterns>
+  </patterns>
+</styles>

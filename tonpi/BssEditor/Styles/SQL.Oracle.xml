@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- This is an commentar to check XML reading works properly -->
+<styles>
+  <categories>
+    <category name="COMMENT" color="LightSteelBlue" fontStyle="Regular" />
+    <category name="KEYWORD" color="DarkOrange" fontStyle="Bold" />
+    <category name="NUMBER" color="CornflowerBlue" fontStyle="Bold" />
+    <category name="LITERAL" color="CornflowerBlue" fontStyle="Italic" />
+    <category name="FUNCTION" color="Crimson" fontStyle="Bold" />
+  </categories>
+  <patterns>
+    <!-- For more details see http://aka.ms/regex -->
+    <!-- You may test your pattern in see http://regexlib.com/RETester.aspx or http://regexstorm.net/tester -->
+    <!-- Here is complex solution for SQL grammar -->
+
+    <pattern regexp="(?&lt;!--.*)'.*?'" category="LITERAL" />
+    <pattern regexp="--.+" category="COMMENT" />>
+    <pattern regexp="\b[+-]?\d+(\.?\d+)?" category="NUMBER" />
+
+
+    <!-- RESERVED WORDS -->
+    <pattern regexp="\bACCESS\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bADD\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bALL\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bALTER\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bAND\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bANY\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bAS\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bASC\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bAUDIT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bBETWEEN\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bBY\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bCHAR\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bCHECK\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bCLUSTER\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bCOLUMN\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bCOLUMN_VALUE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bCOMMENT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bCOMPRESS\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bCONNECT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bCREATE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bCURRENT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bDATE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bDECIMAL\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bDEFAULT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bDELETE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bDESC\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bDISTINCT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bDROP\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bELSE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bEXCLUSIVE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bEXISTS\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bFILE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bFLOAT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bFOR\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bFROM\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bGRANT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bGROUP\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bHAVING\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bIDENTIFIED\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bIMMEDIATE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bIN\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bINCREMENT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bINDEX\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bINITIAL\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bINSERT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bINTEGER\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bINTERSECT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bINTO\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bIS\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bLEVEL\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bLIKE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bLOCK\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bLONG\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bMAXEXTENTS\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bMINUS\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bMLSLABEL\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bMODE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bMODIFY\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bNESTED_TABLE_ID\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bNOAUDIT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bNOCOMPRESS\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bNOT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bNOWAIT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bNULL\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bNUMBER\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bOF\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bOFFLINE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bON\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bONLINE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bOPTION\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bOR\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bORDER\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bPCTFREE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bPRIOR\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bPUBLIC\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bRAW\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bRENAME\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bRESOURCE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bREVOKE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bROW\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bROWID\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bROWNUM\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bROWS\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bSELECT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bSESSION\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bSET\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bSHARE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bSIZE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bSMALLINT\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bSTART\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bSUCCESSFUL\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bSYNONYM\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bSYSDATE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bTABLE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bTHEN\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bTO\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bTRIGGER\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bUID\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bUNION\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bUNIQUE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bUPDATE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bUSER\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bVALIDATE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bVALUES\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bVARCHAR\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bVARCHAR2\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bVIEW\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bWHENEVER\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bWHERE\b" category="KEYWORD" ignoreCase="true"/>
+    <pattern regexp="\bWITH\b" category="KEYWORD" ignoreCase="true"/>
+
+    <!-- FUNCTIONS -->
+    <pattern regexp="\bcount(?=\()" category="FUNCTION" ignoreCase="true"/>
+    <pattern regexp="\bmax(?=\()" category="FUNCTION" ignoreCase="true"/>
+    <pattern regexp="\bmin(?=\()" category="FUNCTION" ignoreCase="true"/>
+    <pattern regexp="\bcoalesce(?=\()" category="FUNCTION" ignoreCase="true"/>
+    <pattern regexp="\bgreatest(?=\()" category="FUNCTION" ignoreCase="true"/>
+    <pattern regexp="\bleast(?=\()" category="FUNCTION" ignoreCase="true"/>
+    <pattern regexp="\btrunc(?=\()" category="FUNCTION" ignoreCase="true"/>
+
+    <pattern regexp="\bSQL%ROWCOUNT\b" category="FUNCTION" ignoreCase="true"/>
+    <pattern regexp="\bROWNUM\b" category="FUNCTION" ignoreCase="true"/>
+
+  </patterns>
+</styles>

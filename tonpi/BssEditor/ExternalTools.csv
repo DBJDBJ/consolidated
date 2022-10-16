@@ -1,0 +1,3 @@
+Open command shell;cmd.exe;/K echo Here is "${FileName}";${FileDir};;s;
+Open containing folder;;;${FileDir};;f;
+Open in default editor;;;${FilePath};;d;

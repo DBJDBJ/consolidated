@@ -1,0 +1,9 @@
+﻿#GUID:24f5e89b-0f6f-447c-b5a6-085e59a99c7d
+StorePositionInRegister	0
+MoveToStartOfFile
+SetSearchPattern	(?<!\r)\n	True	False	False
+SetReplacePattern	"
+"
+ReplaceAllForward
+SetSearchPattern	""	True	False	False
+RestorePositionFromRegister	0
