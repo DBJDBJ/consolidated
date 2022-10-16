@@ -1,0 +1,12 @@
+<job>
+<script language="VBScript">
+  MsgBox "hello world (from vb)"
+WSH.echo "VBS using WSH.echo"
+</script>
+<script language="JScript">
+// worketh
+  WSH.echo("hello world (from js)");
+  // no can do, there is no DOM in WSH scripts
+  // alert("hello world (from js) alert() function");
+</script>
+</job>

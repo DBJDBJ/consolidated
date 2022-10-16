@@ -1,0 +1,103 @@
+// ********************************************************************************
+// $Author: Admin $
+// $Revision: 1 $
+// $Date: 7/24/05 12:42p $
+//
+// This script makes W: drive by substituing it for c:/working_disk folder
+//
+// Dusan	created		25AUG2001
+//
+// ********************************************************************************
+// Globals
+var trace = false ;
+var vbOKCancel = 1;
+var vbInformation = 64;
+var vbCancel = 2;
+var shell = WScript.CreateObject("WScript.Shell");
+var fso = new ActiveXObject("Scripting.FileSystemObject");
+// ********************************************************************************
+// START
+main() ;
+// END
+// ********************************************************************************
+function main()
+{
+	/*
+	try {
+			if ( trace ) msgbox("Dusan's login script") ;
+			loginfo( showFreeSpace("W:") ) ;
+	} catch ( x ) {		
+			// W: drive not found setup W: drive
+			exec("subst W: C:\WORKING_DRIVE") ;
+	} finally {
+			loginfo( " W: drive is available." ) ;
+	}
+	*/
+	try {
+			loginfo( showFreeSpace("X:") ) ;
+	} catch ( x ) {		
+			// X: drive not found setup X: drive
+			exec("subst X: C:\XDRIVE") ;
+	} finally {
+			loginfo( " X: drive is available." ) ;
+	}
+}
+//
+// ********************************************************************************
+// functions 
+// ********************************************************************************
+// Execute in shell and return the return code
+// by default don't bother with retval from the shell
+function exec ( cmdline )
+{
+	var retval = 0 ;
+	retval = shell.run( cmdline,0, true ) ;
+	if ( retval != 0 ) 
+	logerror( "Command [" + cmdline + "] has failed? Return value was: " + retval ) ;
+	return retval ;	
+}
+// ********************************************************************************
+// Welcome
+function msgbox( msg ) 
+{
+	if (
+	    vbCancel ==  shell.Popup(
+	     "\n" + msg + "\n\nPress 'OK' to proceed or 'Cancel' to quit now\n",
+	      0,
+	      WScript.FullName,
+	      vbOKCancel + vbInformation 
+	     ) )
+	        WScript.Quit();
+}
+function showFreeSpace(drvPath)
+{
+  var d, s ="";
+  d = fso.GetDrive(fso.GetDriveName(drvPath));
+  s = "Drive " + drvPath.toUpperCase( ) + " - ";
+  s += d.VolumeName + "\n";
+  s += "Free Space: " + d.FreeSpace/1024 + " Kbytes";
+  return(s);
+}/*
+********************************************************************************
+LogEvent types may be one of the following: Type Value 
+0 SUCCESS 
+1 ERROR 
+2 WARNING 
+4 INFORMATION 
+8 AUDIT_SUCCESS 
+16 AUDIT_FAILURE 
+*/
+function logevent ( msg, evtype )
+{
+  if ( null == evtype ) evtype = 4 ; // INFO is default value
+  shell.LogEvent( evtype, msg ) ;
+}
+function loginfo ( msg )
+{
+  logevent( "INFORMATION FROM:\n" + WScript.ScriptFullName + "\n" + msg ) ;
+}
+function logerror ( msg )
+{
+  logevent( "ERROR FROM:\n" + WScript.ScriptFullName + "\n" + msg, 1 ) ;
+}
+

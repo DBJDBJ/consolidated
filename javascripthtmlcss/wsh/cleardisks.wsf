@@ -1,0 +1,199 @@
+	<package>
+		<comment>
+
+   This script does clear all disks from log,tmp,bak,etc... files
+   see 'files_to_delete' array, to find out which file types are deleted
+   
+   $Author: Dusan$ 
+   $Revision: 1$ 
+   
+		</comment>
+		<job id="dbjsys_cleardisks">
+<!-- put debug="false" and the 'debugger;' statement[s] will be silently ignored -->
+<?job error="true" debug="false" ?> 
+<!------------------------------------------------------------------------->
+<reference object="Scripting.FileSystemObject"></reference>
+<!------------------------------------------------------------------------->
+<script language="JScript" src="ok_to_start.js"></script>
+<!------------------------------------------------------------------------->
+<script language="JScript">
+/* 
+	Referencing the Scripting Runtime typelib:
+	
+	This effectively introduces a set of symbols which have
+	reserved names and whose values CAN be changed. Example:
+	
+	Drive type constant 'Fixed' is in a typelib referenced bellow.
+	var fixed = Scripting.Fixed ; // ok
+	var fixed = Fixed ; // ok
+	Fixed = 123 ; // script compilation error !
+	var Fixed = 123 ; // OK! 
+	
+	The last line is a big problem. If anywhere in the code you do this
+	you will change up the constant value from the typelib so ALWAYS
+	reference the typelib constants with the libname, like so:
+	
+	var fixed = Scripting.Fixed ; // ok and the best way
+*/	
+//
+//---------------------------------------------------------------------------
+// here we decide which files are going to be deleted !
+var files_to_delete = new Array("*.bak", "*.tmp", "*.dmp", "*.log") ;
+//---------------------------------------------------------------------------
+//
+var shell = new ActiveXObject("WScript.Shell") ;
+var fso = new ActiveXObject("Scripting.FileSystemObject");
+//
+// Constants returned by Drive.DriveType are in the Scripting typelib
+// we put them to JScript variables to give them more descriptive names
+// 
+//
+var DriveTypeRemovable = Scripting.Removable ; // 1;
+var DriveTypeFixed = Scripting.Fixed ; // 2;
+var DriveTypeNetwork = Scripting.Remote ; // 3;
+var DriveTypeCDROM = Scripting.CDROM ; // 4;
+var DriveTypeRAMDisk = Scripting.RAMDisk ; // 5;
+//
+//   debugger ;
+ok_to_start("\nDELETE Every\n\n" + files_to_delete + "\n\nFrom all the fixed disks on this computer?\n");
+main() ; 
+//------------------------------------------------------------------------------
+function main()
+{
+	var  status_string = "" ;
+    try {		
+	var drives = new Enumerator(fso.drives) ;
+	var drive ;
+	 for (;!drives.atEnd();drives.moveNext())            
+	 {
+	     drive = drives.item();
+	      if ( DriveTypeFixed != drive.DriveType ) 
+	      		continue ;
+	      if ( drive.IsReady ) {
+	 			status_string += "\nBEGIN clearing " + drive.Path ;
+				status_string += operate_on_folders( drive.RootFolder, delete_in_folder ) ;
+	 			status_string += "\nDONE with " + drive.Path ;
+         	} else {
+         		status_string += "\nSKIPPED drive " + drive.Path + " Reason: NOT READY" ;
+         	}
+	}
+    }  catch( x ) {
+	logerr( "Exception \n" + x.description ) ;
+    }
+    	loginfo( status_string ) ;
+}
+/*
+-------------------------------------------------------------------------------
+Folder attributes constants
+Normal 		0 	Normal file. No attributes are set. 
+ReadOnly 	1 	Read-only file. Attribute is read/write. 
+Hidden 		2 	Hidden file. Attribute is read/write. 
+System 		4 	System file. Attribute is read/write. 
+DISCARDED -- >  Volume 		8 	Disk drive volume label. Attribute is read-only. 
+Directory 	16 	Folder or directory. Attribute is read-only. 
+Archive 	32 	File has changed since last backup. Attribute is read/write. 
+Alias 		64 	Link or shortcut. Attribute is read-only. 
+Compressed 	128 	Compressed file. Attribute is read-only. 
+
+This is defined in : Enum FileAttribute, which is Member of Scripting, typelib
+*/
+//---------------------------------------------------------------------------
+// here we define what is a legal folder. uisng this we make sure we do not
+// fiddle with system or hidden or simillar files
+function ok_folder( folder )
+{
+   if  ( typeof( folder ) != "object" ) return  false ;
+	// ignore  all  these
+	if ((folder.attributes & Scripting.ReadOnly) == Scripting.ReadOnly) return false ;
+	if ((folder.attributes & Scripting.Hidden) == Scripting.Hidden) return false ;
+	if ((folder.attributes & Scripting.System) == Scripting.System) return false ;
+	// discarded --> if ((folder.attributes & 8) == 8) return false ;
+	if ((folder.attributes & Scripting.Alias) == Scripting.Alias ) return false ;
+	// is this realy a folder ?
+	if ((folder.attributes & Scripting.Directory) == Scripting.Directory ) return true ;
+   return false ;
+}
+//-------------------------------------------------------------------------------
+// debugging callback, use it with cscript.exe or you will have a LOT of pop-ups!
+function show_folder( folder )
+{
+   		
+	if ( ok_folder(folder)  ) 
+		WScript.Echo( "Folder good to clean: " + folder.Path ) ;
+	else	
+		WScript.Echo( "Not a good folder to clean: " + folder.Path ) ;
+}
+//---------------------------------------------------------------------------
+// this callback is used to actually delete particular file types
+// NOTE: here we left out a call to check if folder is ok because we do 
+// this in a recursive drill down function which is calling this callback.
+function delete_in_folder( folder )
+{
+   var  fmask = new Enumerator(files_to_delete);
+   for (; !fmask.atEnd(); fmask.moveNext())
+   {
+	try { 
+        WScript.echo("fso.DeleteFile( " + folder.Path + "\\" + fmask.item() + ")") ;
+	    } catch (x) {/* files  not  found */}
+   }
+}
+//---------------------------------------------------------------------------
+function operate_on_folders(root_folder, callback )
+{
+	if ( ! callback ) 
+		throw new Err(0x13, "operate_on_folders() received no callback as argument") ;
+   // do not check if root_folder is ok, FSO is confused about root folder attributes!		
+   callback( root_folder ) ; // clean the root folder
+   // now drill down		   		   
+   return down_the_folder_tree( root_folder, callback ) ;
+}
+//---------------------------------------------------------------------------
+// recursively drill-down the [sub]folders cleaning them all 
+function down_the_folder_tree ( folder, callback )
+{
+   var retval = "" ;
+   var  fc = new Enumerator(folder.SubFolders);
+   for (; !fc.atEnd(); fc.moveNext())
+   {
+   	   // if folder is system, hidden, etc. we stop drilling down that path
+	   if ( ok_folder(fc.item())  ) 
+	   {
+	      callback( fc.item() ) ;
+	      retval += down_the_folder_tree( fc.item(), callback ) ;
+	   }
+	   else
+	   {
+	   	retval +=  "\nStopped at: " + fc.item().Path ;
+	   }
+   }
+   	return retval ;
+}
+///////////////////////////////////////////////////////////////////////////////////
+//
+// LogEvent types may be one of the following: Type Value 
+// 0 SUCCESS 
+// 1 ERROR 
+// 2 WARNING 
+// 4 INFORMATION 
+// 8 AUDIT_SUCCESS 
+// 16 AUDIT_FAILURE 
+//
+///////////////////////////////////////////////////////////////////////////////////
+function logevent ( msg, evtype )
+{
+  if ( null == evtype ) evtype = 4 ; // INFO is default value
+  shell.LogEvent( evtype, msg ) ;
+}
+function loginfo ( msg )
+{
+  logevent( "INFORMATION FROM:\n" + WScript.ScriptFullName + "\n" + msg ) ;
+}
+function logerror ( msg )
+{
+  logevent( "ERROR FROM:\n" + WScript.ScriptFullName + "\n" + msg, 1 ) ;
+}
+///////////////////////////////////////////////////////////////////////////////////
+			</script>
+</job>
+		<!-------------------------------------------------------------------------------->
+	</package>

@@ -1,0 +1,40 @@
+<job>
+<!------------------------------------------------------------------------->
+<script language="JScript" src="lib/whoami.js"></script>    
+<script language="JScript" src="lib/ok_to_start.js"></script>    
+<!------------------------------------------------------------------------->
+<runtime>
+        <!-- also use the /? to show the usage dialogue -->
+        <description>Poor Win Devs Building Script</description>
+        <named
+            name = "compiler"
+            helpstring = "Valid values are: cl and clang"
+            type = "string"
+            required = "true"
+        />
+        <example>Example: builder.wsf /compiler:clang</example>
+    </runtime>
+<script language="JScript">
+
+    // ok_to_start();
+    whoami() ;
+
+// Show the unnamed arguments.
+WScript.Echo(WScript.Arguments.Unnamed.length + " unnamed arguments")
+
+for (var i = 0; i <= WScript.Arguments.Unnamed.length - 1; i++) {
+    WScript.Echo(" " + WScript.Arguments.Unnamed.Item(i));
+}
+
+// Show the named arguments.
+WScript.Echo (WScript.Arguments.Named.length + " named arguments")
+WScript.Echo (" compiler: " + WScript.Arguments.Named.Item("compiler"));
+
+// if (WScript.Arguments.length != 1)
+// {
+//    WScript.Arguments.ShowUsage();
+//    WScript.Quit();
+// }
+
+</script>
+</job>
