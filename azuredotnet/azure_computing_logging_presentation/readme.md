@@ -8,6 +8,7 @@ https://marketplace.visualstudio.com/items?itemName=yzane.markdown-pdf -->
 <h1>Modern Azure Hosted Solutions Logging infrastructure</h1>
 <h2>Introduction</h2>
 
+- [Introduction](#introduction)
 - [Key Assumptions](#key-assumptions)
 - [Azure Kubernetes Service](#azure-kubernetes-service)
 - [Amazon Elastic Kubernetes Service](#amazon-elastic-kubernetes-service)
@@ -18,6 +19,11 @@ https://marketplace.visualstudio.com/items?itemName=yzane.markdown-pdf -->
   - [Without FluentBit](#without-fluentbit)
 - [Syslog](#syslog)
 
+# Introduction
+
+For Cloud Native Solutions, logging and monitroing is criticaly important. [Implementations have grown in complexity and are far from trivial](https://youtu.be/Zr7LcSr6Ooo).
+
+This is a short analysis on the state of logging technologies circa 2022Q3. In the context of Azure/AWS hosting.
 
 # Key Assumptions
 [key_assumptions](./key_assumptions.md)
