@@ -1,0 +1,53 @@
+<!DOCTYPE html> 
+<html>
+<!--
+    (c) 2005-2007-2014 by dbj@dbj.org. All rights reserved.
+    ----------------------------------------------------
+-->
+<head>
+<title>modal box</title>
+<style type="text/css" id="dbj_modal_2_styles" media="screen" >
+.dbj_modal_button {  }
+</style>
+</head>
+<body>
+		<DIV onselectstart="window.event.returnValue=false;" id="divProgressDialog" style="BORDER-RIGHT: buttonhighlight 2px outset; BORDER-TOP: buttonhighlight 2px outset; DISPLAY: __none; FONT-SIZE: 8pt; Z-INDEX: 4; BORDER-LEFT: buttonhighlight 2px outset; NOWIDTH: 350px; CURSOR: default; BORDER-BOTTOM: buttonhighlight 2px outset; FONT-FAMILY: Tahoma; POSITION: absolute; BACKGROUND-COLOR: buttonface">
+			<DIV id='progress_title' style="PADDING-RIGHT: 3px; PADDING-LEFT: 3px; FONT-WEIGHT: bolder; PADDING-BOTTOM: 3px; COLOR: captiontext; PADDING-TOP: 3px; BORDER-BOTTOM: white 2px groove; BACKGROUND-COLOR: activecaption">
+				Default Caption
+			</DIV>
+			<DIV id='progress_text_1' style="PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; PADDING-TOP: 5px">
+				Default Text 1
+			</DIV>
+			<DIV id='progress_text_2' style="PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; PADDING-TOP: 5px">
+				DEfault Text 2
+			</DIV>
+			<DIV style="PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; PADDING-TOP: 5px; TEXT-ALIGN: center;">
+				<DIV id="divProgressOuter" style="BORDER-RIGHT: buttonshadow 1px solid; BORDER-TOP: buttonshadow 1px solid; BORDER-LEFT: buttonshadow 1px solid; WIDTH: 336px; BORDER-BOTTOM: buttonshadow 1px solid; HEIGHT: 15px">
+					<DIV id="divProgressInner" style="MARGIN: 0px; WIDTH: 0px; COLOR: red ; HEIGHT: 13px; BACKGROUND-COLOR: infobackground; TEXT-ALIGN: center"></DIV>
+				</DIV>
+			</DIV>
+			<DIV style="BORDER-TOP: white 2px groove; PADDING-BOTTOM: 5px; PADDING-TOP: 3px; BACKGROUND-COLOR: buttonface; TEXT-ALIGN: center">
+					<INPUT id="btnCancel" 
+					style="FONT-SIZE: 8pt; FONT-FAMILY: verdana,arial,Tahoma; width:30%; margin:3px;"
+					onclick="top.alert('modal dialogue htc, btnCancel onclick event handler is not user defined.')"
+					type="button" value="Cancel" name="btnCancel" />
+					<INPUT id="btnYes"
+					style="FONT-SIZE: 8pt; FONT-FAMILY: verdana,arial,Tahoma; width:30%; margin:3px;"
+					onclick="top.alert('modal dialogue htc, YES onclick event handler is not defined.')"
+					type="button" value="Yes" name="btnYes" />
+					<INPUT id="btnNo" 
+					style="FONT-SIZE: 8pt; FONT-FAMILY: verdana,arial,Tahoma; width:30%; margin:3px;"
+					onclick="top.alert('modal dialogue htc, NO onclick event handler is not defined.')"
+					type="button" value="No" name="btnNo" />
+			</DIV>
+		</DIV>
+		<!-- 
+		BEGIN TRANSPARENT MODAL DIV
+		Also stops the user to click on anything bellow it.
+		-->
+		<DIV id="divModal" style="Z-INDEX: 3; FILTER: alpha(opacity=75); LEFT: 0px; POSITION: absolute; TOP: 0px; BACKGROUND-COLOR: white"
+			onclick="window.event.cancelBubble=true; window.event.returnValue=false;"></DIV>
+</body>
+<script src="http://code.jquery.com/jquery-1.6.1.js" type="text/javascript" id="JQUERY161" onload="/* alert('JQUERY142 Loaded!') */" ></script>
+
+</html>

@@ -1,0 +1,20 @@
+{
+  "license": "Apache-2.0",
+  "private": true,
+  "name": "dbj_cond_test",
+  "version": "1.0.3",
+  "description": "dbj_cond_test",
+  "main": "app.js",
+  "author": {
+    "name": "dbj.org"
+  },
+  "dependencies": {
+    "benchmark": "^2.1.4",
+    "colors": "^1.1.2",
+    "dbj.cond": "^4.0.1",
+    "dbj.cond.comparators": "^0.2.0",
+    "eslint": "^4.16.0",
+    "fast-deep-equal": "^1.0.0"
+  },
+  "devDependencies": {}
+}

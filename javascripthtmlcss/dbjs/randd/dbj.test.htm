@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html >
+<html>
+<head>
+    <title>DBJ*QT&trade; Quick Tests by DBJ &copy; 2009 by DBJ.ORG&trade;</title>
+    <style type="text/css">
+        * { font: 12px/1.1 verdana;} 
+        .gray {background-color:#c0c0c0; }
+        .false {background-color:red; width:33%; font-weight:bold; }
+        .true {background-color:green; width:33%;font-weight:bold; }
+        td, tr { height:20px; }
+        .test_table_css { table-layout:fixed; font:12px/1.1 verdana, arial,tahoma; margin:5px; }
+        .test_table_css caption { background-color:#C0C0C0; color:#000000; height:2em; padding:0.2em; cursor:hand; }
+        .test_table_css th { border-bottom: 2px solid; }
+        .test_table_css .true { background-color:Teal; }
+	.dbj_footer { font-size:x-small; text-align:center; margin:10px; border-top:2px solid; }
+    </style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js" type="text/javascript" id="JQ.1.3" ></script>
+<script src="http://dbj.org/6/dbj.lib.js" type="text/javascript"></script>
+</head>
+<body>
+<script type="text/javascript" >
+///<reference path="dbj.lib.js" />
+    var TEST = {
+        table_id: "test_table_" + (+new Date()),
+        table_default_class_name: "test_table_css",
+        cases: {
+            "null": 0,          "undefined": 0,     "document": 0,  "top.alert": 0,
+            "RegExp": 0,        "XMLHttpRequest": 0,"1": 0,         "new String()": 0,
+            "new Date()":0,     "Math": 0,          "new Array()": 0, "[]": 0,
+            "new Object()": 0,  "{}": 0
+            , "o = { toString: undefined, valueOf: undefined }": 0
+            , "o = { toString: undefined, valueOf: function() { return 'function X'; } }": 0
+        },
+
+        all: function(f) {
+            var rezult = {};
+            for (var j in TEST.cases) {
+                try {
+                    rezult[j] = "" + f(eval(j));
+                } catch (x) {
+                    rezult[j] = "ERROR: " + x.description;
+                }
+            }
+            return rezult;
+        },
+        asTable: function(o, c1, c2, c3) {
+            if ("object" != typeof o) return null;
+            var rezult = "<table id='" + TEST.table_id + "' class='" + TEST.table_default_class_name + "'><caption>" + (c1 || "") + "</caption><tr><th width='50%'>" + (c2 || "col 1") + "</th><th width='50%'>" + (c3 || "col 2") + "</th></tr><tbody>";
+            for (var j in o) {
+                rezult += "<tr><td>" + j + "</td><td class='"+o[j]+"'>" + o[j] + "</td></tr>";
+            }
+            return rezult + "</tbody></table>";
+        }
+    }
+</script>
+<script type="text/javascript" >
+(function() {
+    Array.prototype.indexOf = function(o) {
+        for (var i in this)
+            if (this[i] == o) return i;
+        return -1;
+    }
+    // remove all from array
+    Array.prototype.remove = function(o) {
+        var index = Array.prototype.indexOf.call(o);
+        if (~index) {
+            this.splice(index, 1);
+            return this.remove(o);
+        }
+        return this;
+    }
+})();
+// V.5
+// does not handle properly only one case and only if IE < 8
+// var singularity = { toString: undefined, valueOf : function(){return "string BOMBA!";}}
+(function(tos) {
+    var s = tos.call(tos);
+    isF = function(f) {
+        return s === tos.call(f);
+    }
+    /*@cc_on
+    @if (1==1)
+    // in IE, version bellow replaces version above.
+    isF = function(f) { try {return s === tos.call(f) ? true : /\bfunction\b/.test(f);
+                            } catch (x) { return false; }
+                      }
+    @end
+    @*/
+})(Object.prototype.toString);
+</script>
+<script type="text/javascript" id="andrea">
+    // http: //webreflection.blogspot.com/2009/08/isfunction-hacked-iscallable-solution.html
+    // does not handle properly only one case and only in IE
+    // var singularity = { toString: undefined, valueOf : undefined }
+    (function(tos) {
+
+    var u = "undefined", s = tos.call(tos);
+
+    isCallable = function(f) {
+        return s === tos.call(f);
+    };
+
+    // in IE, version bellow replaces version above. 
+    /*@cc_on
+    @if (1==1)
+    isCallable = function(f) {
+        return s === tos.call(f) || (!!f && typeof f.toString == u && typeof f.valueOf == u && /^\s*\bfunction\b/.test(f));
+    }
+    @end
+    @*/
+})(Object.prototype.toString);
+</script>
+<script type="text/javascript" >
+    // TESTING ---------------------------------------------------------
+
+    function run(element) {
+
+        [1, 2, 3].remove(2);
+    
+      $c =  (function (id) {
+            $("#"+id).remove();
+            $(document.body).append("<div id='"+id+"' ></div>");
+            return $("#"+id);
+        })("container");
+
+        $c.append(TEST.asTable( TEST.all(isF),"<a href='javascript:alert(isF)'>isF()</a>","Input","isF() rezult")) ;
+        //$c.append(TEST.asTable(TEST.all(isCallable), "<a href='javascript:alert(isCallable)'>WebReflection&trade; isCallable()</a>", "Input", "isCallable() rezult"));
+        $c.append(TEST.asTable(TEST.all(JSON.stringify), "<a href='javascript:alert(JSON.stringify)'>JSON.stringify()</a>", "Input", "JSON.stringify() rezult"));
+        $c.append(TEST.asTable(TEST.all(dbj.classof), "<a href='javascript:alert(dbj.classof)'>dbj.classof()</a>", "Input", "dbj.classof() rezult"));
+
+        return false;
+    }
+</script>
+<p>Quick Tests by DBJ</p>
+<button onclick="run();">RUN</button>
+<p class='dbj_footer'><a href="http://dbj.org">DBJ.ORG&trade;</a> </p>
+</body>
+</html>

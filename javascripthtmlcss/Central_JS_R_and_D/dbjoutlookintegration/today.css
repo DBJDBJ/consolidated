@@ -1,0 +1,70 @@
+/*
+ (c) 2009 by DBJ.ORG
+
+*/
+
+
+
+body { overflow:auto ; }
+
+
+/* svaki body ce po defaultu imati ove attribute stila */
+body { 
+background-color:white; color:navy; 
+font:12px/1.5 verdana,tahoma,arial; 
+/* background-image:url(logo/dbjpoza.gif) ; */
+scrollbar-base-color : navy ;
+scrollbar-3dlight-color : silver ;
+scrollbar-arrow-color : navy ;
+scrollbar-darkshadow-color : navy ;
+scrollbar-face-color : silver ;
+scrollbar-highlight-color : navy ;
+scrollbar-shadow-color : navy ;
+scrollbar-track-color : navy ;
+}
+
+/* ovde kazemo da klasa 'mid_frame_title' vazi samo za DIV-ove */
+DIV.mid_frame_title 
+{ margin:5px; padding:5px;  
+	width:100%; height:100%; 
+	font-weight:bold;
+	font-size:large ;
+	font-family:verdana,tahoma,arial;
+	text-align:center;
+}
+
+DIV.bottom_menu 
+{
+	font-size:x-small ;
+	text-align:center ;
+	font-weight:bold ;
+	margin:0px; padding:1px;  
+	width:100%;  
+}
+DIV.bottom_menu2 
+{
+	text-align:center ;
+	font-weight:normal ;
+	font-size:smaller ;
+	margin:0px; padding:1px;  
+	width:100%;  
+}
+
+/*
+LINKOVI
+*/
+a { border:0px solid silver; }
+a:visited { text-decoration:none; padding:0px; color:silver}
+a:active { text-decoration:none; padding:0px; color:silver}
+a:link { text-decoration:none; padding:0px; color:silver}
+a:hover {text-decoration:none; padding:0px; color:navy; background-color:silver;}
+
+/*
+klase
+*/
+.lightext { color:silver; }
+.lightborder { border:1px solid silver; }
+.absolute_default { position:absolute;top:0;left:0; }
+
+td.half { width:50%; }	
+td { border:1px solid silver; }

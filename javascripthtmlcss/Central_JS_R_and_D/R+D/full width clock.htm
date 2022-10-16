@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html />
+<html>
+<head>
+<title>DBJ.ORG&trade; simple clock</title>
+<style type="text/css">
+html, body { 
+		height:100%; width:100%; border:0px solid; margin:0px; padding:0px;
+		overflow:hidden;
+		} 
+		#clock_face { 
+		font: x-large/1.5 segoe ui,verdana,arial,tahoma; letter-spacing:1px;
+		background-color: #C0C0C0; 
+		}
+</style>
+
+</head>
+<body scroll="no">
+<button onclick="alert(document.body.clientHeight)">client height</button>
+<button onclick="alert(document.body.offsetHeight)">offset height</button>
+<div id="clock_face">&nbsp;</div>
+</body>
+<script type="text/javascript" >
+(function (GLOB, undefined) {
+	onload = function () {
+		window.setInterval(Clock_Tick, 1000);
+		Clock_Tick();
+	}
+
+	var cf = document.getElementById("clock_face")
+	, sTime = "" ;
+
+	function Clock_Tick() {
+		var dToday = (new Date()).toLocaleTimeString();
+		cf.style.fontSize = font_size();
+		cf.innerText = dToday;
+	}
+
+	var iRatio = 4, sanity_koef = 1 / 1;
+	function font_size() {
+		var iDocHeight = document.body.offsetHeight,
+   		iDocWidth = document.body.offsetWidth;
+		if ((iDocHeight * iRatio) > iDocWidth)
+			iDocHeight = iDocWidth / iRatio;
+		return sanity_koef * iDocHeight + "px" ;
+	}
+} (this));
+</script>
+</html>

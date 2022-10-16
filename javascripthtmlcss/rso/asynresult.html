@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>DBJ*AsyncResult</title>
+</head>
+<script src="jquery-1.11.2.min.js"></script>
+<body>
+    <script>
+// AsynResult V 8.0
+// MIT style (c) 2009-2010 by DBJ.ORG
+// caling example
+//     spawn({ 'worker': w1, 'delay': 1000, 'callback': on_async_finished }, 1, 2, 3)
+//
+// Mandatory arguments :
+// 1:single JSON object where
+// worker   [mandatory] function pointer of the worker to execute asynchronously
+// delay    [optional]  delayed execution time unit in microseconds, if null then 1.
+// callback [optional]  called 'back' when worker is done with AsyncResult instance
+//                      as its only argument
+// [optional]
+// any arguments required by a worker function
+//
+    function spawn ( ){
+    var AsyncResult = function(args_) {
+    var FP = args_[0].worker;
+    var tu = parseInt(args_[0].tu === null ? 1 : args_[0].tu);
+    tu = (tu > spawn.maxdelay ? spawn.maxdelay : tu)
+    var CB = args_[0].callback;
+    // create properties on the curent instance
+    this.done = false;
+    this.retval = null;
+    this.tid = null;
+    this.callback = CB;
+    // preserve the current instance aka 'this' in 'that'
+    var that = this;
+    // transform arguments to array and cut the first element
+    // thus leaving arguments for FP
+    that.args = Array.prototype.slice.call(args_).slice(1);
+    // be 'future proof'
+    // http://wiki.ecmascript.org/doku.php?id=proposals:json_encoding_and_decoding&s=tojsonstring
+    // and use: http://www.json.org/json2.js
+    this.toJSONString = function() { return JSON.stringify(that); }
+    this.toString = function() {
+    // return JSON formated object exposing private properties
+    // NOTE: this idiom exposes private properties without get/set methods
+    return this.toJSONString();        }
+    // this private method is delay executed *outside* of the context of the current instance
+    // it is executed in the context of the 'global space' aka the 'window' object
+    function doit(x) {
+    try {
+    // execute FP(args), and preserve its return value
+    // use 'that' for execution contest
+    that.retval = FP.apply(that, that.args);
+    // signal that execution finished ok
+    that.done = true;
+    } catch (x) {
+    // FP() caused an exception
+    that.retval = x.message;
+    // for caller to see which one
+    // signal that execution finished in errror
+    that.done = false;
+    }
+    // for testing purposes show the state of the AsyncResult instance
+    if (spawn.log) spawn.log("AsyncResult::doit()\n\n" + that);
+    // use clearInterval to release the timer ID
+    clearTimeout(that.tid);
+    // use the callback , if given
+    if (that.callback) {
+    var cb_tid = setTimeout(function(x) {
+    clearTimeout(cb_tid);
+    // pass 'that'/'this' to the callback
+    try { that.callback(that);
+    } catch (x) {
+    /* ignore callback exceptions, but log them */
+    if (spawn.log) spawn.log("AsyncResult::doit() callback exception\n\n" + x.message);
+    }}, 1);
+    }
+    }
+    // delay doit() execution , in the context of the 'window' object
+    that.tid = setTimeout(doit, tu);
+    }
+    return new AsyncResult( arguments ) ; // immediate instance return
+    }
+    // maximum number of seconds spawn will accept
+    spawn.maxdelay = 60 * 1000; // is one minute
+    // assign a logging method. if null will not be used
+    // otherwise must be a function with a single string argument
+    spawn.log = console.log ;
+
+    $(function(){
+        //function test_async_result ()      {
+        var large_image_url = "http://www.bbc.co.uk/london/images/london_map1807_large.jpg";
+        // this function is going to be delay-executed by the AsyncResult instance
+        function begin_async_operation(the_url, image_loaded_fun) {
+            // this is passed from AsyncResult instance that called this function
+            // call bellow calls it toString() method which calls its toJSONString() method
+            // which reveals all the parameters present on it.
+            dbj.log("begin_async_operation() this == " + this);
+            // return value will be preserved as AsyncResult::reval property
+            return $('<img alt="" />')
+            .attr("src", the_url)
+            // use the event callback passed through spawn(), AsynResult() mechanism
+            .load(function() { image_loaded_fun(this); })
+            /* return the actual img dom object */
+            [0];    }
+        // this is AsyncResult callback function which is called after AsyncResult
+        // has delay=executed the function to be spawned
+        // receives AsyncResult instance
+        function end_async_operation(async_result) {
+            dbj.log('end_async_operation()');
+            // in this usage scenario, we know this is just an intermediary step
+            // before rela large image arrives, so we will use it as an opportunity
+            // to show a temporary spinning animated gif image
+            show_test_image('http://www.wirenc.com/statics/images/80px_spi.gif');
+        }
+        // this is actually called by jQuery when .load() gets fired upon image arrival
+        // receives img object instance
+        function on_large_image_loaded(img_instance) {
+            dbj.log("on_large_image_loaded()");
+            show_test_image(img_instance.src);
+        }
+        function show_test_image(image_url) {
+            $("#test_image").find("img").attr("src", image_url);
+            $("#test_image").attr("href", image_url);
+        }
+        // prepare the place for the test images to appear
+        $("#test_image").remove();
+        $(document.body).prepend('<a id="test_image" target="_blank"><img style="width: 100px;" alt="" /></a>');
+
+        dbj.log("Async started, spawn() returned : " +
+        spawn(
+        /* first argument is mandatory JSON object */
+        { 'worker': begin_async_operation, 'delay': 1, 'callback': end_async_operation },
+        /* all the other args are optional. in this case we pass the image source url
+        and the callback to be used by jQuery inside load(), on image ready event */
+        large_image_url,
+        on_large_image_loaded
+        ));
+        
+    });
+        </script>
+</body>
+</html>

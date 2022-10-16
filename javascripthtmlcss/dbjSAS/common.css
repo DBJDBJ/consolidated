@@ -1,0 +1,18 @@
+﻿body {
+}
+.toolbar { width:100%; height:10%; margin:1px; padding:1px; 
+           position:relative; top:0; left:0; }
+.toolbar button { margin:2px 5px 2px 2px; width:128px; height:32px; 
+                  font-size:16px; overflow:hidden; text-align:left; padding:1px 1px 1px 5px; }
+#display { width:100%; height:99%; margin:1px; padding:1px; overflow:auto; 
+           font: small/1.1 "courier new",verdana, arial, tahoma ;
+         }
+#specimen { position:absolute; right:10px; 
+            bottom:10px; width:150px; height:30px; border:2px solid; z-index:99;
+            padding:3px;
+            background-color:transparent; } 
+.specimen button { height:100%; width:100%; }  
+.dbjPanel { height:700px; width:49%; padding:0px;margin:0px; 
+            font:12px/1.1 monospace; overflow:hidden;}
+.editableText {} 
+textarea { overflow:auto; white-space:pre; word-spacing:normal; }

@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html />
+<html> <head>
+<title>HTML5 Canvas pie menu demo</title>
+</head>
+
+<body>
+<h5>Click anywhere in the coloured area</h5>
+
+<ul id="piemenu" style="visibility:hidden; position: absolute; right:-1">
+  <li id="item1"><img src="demo/1.png"></li>
+  <li id="item2"><img src="demo/2.png"></li>
+  <li id="item3"><img src="demo/3.png"></li>
+  
+</ul>
+<div id="area" style="width:500; height:500; background-color:#c0c0c0"></div>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+<script type="text/javascript" src="jquery.piemenu.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('#area').click(function (e) {
+            $('#piemenu').pieMenu({ left: e.pageX, top: e.pageY },
+      {
+          elementStyle: { position: 'absolute' },
+          onSelection: function (item) { alert(item.attr('id') + ' was clicked!'); }
+      });
+        });
+    });
+</script>
+</body>
+</html>

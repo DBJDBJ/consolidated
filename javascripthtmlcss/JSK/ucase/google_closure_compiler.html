@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Google closure compiler front end</title>
+<style type="text/css">
+html,body { height:100%; width:100%; background-color:#515151; overflow:hidden; padding:5px; }
+form,textarea { 
+            font:large/1.2 monospace; 
+          }
+form, textarea { width:90%; height:90%; }
+input { padding:0.5%;margin:1%; font-size:large; }
+input[type="submit"] { background:tomato;  }
+input[type="button"] { background:#7fbebe; }
+</style>
+</head>
+  <body>
+    <form id="forma" action="http://closure-compiler.appspot.com/compile" method="POST"	>
+	<p>
+    <input type="submit" value="Optimize" />
+    <input type="button" value="WHITESPACE_ONLY" onclick="level_changed(forma.compilation_level.value = 'WHITESPACE_ONLY')" />
+    <input type="button" value="SIMPLE"  		onclick="level_changed(forma.compilation_level.value = 'SIMPLE_OPTIMIZATIONS')" />
+    <input type="button" value="ADVANCED" 		onclick="level_changed(forma.compilation_level.value = 'ADVANCED_OPTIMIZATIONS')" />
+	</p>
+    <textarea name="js_code" cols="50" rows="5">
+    /* compilation level: SIMPLE_OPTIMIZATIONS */
+    function hello(name) {
+      // Greets the user
+      alert('Hello, ' + name);
+    }
+    hello('New user');
+    </textarea>
+    <input type="hidden" name="compilation_level" value="SIMPLE_OPTIMIZATIONS" />
+    <input type="hidden" name="output_format" value="text" />
+    <input type="hidden" name="output_info" value="compiled_code" />
+    </form>
+<!-- 
+https://developers.google.com/closure/compiler/docs/compilation_levels#enable-api
+-->	
+  <script>
+  function level_changed ( new_level ) {
+    var rx = /\/\*.+\\*\// ,
+	code = forma.js_code.value ;
+	if ( rx.test(code))
+		forma.js_code.value = code.replace( rx, "/* compilation level: " + new_level + " */" );
+	else
+		forma.js_code.value = "/* compilation level: " + new_level + " */\n" + code ;
+  }
+  </script>
+  </body>
+</html>

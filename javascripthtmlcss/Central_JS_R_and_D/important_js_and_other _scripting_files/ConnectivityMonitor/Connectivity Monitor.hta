@@ -1,0 +1,269 @@
+<html>
+<!-- 
+==========================================================================
+
+ NAME: Connectivity Monitor
+
+ AUTHOR: DBJ@DBJ.ORG
+ DATE  : 1/29/07
+
+ COMMENT: 
+ 
+ "It is the mark of an educated mind to be able to entertain a thought without accepting it." -Aristotle
+
+========================================================================== -->
+<head>
+<title>Connectivity Monitor</title>
+
+<hta:application
+	applicationname="Connectivity Monitor"	
+	border="dialog"
+	borderstyle="normal"
+	caption="Connectivity Monitor"
+	contextmenu="no"
+	icon="images\icon.ico"
+	maximizebutton="no"
+	minimizebutton="yes"
+	navigable="yes"
+	scroll="no"
+	selection="no"
+	showintaskbar="yes"
+	singleinstance="yes"
+	sysmenu="yes"
+	version="1.0"
+	windowstate="normal"
+>
+<script type="text/vbscript" >
+Option Explicit
+' On Error Resume Next
+
+Dim intRefreshRt: 	intRefreshRt = 60 * 1000 '60 Second Refresh Rate in Milliseconds
+' Dictionary object created to store Host/Computer names and the DateTime of 
+' the last successful ping
+Dim objDict: 		Set objDict = CreateObject("Scripting.Dictionary")
+' Define the file that will be used to store the Host/Computer names
+Dim strFileName: 	strFileName = "hostslist.txt"
+' Define variable that will be used to automatically refresh the data
+Dim iTimerID
+' Define constants to use when accessing the text file
+Const ForReading = 1
+Const ForWriting = 2
+Const ForAppending = 8
+
+	Sub Window_OnLoad
+' 		On Error Resume Next
+		
+		Dim objFSO:	Set objFSO = CreateObject("Scripting.FileSystemObject")
+		' Resize the HTA and move
+		window.resizeTo 700, 500
+		window.moveTo screen.width/4, screen.height/4
+		' Check for the existence of the file defined above, create if it does not exist
+		If Not objFSO.FileExists(strFileName) Then
+			objFSO.CreateTextFile strFileName, True
+		End If
+		Set objFSO = Nothing
+		' Call Subs
+		UpdateDict
+		UpdateTable
+		' Set timer to execute the UpdateTable Sub every second defined in the intRefreshRt variable
+		iTimerID = window.setInterval("UpdateTable", intRefreshRt)
+	End Sub
+	
+	Sub UpdateTable
+' 		On Error Resume Next
+		
+		Dim strComputer, strHTML, strStatus
+		' Begin building HTML table
+		strHTML = "<table width='100%' border='0'><tr>" & _
+				  "<td nowrap><strong>Remote Host</strong></td>" & _
+				  "<td nowrap><strong>Last Successful Ping</strong></td>" & _
+				  "<td class='status' nowrap><strong>Status</strong></td></tr>"
+		' Loop through dictionary to get computer names and datetime of last successful ping
+		For Each strComputer In objDict.keys
+			strStatus = GetStatus(strComputer)
+			If Not LCase(strStatus) = "red.jpg" Then
+				objDict(strComputer) = Now ' Update last successful ping for the Host/Computer
+			End If
+			strHTML = strHTML & "<tr><td>" & strComputer & "</td>" & _
+					  "<td>" & objDict(strComputer) & "</td><td class='status'>" & _
+				  	  "<img src='images/" & strStatus & "' width='20' height='20'></td></tr>"
+		Next
+		' Send HTML code generated above to body section
+		window.document.getElementById("dispstatus").innerHTML = strHTML & "</table>"
+	End Sub
+	
+	Function GetStatus(strComputer)
+' 	 	On Error Resume Next
+	
+		Dim wmiQuery, objWMIService, objPing, objStatus, intReply, i
+		
+		intReply = 0
+		' Define WMI query to ping
+		wmiQuery = "Select * From Win32_PingStatus Where " & _
+			"Address = '" & strComputer & "'"
+		
+		' Make WMI connection to local machine
+		Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")
+		' Execute Query
+			
+		For i = 1 To 4
+			Set objPing = objWMIService.ExecQuery(wmiQuery)
+			' Retrieve the status code of each ping request
+			For Each objStatus In objPing
+				Select Case objStatus.StatusCode
+					Case 0 
+						intReply = intReply + 1
+				End Select
+			Next
+		Next
+		Set objPing = Nothing
+		Set objWMIService = Nothing
+		' Determine the image color depending on the number of pings successfully received
+		Select Case True
+			Case (intReply = 0)
+				GetStatus = "red.jpg"
+			Case (intReply => 3)
+				GetStatus = "green.jpg"
+			Case Else
+				GetStatus = "yellow.jpg"
+		End Select
+	End Function
+	
+	Sub AddNewHost
+' 		On Error Resume Next
+		
+		Dim objFile, strComputer
+		' Get host/computer name defined in the text field
+		strComputer = window.document.getElementById("newhost").value
+		' If the host/computer name is empty then do nothing
+		If (IsNull(strComputer) Or strComputer = "" Or strComputer = " ") Then Exit Sub
+		' Clear the host/computer name text field
+		window.document.getElementById("newhost").value = ""
+		' Check to ensure the host/computer name does not already exists
+		If Not objDict.Exists(strComputer) Then
+			' Open the text file and add the new host/computer
+			Set objFile = FileObject(ForAppending)
+			objFile.WriteLine strComputer
+			objFile.Close
+			Set objFile = Nothing
+			' Call subs to update the information displayed
+			UpdateDict
+			UpdateTable
+		End If
+	End Sub
+	
+	Sub UpdateHList
+' 		On Error Resume Next
+		
+		Dim objFile, arrTemp, strTemp, i
+		' Get the host/computer names in the text area and split into an array
+		arrTemp = Split(window.document.getElementById("txtahlist").Value, VbCrLf)
+		' Open text file
+		Set objFile = FileObject(ForWriting)
+		' Loop through array, writing to text file if the value is not null or blank
+		For i = 0 To UBound(arrTemp)
+			strTemp = arrTemp(i)
+			If Not (IsNull(strTemp) Or strTemp = "" Or strTemp = " ") Then
+				objFile.WriteLine strTemp
+			End If
+		Next
+		objFile.Close
+		Set objFile = Nothing
+		' Clear info from dictionary in case there has been deletions
+		objDict.RemoveAll
+		' Refresh all the data displayed by calling the subs
+		UpdateDict
+		UpdateTable
+		' Re-state the timer that is cleared in the EditList sub
+		iTimerID = window.setInterval("UpdateTable", intRefreshRt)
+	End Sub
+	
+	Sub EditList
+' 		On Error Resume Next
+		
+		Dim objFile, strHTML
+		' Stop the time to prevent the data from refreshing while making changes to the host list
+		window.clearInterval(iTimerID)
+		' Read the current host/computer names from the text file
+		Set objFile = FileObject(ForReading)
+		' Output data from text file to text area to review/modify as needed
+		strHTML = "<textarea id='txtahlist' cols='30' rows='10'>" & objFile.ReadAll & "</textarea>" & _
+				  "<br /><br /><input type='button' value='Update List' onclick='UpdateHList'>" & _
+				  "&nbsp;&nbsp;<input type='button' value='Cancel' onclick='UpdateTable'>"
+		objFile.Close
+		Set objFile = Nothing
+		' Write HTML to body of HTA
+		window.document.getElementById("dispstatus").innerHTML = strHTML
+	End Sub
+	
+	Function FileObject(strMethod)
+' 		On Error Resume Next
+		
+		Dim objFSO:	Set objFSO = CreateObject("Scripting.FileSystemObject")
+		' Open text file using the method specified
+		Set FileObject = objFSO.OpenTextFile(strFileName, strMethod)
+		Set objFSO = Nothing
+	End Function
+	
+	Sub UpdateDict
+' 		On Error Resume Next
+		
+		Dim objFile, strLine
+		' Open the text file to read its content
+		Set objFile = FileObject(ForReading)
+		' Loop through each line adding it to the dictionary
+		Do Until objFile.AtEndOfStream
+			strLine = objFile.ReadLine
+			If Not (IsNull(strLine) Or strLine = "" or strLine = " ") Then
+				If Not objDict.Exists(strLine) Then
+					objDict.Add strLine, ""
+				End If
+			End If
+		Loop
+		objFile.Close
+		Set objFile = Nothing
+	End Sub
+</script>
+<style type="text/css" media="all">
+    html,body 
+    {
+        font:12px/1.1 verdana,tahoma,arial;
+        background-color:#000;
+        color:#fff;
+        }
+a:link 
+{
+    color:#fff ;
+	text-decoration:none;
+}
+a:visited {
+    color:#fff ;
+	text-decoration:none;
+}
+a:hover {
+	font-weight:bold;
+	text-decoration:underline;
+}
+td {
+	font: inherit;
+	vertical-align: center;
+}
+.status {
+	text-align:center;
+}
+</style>
+</head>
+<body>
+<div align="center">
+<h3>Server Monitor</h3>
+<p>&copy; 2011 by IST MOSS Service Line, using  <a href="http://msdn.microsoft.com/en-us/library/aa394350(v=vs.85).aspx" >Win32_PingStatus</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="" onclick="EditList">Edit Host List</a></p>
+<p>
+Add Host (by name): <input type="text" id="newhost" onKeyPress="if window.event.keycode = 13 then AddNewHost">&nbsp;&nbsp;
+<input type="button" value="Add" onClick="AddNewHost">
+</p>
+<div id="dispstatus"></div>
+</div>
+<p>60 Second Refresh Rate</p>
+</body>
+
+</html>

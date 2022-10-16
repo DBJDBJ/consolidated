@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
+    <title>SABO | Delicious Catering Solutions</title>
+    <link href="dbj.css" rel="stylesheet" id="dbj_style_sheet" />
+</head>
+<body bgcolor="#00abec" onclick="mailto:borjankino@gmail.com?subject=SABO CATERING ZAHTEV sa sajta">
+<a href="mailto:borjankino@gmail.com?subject=SABO CATERING ZAHTEV sa sajta" >
+    <div id="feature">
+        <div id="content">
+		Contact
+        </div>
+    </div>
+</a>	
+    <!--   http://www.microdatagenerator.com/   -->
+    <span style="display:none">
+        <div itemscope itemtype="http://schema.org/Restaurant">
+            <span itemprop="name"> SABO Catering</span>
+
+            <div itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+                <span itemprop="ratingValue">5</span> stars -
+                based on <span itemprop="reviewCount">21</span> reviews
+            </div>
+
+            <div itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">
+                <span itemprop="streetAddress"> </span>
+                <span itemprop="addressLocality">Belgrade </span>,
+                <span itemprop="addressRegion">Serbia </span>
+                <span itemprop="postalCode">11000</span>
+            </div>
+            <span itemprop="telephone"></span>
+            <a href="" itemprop="maps">URL of Map</a>
+
+            Categories:    <span itemprop="servesCuisine">
+            </span>
+
+            Price Range: <span itemprop="priceRange">$$</span>
+            Takes Reservations: Yes
+        </div>
+    </span>
+<script>
+
+    onload = function () {
+	
+	const doc = document,
+      mailto_url = 	"mailto:borjankino@gmail.com?subject=SABO CATERING ZAHTEV sa sajta";
+	
+			doc.onclick = function(e) {
+			  e.preventDefault();
+			   var win = open(mailto_url, "_blank", "toolbar=yes,scrollbars=yes,resizable=yes,top=5,left=5,width=400,height=400");
+			  return false;
+			};
+			
+			doc.ondragover = doc.ondrop = function(e) {
+			  e.preventDefault();
+			  return false;
+			};
+	}
+  </script>	
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- DBJ@DBJ.org -->
+<HTML>
+<HEAD>
+<TITLE>&copy; 2007-2009 by DBJ.ORG&trade;</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=windows-1252">
+<STYLE>
+body {font:10px verdana; background:menu; margin:1; padding:0; }
+table { font:10px verdana; margin:0; padding:0; }
+.maintable { width:100%; height:88%; margin:0; }
+.toolbartable { width:100%; height:8%; margin:0; }
+.toolbarcell { 
+width:16%; valign:top; text-align:center; font-size:12px; font-weight:bolder; border:2px outset; 
+/* filter:progid:DXImageTransform.Microsoft.DropShadow(OffX=2, OffY=2, Color='gray', Positive='true'); */
+/* filter:progid:DXImageTransform.Microsoft.Barn(orientation='horizontal' motion='in'); */
+/* filter:progid:DXImageTransform.Microsoft.Pixelate(); */
+/* filter:progid:DXImageTransform.Microsoft.Inset(); */
+/* filter:progid:DXImageTransform.Microsoft.Slide(bands=5, slideStyle='push'); */
+/* filter:progid:DXImageTransform.Microsoft.Slide(bands=5, slidestyle='swap'); */
+/* filter:progid:DXImageTransform.Microsoft.Slide(bands=5, slidestyle='hide'); */
+/* filter:progid:DXImageTransform.Microsoft.Spiral(); */
+/* filter:progid:DXImageTransform.Microsoft.Stretch(stretchStyle='push'); */
+}
+.toolbarrow  { height:5mm; }
+a { text-decoration:none; padding:3px; }
+a:hoover { text-decoration:underline; }
+a:visited { text-decoration:none;  }
+a:active { text-decoration:none; }
+a:link { text-decoration:none; }
+
+</STYLE>
+</HEAD>
+<BODY scroll=no >
+<TABLE class=toolbartable cellSpacing=5 cellPadding=0 >
+<TR class=toolbarrow >
+    <TD class=toolbarcell ><SCRIPT language=JavaScript>document.write( (new Date()).toLocaleDateString()) ;</SCRIPT></TD>
+    <TD class=toolbarcell id='clock_TD' ></td>
+    <TD class=toolbarcell ><A href="outlook://Calendar/">Calendar</A></td>
+    <TD class=toolbarcell ><A href="outlook://Inbox/">Inbox</A></td>
+    <td class=toolbarcell ><A href="outlook://Contacts/">Contacts</A></td>
+    <td class=toolbarcell ><A href="javascript:dbj_inbox_clearing();">Inbox Clearing</A></TD>
+</TR>
+</TABLE>
+<!-- end upper table, begin lower table -->
+<TABLE class=maintable cellSpacing=0 cellPadding=3 align=center border=0 >
+  <TR>
+    <TD id="google_cell" height="60%">
+    <iframe src="http://www.google.co.uk/ig?hl=en&source=iglk" width="100%" height="100%" ></iframe>
+   </TD>
+   <TD width="30%" >
+      <OBJECT id=ViewInbox height="100%" width="100%" 
+      classid=CLSID:0006F063-0000-0000-C000-000000000046><PARAM NAME="Folder" VALUE="Inbox"><PARAM NAME="Namespace" VALUE="MAPI"><PARAM NAME="Restriction" VALUE=""><PARAM NAME="DeferUpdate" VALUE="0">
+      </OBJECT>
+   </TD>
+</TR>
+<TR>
+    <TD colspan='2' >
+   <OBJECT id=ViewCalendar height="100%" width="100%" 
+      classid=CLSID:0006F063-0000-0000-C000-000000000046><PARAM NAME="Folder" VALUE="Calendar"><PARAM NAME="Namespace" VALUE="MAPI"><PARAM NAME="Restriction" VALUE=""><PARAM NAME="DeferUpdate" VALUE="0">
+      </OBJECT>    
+     
+    </TD>
+</TR>
+</TABLE>
+<script type="text/javascript" id="dbj_fwork_script">
+var dbj = new Object();
+dbj.instances = new Array() ;
+dbj.clock = function ( element )
+{
+    var timerID = null
+    var timerRunning = false;
+
+    this.stopclock = function (){
+	    if(timerRunning)
+		    clearTimeout(timerID)
+	    timerRunning = false
+    }
+
+    function showtime () {
+	    element.innerText = (new Date()).toLocaleTimeString() ;
+	    timerID = setTimeout(showtime,1000);
+	    timerRunning = true;
+    }
+
+    this.startclock = function() {
+	    this.stopclock();
+	    showtime();
+    }
+    
+    this.startclock() ;
+    dbj.instances.push( this ) ;
+}
+//-------------------------------------------------------------------
+dbj.display_element = null ;
+dbj.store = null ;
+dbj.new_display_element = function ( new_element ) {
+    dbj.store = new_element.innerHTML ; new_element.innerHTML = "" ;
+    dbj.display_element = new_element ;
+}
+dbj.restore_display_element = function ( old_element ) {
+    old_element.innerHTML = dbj.store ;    
+}
+dbj.print = function ( msg ) { if ( dbj.display_element ) dbj.display_element.innerText += msg ; }
+dbj.start = function ( future_display_element )
+{
+    function copyright_notice ()
+	{
+		var msg = "DBJ*INBOX(tm)  -- OL Inbox classification by email domain " +
+		"\n -------------------------------------------------------- " +
+		"\n (c) 2001-2009 by DBJSystems Ltd (mailto:dbj@dbj.org)" ; 
+		dbj.print( "\n/*\n" + msg + "\n*/\n\n\n" ) ;
+	}
+	try {
+	dbj.new_display_element( future_display_element ) ;
+ 	for (i=0; i<document.all.length; i++) document.all(i).unselectable = "on";
+	//ensure that all document elements except the display textarea are unselectable
+	copyright_notice() ;
+	} catch ( x ) {
+	    dbj.error(x, top.alert )
+	}
+	
+}
+
+dbj.error = function ( exception, displayF ) 
+{
+    var rez = new String();
+	if (exception instanceof Error)
+	{
+		// this is a run-time error from the script engine
+		rez = exception.name + " " ;
+		rez += "\nNumber : " + (exception.number & 0xFFFF) ;
+		rez += "\nDescription : " + exception.description  ;
+	}
+	else
+	{
+		// this is a custom exception thrown by user code
+		rez = "Non-native exception caught : " + exception ;
+	}
+	  if ( ! displayF )
+	    dbj.print( "\n" + rez ) ;
+	  else
+	    displayF( "\n" + rez ) ;  
+}
+</script>
+<script type="text/javascript" id="script_glavni" >
+ //----------------------------------------------------------
+    DBJ_OL_outlook_application = function(x) {
+        debugger;
+        var olapp = DBJ_OL_outlook_application.olapp;
+        if (olapp === null) {
+            try {
+                olapp = ViewInbox.OutlookApplication;
+            } catch (x) {
+                olapp = new ActiveXObject("Outlook.Application");
+            }
+        }
+        return olapp;
+    }
+    DBJ_OL_outlook_application.olapp = null;
+//----------------------------------------------------------
+window.onload = function ()
+{
+    try {
+            new dbj.clock( clock_TD ) ;
+            window.defaultStatus = "(c) 2006-2010 by dbj@dbj.org" ;
+    } catch (x) {
+    }
+}
+//----------------------------------------------------------
+function dbj_inbox_clearing()
+{
+        if ( ! confirm ("DBJ*Inbox method moves ALL emails from the inbox into the sub folders. Sub-folders are made from the domain name segments of the senders e-mail addresses.\nAre you sure you want to do this?") ) 
+            return ;
+        var myOlApp = null ;
+        var olFolderInbox = 6 ;
+        var myNamespace = null ;
+        var inboxFolder = null ;
+    try {
+         dbj.start( google_cell ) ;
+         myOlApp = DBJ_OL_outlook_application() ;
+        myNamespace = myOlApp.GetNamespace("MAPI")
+        inboxFolder = myNamespace.GetDefaultFolder(olFolderInbox)
+                   ol_inbox (inboxFolder);
+    } catch (x) {
+                    dbj.error( x ) ;
+    } finally {
+        if ( inboxFolder ) inboxFolder = null ;
+        if ( myNamespace ) myNamespace = null ;
+        if ( myOlApp ) myOlApp = null ;
+        top.alert("\nDBJ*Inbox method has finished\nProceed to restore the view.");
+        dbj.restore_display_element( google_cell ) ;
+    }
+}
+//----------------------------------------------------------
+function ol_inbox ( inboxFolder )
+{
+// 
+dbj.print("\nOn the Outlook Security dialogue (if it appears), set the processing permit length to 1 or more minutes...\n");
+//myFolder.Display();
+var myItem = null ;
+var itemFolder = null ;
+var target_folder = null ;
+var inboxEmails = new Array() ;
+// first save references into an array
+for ( var j = 0 ; j < inboxFolder.Items.Count ; j++)
+{
+    inboxEmails.push( inboxFolder.Items(j+1) ) ;
+}
+//
+dbj.print("\nFound : " + inboxEmails.length + ", emails in the inbox.\n" + inboxEmails.join("\n") );
+dbj.print("\n\n");
+//
+var targetpath = null ;
+//
+for ( var j = 0; j < inboxEmails.length; j++ )
+{
+   myItem = inboxEmails[j] ;
+   
+    if ( myItem.SenderEmailType == "EX" )
+    {
+        dbj.print("\nSkipping. E-mail from internal Exchange user:" + myItem.SenderEmailAddress);
+        continue ;
+    }
+
+   dbj.print("\nMoving : " +  myItem.SenderEmailAddress ) ;
+  
+   target_folder= arr2fld( inboxFolder,adr2arr(myItem.SenderEmailAddress) ) ;
+   dbj.print( ", to " + target_folder ) ;
+   try {
+        myItem.Move( target_folder ) ;
+        } catch ( x ) {
+                dbj.error( x ) ;
+        }
+    dbj.print(", ... Done.");    
+    // inboxEmails[j] = null; // good boy ;)
+}
+   myNamespace = null ;
+   dbj.print("\n\n***Inbox Done.***");
+}
+//----------------------------------------------------------
+// receive email addr. return elements in a reversed arr.
+// user@here.there.co.uk is returned as: uk,co,there,here,user
+function adr2arr ( address )
+{
+       var arr1 = address.split("@");
+       var arr2 = arr1[1].split(".");
+       return arr2.reverse().concat( arr1[0] );
+}
+//----------------------------------------------------------
+// create sub-folders as named in the array given
+function arr2fld ( parent_folder, fldarr )
+{
+   if ( fldarr.length < 1 ) return parent_folder ;
+   var subname = fldarr.shift() ;
+   var subfld = null ;
+   try {
+       subfld = parent_folder.Folders.Item( subname ) ;
+   } catch ( x ) {
+       subfld = parent_folder.Folders.Add( subname ) ;
+   }
+      return arr2fld( subfld, fldarr ) ;
+}
+</script>
+</BODY>
+</HTML>

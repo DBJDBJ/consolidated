@@ -1,0 +1,140 @@
+<!DOCTYPE html />
+<html>
+<!--  Set document compatibility mode to IE8Mode  -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" >
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=iso-8859-1" >
+<!--- 
+ NAME: Ping Monitor
+ AUTHOR: DBJ@DBJ.ORG
+ COMMENT: "It is the mark of an educated mind to be able to entertain a thought without accepting it." -Aristotle
+--->
+<head>
+<hta:application
+	applicationname="PingMonitor"	
+	border="dialog"
+	borderstyle="normal"
+	caption="PingMonitor"
+	contextmenu="no"
+	icon="images\icon.ico"
+	maximizebutton="yes"
+	minimizebutton="yes"
+	navigable="yes"
+	scroll="no"
+	selection="no"
+	showintaskbar="yes"
+	singleinstance="yes"
+	sysmenu="yes"
+	version="1.0"
+	windowstate="normal"
+>
+<title>©</title>
+<link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css' />
+<link href='http://fonts.googleapis.com/css?family=Reenie+Beanie' rel='stylesheet' type='text/css' />
+<style type="text/css" media="all" >
+    html,body { font-family:ReenieBeanie,DroidSans;}
+.dbj_print_line { font:12px/1.1 verdana,tahoma,arial;}
+#close_icon { position:fixed; top:1px; right:1px; font-size:72px; z-index:999; width:72px; height:72px; 
+              text-align:center; cursor:pointer;
+              border:0px; padding:0px; color:Black; background-color:White; display:none; }
+</style>
+
+</head>
+<body>
+<div id="content">
+<div id="close_icon" onclick="return window.close();" >&#935;</div>
+<div id="status">
+</div>
+</div>
+</body>
+<script type="text/javascript" src="dbj.microlib.js"></script>
+<script type="text/javascript" >
+(function () {
+    /*
+    GPL (c) DBJ.ORG
+    */
+    var intMin = 3600, strUser, strPassword, strComputer = ".", /* "WS01" */strDomain = "HG235";
+
+    if (strComputer !== ".") {
+        strUser = prompt("Please enter your user name:"); ;
+        //var objPassword = new ActiveXObject("ScriptPW.Password");
+        strPassword = prompt("Please enter your password:");
+        dbj.print();
+    }
+
+    var objSWbemLocator = new ActiveXObject("WbemScripting.SWbemLocator"), objWMIService;
+    try {
+        objWMIService = objSWbemLocator.ConnectServer(strComputer,
+			"root\CIMV2",
+			strUser,
+			strPassword,
+			"MS_409",
+			"NTLMDomain:" + strDomain);
+    } catch (x) {
+        // try local machine
+        objWMIService = objSWbemLocator.ConnectServer(".");
+    }
+
+    function foreach(collection, method, context) {
+        for (var e = new Enumerator(collection); !e.atEnd(); e.moveNext()) {
+            method.call((context || this), e.item());
+        }
+    }
+    var 
+    qry = ["SELECT * FROM Win32_PingStatus WHERE address='{0}' AND ResolveAddressNames='TRUE'", "SELECT * FROM Win32_IP4RouteTable"],
+    qry_idx = 0,
+    pings_status_message = {
+        "0": "Success", "11001": "Buffer Too Small", "11002": "Destination Net Unreachable", "11003": "Destination Host Unreachable",
+        "11004": "Destination Protocol Unreachable", "11005": "Destination Port Unreachable", "11006": "No Resources", "11007": "Bad Option",
+        "11008": "Hardware Error", "11009": "Packet Too Big", "11010": "Request Timed Out", "11011": "Bad Request", "11012": "Bad Route",
+        "11013": "TimeToLive Expired Transit", "11014": "TimeToLive Expired Reassembly", "11015": "Parameter Problem",
+        "11016": "Source Quench", "11017": "Option Too Big", "11018": "Bad Destination", "11032": "Negotiating IPSEC", "11050": "General Failure"
+    };
+
+    function pinger_status_message(intCode) {
+        return intCode != null ? pings_status_message[intCode] || (intCode + " Unknown ") : " No Status Code? ";
+    }
+
+    window.dbj_pinger = function ( machine_name , printer_callback ) {
+        var colItems = objWMIService.ExecQuery(qry[qry_idx].format( machine_name )), report = [];
+        report.push("**************** Query : " + qry[qry_idx]);
+        foreach(colItems, function (objItem) {
+
+            if (qry_idx == 0) report.push("**************** Status Code : " + pinger_status_message(objItem.StatusCode) + "******************");
+
+            foreach(objItem.Properties_, function (prop) {
+                report.push(prop.Name + " : " + prop.Value + "\t");
+            });
+            report.push("");
+        });
+        printer_callback(report.join("<br />"));
+    }
+
+} ());
+</script>
+<script type="text/javascript">
+    window.onload = function (undefined) {
+        /* */
+        var revision = new Date(document.lastModified),
+            title = "DBJ*Ping " + revision + "&copy; DBJ.ORG",
+            line = "------------------------------------------------------------------------";
+
+        /* THE MAIN */
+
+        dbj.later(null, function () { "top.document.title = '" + title + "'" });
+        dbj.later(null, function () { dbj.$("#close_icon").style.display = "inline"; });
+
+        dbj.sendRequest("pinger.cfg", function (config) {
+            for (var group_name in config.groups) {
+                dbj.print("Group: " + group_name);
+                var group = config.groups[group_name];
+                for (var L = group.hosts.length, j = 0; j < L; j++) {
+                    dbj.print("|----------| Host: " + group.hosts[j]);
+                    dbj.later(window, dbj_pinger, 100, group.hosts[j], dbj.print);
+                }
+            }
+        });
+
+        /* eof MAIN */
+    }
+ </script>
+</html>

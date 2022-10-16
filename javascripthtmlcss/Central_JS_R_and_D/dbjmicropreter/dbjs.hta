@@ -1,0 +1,175 @@
+<!DOCTYPE html />
+<!--- PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" --->
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<!--
+//-----------------------------------------------------------------------------
+//                                                                  
+//  DBJ(tm) - Solution Evolution(tm)
+//                                                                  
+//  Copyright© DBJ.ORG. 
+//  All Rights Reserved. GPL applies.                                             
+//                                                                  
+//  THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF DBJ.ORG   
+//                                                                  
+//  The copyright notice above does not evidence any                
+//  actual or intended publication of such source code.             
+//                                                                             
+//-----------------------------------------------------------------------------
+-->
+<head>
+<!--##########################################################################################################-->
+<!--		  Set document compatibility mode to the top possible                                             -->
+<!----meta http-equiv="X-UA-Compatible" content="IE=edge" /--->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" /> 
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=iso-8859-1" />
+<!--##########################################################################################################-->
+	 <HTA:APPLICATION ID="oHTA"
+	 APPLICATIONNAME="dbj_javascript_micropreter"
+	 BORDER="thin"
+	 BORDERSTYLE="normal"
+	 CAPTION="yes"
+	 ICON="dbjtamtam.ico"
+	 MAXIMIZEBUTTON="yes"
+	 MINIMIZEBUTTON="yes"
+	 SHOWINTASKBAR="yes"
+	 SINGLEINSTANCE="no"
+	 SYSMENU="yes"
+	 VERSION="2011"
+	 WINDOWSTATE="normal"
+	 />
+		<Title>&nbsp;</Title>
+		<!--- meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie6" / --->
+		<!--  meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" -->
+ <link rel="stylesheet" href="http://960.gs/css/reset.css" />
+<link rel="stylesheet" href="http://960.gs/css/text.css" />
+<!-- link rel="stylesheet" href="http://960.gs/css/960.css" /-->
+    <!--
+<link rel="stylesheet" href="styles/vs.css">
+<script src="highlight.pack.js"></script>
+        -->
+<!-- script>hljs.initHighlightingOnLoad(); -->
+
+		<style type="text/css" media="screen">
+		object { display:none; }
+		/* html { height:100%; width:100%; } */
+		body { /* width:100%; height:100%; */ overflow:hidden; background-color:buttonface; }
+		.wide { width:100%;}
+		.upleft { top:0; left:0; position:relative; }
+		.big { height:99%; }
+		.toolbar_button { /*font-family:"segoe ui" verdana Tahoma;*/ font-size:small; margin:3px; width:15%; }
+		textarea#display { 
+				border:1px solid;  
+				padding:3px; overflow:auto; 
+				/* font:bolder large/1.0 courier new,courier ; */
+				background-color:white; color:Black;
+				height:90%;  
+				}
+		div#toolbar { background-color:buttonface; vertical-align:middle; }
+		</style>
+</HEAD>
+<body scroll="no" oncontextmenu="false" >
+<!-- *** begin modal instantiation *** -->	
+<!---
+div id='modal' style="behavior:url(dbj_modal_2.htc);" NOUNLOAD_MESSAGE="*** THIS*MODAL Dialogue WARNING ***" NODEBUG 
+/---> 
+<!-- DEBUG attr. fires ondebug event. event.dbgmsg property is the debug message -->
+<!-- *** end of modal instantiation *** -->	
+	<!--Create the Dialog Helper Object-->
+ <object id=dlgHelper CLASSID="clsid:3050f819-98b5-11cf-bb82-00aa00bdce0b" WIDTH="0px" HEIGHT="0px" VIEWASTEXT></object>
+<!-- Create the licensing object for the common dialog activex control -->
+<object CLASSID="clsid:5220cb21-c88d-11cf-b347-00aa00a28331"  ID="Object1" VIEWASTEXT>
+	<PARAM NAME="LPKPath" VALUE="comdlg.lpk">
+</object>
+<object id="cDialog"
+classid="clsid:F9043C85-F6F2-101A-A3C9-08002B2F49FB"
+codebase="http://activex.microsoft.com/controls/vb6/comdlg32.cab">
+</object>
+<!--Create the Common Dialog Box activex control-->
+    <!--
+<object ID="cDialog" WIDTH="0px" HEIGHT="0px"
+	CLASSID="CLSID:F9043C85-F6F2-101A-A3C9-08002B2F49FB"
+	CODEBASE="comdlg32.cab" VIEWASTEXT>
+</object>
+    -->
+<!-- #################################################################################################### -->
+<div id="toolbar" class="wide" align="center" >
+	<button id="dugme_eval" class='toolbar_button' title="CTRL+Eval: html output" >Eval</button>
+	<button id="dugme_jqry" class='toolbar_button' onclick="return window.showModelessDialog('http://docs.jquery.com/Main_Page',null,'resizable:1;dialogWidth:800px;dialogHeight:600px');">jQuery</button>
+	<button id="dugme_new" class='toolbar_button'  >New</button>
+	<button id="dugme_save" class='toolbar_button' >Save</button>
+	<button id="dugme_load" class='toolbar_button' >Load</button>
+	<button id="dugme_quit" class='toolbar_button' >Quit</button>
+</div> 
+<div id="datePicker2" data-win-control="WinJS.UI.DatePicker" data-win-options="{current: '6/2/1969'}" ></div>
+<textarea id="display" wrap='off' tabindex="6" class="wide" title="Right click: remove c-style comments, CTRL+Right click: compress. ALT+Right click:decompress." ></textarea>
+</body>
+<!--##########################################################################################################-->
+<script type="text/vbscript" id="dbj_mbox_vbs_">
+'On Error Resume Next
+'Set objDialog = CreateObject( "MSComDlg.CommonDialog" )
+'If Err Then
+'	MsgBox Err.Description & vbCrLf & vbCrLf & "This script requires COMDLG32.OCX." & vbCrLf & vbCrLf & "Please make sure it is installed and registered.", , "COMDLG32 not registered"
+'End If
+' -----------------------------------------------------------------------
+Function DisplayCustomError(strMessage)
+	'Display custom message and information from VBScript Err object.
+	dim strError : strError = VbCrLf & strMessage & VbCrLf & _
+	  "Number (dec) : " & Err.Number & VbCrLf & _
+	  "Number (hex) : &H" & Hex(Err.Number) & VbCrLf & _
+	  "Description  : " & Err.Description & VbCrLf & _
+	  "Source       : " & Err.Source
+	Err.Clear
+	DisplayCustomError = MsgBox(strError,16,"DBJ VBScript Error Box")
+End Function
+' ------------------------------------------------------------------------
+Function mBox(m_,n,t_)
+	On Error Resume Next
+			dim x : x=MsgBox(m_,n, t_)
+			If Err = 0 Then
+					mBox = x
+			Else
+					dim  strMessage : strMessage = "VBS ERROR: Inside mBox()"
+					mBox = DisplayCustomError(strMessage)
+			End If
+End Function
+</script>
+<!-- script type="text/javascript" src="http://dbj.org/6/dbj.lod.js" ></script -->
+<script type="text/javascript" src="http://y.dbjdbj.org/6/dbj.lod.js" ></script>
+<script type="text/javascript" >
+//@cc_on
+//@set @_DEBUG =(1==0)
+//@set @_TRACE =(1==0)
+//-------------------------------------------------------------------------
+// dbj 2016 JAN 25 this does not work anymore, at least not outside of comment
+//@if (@_DEBUG) debugger;	@end  
+//-----------------------------------------------------------------------
+// dbj 2016 JAN 25 dbjdbj.org changes to y.dbjdbj.org in url's
+	dbjdbj.load(
+			[
+			"http://code.jquery.com/jquery-git.js",
+			"../lib/jquery.rightClick.js",
+			"http://y.dbj.org/6/dbj.lib.js",
+			"http://y.dbj.org/6/dbj.es5.js",
+			"http://y.dbj.org/6/dbj.jquery.js",
+			"http://y.dbj.org/6/dbj.xml.json.js",
+	/*
+			"../lib/chili/jquery.chili-2.2.js",
+			"../lib/chili/recipes.js",
+	"plugins/ado/ado.vbs",
+	"plugins/ado/dbj.ado.vbs",
+	"plugins/winsearch.js",
+	*/
+			"dbjs.js",
+			"dbjs/dbjs.mbox.js",
+			"dbjs/dbjs.start.js",
+            "dbjs/jsmin.js"
+			],
+			function () { return !!window.jQuery && !!window.dbj && !!window.THIS && !!window.all_is_ok_to_start; },
+			function () { all_is_ok_to_start(); }
+			/*, function () { alert("Could not load all scripts required?"); }*/
+);
+</script>
+</html>
+<!--##########################################################################################################-->
+<!--- script type="text/javascript" src="https://getfirebug.com/firebug-lite.js" onload="alert('Firebug Lite Loaded')"></script --->
+<!--##########################################################################################################-->

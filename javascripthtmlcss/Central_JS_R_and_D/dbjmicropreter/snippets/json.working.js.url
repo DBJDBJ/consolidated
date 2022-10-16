@@ -1,0 +1,16 @@
+
+var url = "http://search.yahooapis.com/ImageSearchService/V1/imageSearch?appid=YahooDemo&query=Madonna&output=json"
+var the_object;
+var http_request = new XMLHttpRequest();
+http_request.open( "GET", url, true );
+http_request.send(null);
+http_request.onreadystatechange = function () {
+    if ( http_request.readyState == 4 ) {
+        if ( http_request.status == 200 ) {
+            the_object = eval( "(" + http_request.responseText + ")" );
+        } else {
+            alert( "There was a problem with the URL." );
+        }
+        http_request = null;
+    }
+};

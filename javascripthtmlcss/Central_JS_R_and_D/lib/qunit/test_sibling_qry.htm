@@ -1,0 +1,57 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<title>Huge select element</title>
+<!-- script type="text/javascript" src="http://code.jquery.com/jquery-nightly.min.js"></script -->
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+<link href="qunit.css" rel="stylesheet" type="text/css" />
+<script src="qunit.js" type="text/javascript"></script>
+<script type="text/javascript">
+      $( function() {
+          module("General Sibling Combinator");
+
+          test("element ~ element", function() {
+              expect(3);
+              equals($('code ~ strong').length, 3, "$('code ~ strong').length");
+              equals($('code ~ code').length, 3, "$('code ~ code').length");
+              equals($('strong ~ strong').length, 2, "$('strong ~ strong').length");
+          });
+
+          test("find(element ~ element)", function() {
+              expect(6);
+              equals($('p#first').find('code ~ strong').length, 3, "$('p#first').find('code ~ strong').length");
+              equals($('p#first').find('code ~ code').length, 3, "$('p#first').find('code ~ code').length");
+              equals($('p#first').find('strong ~ strong').length, 2, "$('p#first').find('strong ~ strong').length");
+
+              equals(document.querySelectorAll("p code ~ strong").length, 3, 'document.querySelectorAll("p code ~ strong").length');
+              equals(document.querySelectorAll("p code ~ code").length, 3, 'document.querySelectorAll("p code ~ code").length');
+              equals(document.querySelectorAll("p strong ~ strong").length, 2, 'document.querySelectorAll("p strong ~ strong").length');
+
+          });
+
+          module("Sibling Method");
+
+          test("find(element ~ element)", function() {
+              expect(2);
+              equals($('code:first').siblings().length, 6, "$('code:first').siblings().length");
+              equals($('strong').siblings('code').length, 4, "$('strong').siblings('code').length");
+          });
+      }) ;
+  </script>
+  <!-- style type="text/css">
+    #main {border: 1px solid #999;}
+    #mySelect {margin: 1em; padding: 1em; border: 1px solid #999; width:300px; }
+    option { width: 300px; font:12px/1.1 verdana; }
+  </style -->
+</head>
+<body>
+<h1 id="qunit-header">General Sibling Combinator</h1>
+<h2 id="qunit-banner">DBJ*ORG</h2>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+<div id="main">
+<p id="first">This is a <code>paragraph</code>, <strong>which</strong> means it is <strong>wrapped</strong> in <code>&lt;p&gt;</code> <strong>and</strong> <code>&lt;/p&gt;</code>. Those "p" tags (and "paragraph") in the previous sentence are formatted as <code>&lt;code&gt;</code>.
+</p>
+</div>
+</body>
+</html>

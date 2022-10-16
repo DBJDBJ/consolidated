@@ -1,0 +1,260 @@
+<!DOCTYPE html > 
+<html>
+<!--
+//                                                                  
+//  DBJ.ORG - Solution Evolution(tm)
+//                                                                  
+//  Copyright © 2010 by DBJ.ORG. 
+//  All Rights Reserved. GPL applies.                                             
+//                                                                  
+//  THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF DBJ.ORG   
+//                                                                  
+//  The copyright notice above does not evidence any                
+//  actual or intended publication of such source code.             
+//                                                                             
+-->
+<head>
+<!--##########################################################################################################-->
+<!--		  Set document compatibility mode to IE8Mode                                                      -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=iso-8859-1" />
+<!--##########################################################################################################-->
+<title>DBJ*MetaSocket&trade; $Revision: 29 $ &copy;2009-2010 by DBJ.ORG</title>
+<link href="http://dbj.org/4/blueprint/screen.css" rel="stylesheet" type="text/css" media="all" />
+<link href="../lib/modal/jquery.modal.css" rel="stylesheet" type="text/css" />
+<style type="text/css" >
+.toolbar { width:100%; height:10%; margin:1px; padding:1px; }
+.toolbar button { margin:2px 5px 2px 2px; width:128px; height:32px; 
+                  font-size:16px; overflow:hidden; text-align:left; padding:1px 1px 1px 5px; }
+_display { width:100%; height:99%; margin:1px; padding:1px; overflow:auto; 
+           /*font: small/1.1 verdana, arial, tahoma ;*/
+         }
+/*         */
+#specimen { position:absolute; right:10px; bottom:10px; width:150px; height:30px; border:2px solid; z-index:99;
+            padding:3px;
+            background-color:transparent; } 
+.specimen button { height:100%; width:100%; }  
+.dbjPanel { height:700px; width:49%; padding:0px;margin:0px; 
+            font:12px/1.1 monospace; overflow:hidden;}
+.editableText {} 
+textarea { overflow:auto; white-space:pre; word-spacing:normal; }
+</style>
+</head>
+<body>
+<div id="container">
+<div id="toolbar" class="toolbar" >
+<button id="highlight">Highlight</button><button id="eval">Eval</button>
+</div>
+<div class="dbjPanel" style="float:left;">
+<textarea id="display" rows="80" cols="160" style="width:99%;height:99%" class="editableText" >
+/* Object to store things from dom elements */   
+var result = {} ;
+/* Function called on each element in jQuery stack, to collect attributes or style properties */   
+function collector()  { 
+      var names = arguments , id_ = function ( el ) { return el.tagName + (el.id ? "#" + el.id : "") ; },
+          set_ = function ( obj ) { return obj || {} ; },
+       for_each_name = function ( callback ) {
+        for ( var j = 0, l = names.length ; j < l ; j++ ) callback( names[j], j ) ;
+       } ;
+/* the "plug" function called by MetaSocket 
+   parameter 'P' contains names and values for a single element, as mentioned in one or more '[]'
+   in the current selector. MetaSocket is making 'P' for every element from the jQuery stack.       
+   object 'this', is instance of the single element, from the jQuery 'stack' */                                 
+    return function ( P )  { 
+          var id = id_(this);     
+          for_each_name( function( name, idx ) {
+/* name is a single css property or attribute, mentioned in the selector if names given as arguments are wrong we stop here */
+          if ( undefined === P.nvo[name] ) return; 
+              result[id] = set_( result[id]);
+              result[id][name] = P.nvo[name].value ;
+            });
+            return false; /* signal to MetaSocket NOT to change the state of 'this' element */
+        }
+}
+/* select all elements having attribute "id" and "bottom" and "width!=auto" and "height!=auto" 
+   what is not mentioned in '[]' brackets will not be sent to the plug function in its 'P' argument */
+$('[id][~bottom][~width!=auto][~height!=auto]', document.body )
+/* give to MetaSocket, one plugin function, which is a collector for css properties we used in selector*/
+.S( collector('bottom','width','height')  ) ;
+if ( window.JSON ) show_ = JSON.stringify(result);
+/* this trivial example plug changes the elements matched */
+var selector = "#specimen[~right]";
+$(selector).css("right",10);
+$(selector).S( function (P) {
+     show_ =  "#" + this.id + ", right:" + P.let("right",  400) ; 
+     return true; // signal that values in P are to be 'mapped back' to 'this' element 
+});
+show_;
+</textarea>
+</div>
+<div class="dbjPanel" style="float:right;">
+<textarea  id="rezult" rows="80" cols="160" style="width:99%;height:99%" class="editableText" ></textarea>
+</div>
+<div id="specimen" att1="ATT1" att2="true" ><button id="specimen_button" >id=&quot;specimen&quot;</button></div>
+<!-- eof #container -->
+</div>
+<!-- Alert Dialog -->
+<div class="jqmAlertConfirm" id="alert">
+
+<div id="ex3b" class="Window" >
+    <div class="Title clearfix">
+    <h1>Warning!</h1><a href="#" class="jqmClose"><em>Close</em></a>
+  </div>
+  
+  <div class="Content"></div>
+</div>
+
+</div>
+<!-- Confirm Dialog -->
+            <div class="jqmAlertConfirm jqmWindow" id="confirm">
+
+                 <div class="Title clearfix">
+                Confirmation por favor...<a href="#" class="jqmClose"><em>Close</em></a>
+                </div>
+  
+                <div class="Content">
+                    <p>Continue?</p>
+                </div>
+                <input type="submit" value="no" />
+                <input type="submit" value="yes" />
+            </div>
+</body>
+<!-- DBJ -->
+<script  type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+<script src="../lib/modal/jquery.modal.js" type="text/javascript"></script>
+<script src="../lib/chili/jquery.chili-2.2.js" type="text/javascript"></script>
+<script src="../lib/chili/recipes.js" type="text/javascript"></script>
+<!-- Chili settings for a static setup -->
+<script src="jquery.moreSelectors.js" type="text/javascript" ></script>
+<script src="jquery.metasocket.js" type="text/javascript" ></script>
+<!-- DBJ -->
+<script type="text/javascript" >
+    var M$FT = /*@cc_on!@*/false, NL = M$FT ? "\r\n" : "\n";
+    var handler = (function() {
+    function who_called(F, x) {
+            try {
+                var who = F.caller.toString().match(/\w+/g);
+                return who[0] + " " + who[1];
+            } catch (x) {
+                return " GLOBAL namespace ";
+            }
+        }
+        function errshow(errobj) {
+            return NL + "EXCEPTION: " + errobj.name + " " + ", number : " + (errobj.number & 0xFFFF) +
+               ", description : " + errobj.description + (errobj.stack ? NL + errobj.stack : NL)
+                + ", from: " + who_called(handler);
+        }
+
+        return function(x, error) {
+            if ("boolean" === typeof x && x === false) {
+                error = x = "Assertion Failed!";
+            }
+            if (Object.prototype.toString.call(x) === "[object Error]") {
+                error = x = errshow(x);
+            }
+            if (window.console) {
+                if (error)
+                    window.console(x);
+                else
+                    window.console.err(x);
+            } else {
+                if (M$FT && error) {
+                    if (confirm(x + NL + "OK to Debug?"))
+                        debugger;
+                } else {
+                    alert(x);
+                }
+            }
+        }
+    } ());
+</script>
+<script type="text/javascript" >
+    // apply every css property in arg object to the jQuery instance
+    jQuery.fn.cssApply = function(propobj) {
+        for (var prop in propobj) {
+            this.css(prop, propobj[prop]);
+        }
+        return this;
+    };
+</script>
+<script type="text/javascript" >
+    jQuery(function() {
+
+        ChiliBook.automatic = false;
+        ChiliBook.lineNumbers = false;
+
+        var container_ = document.getElementById("container"),
+            $toolbar = $("#toolbar", container_)[0],
+            $rezult = $("#rezult"),
+            $display = $("#display", container_);
+
+        $('.editableText', document.body).each(function() {
+            $(this).attr('contentEditable', true);
+        });
+
+        var blanket_maker = (function( /* element_to_be */ _blanketed ) {
+            
+            var $blanket = $(document.body).append("<div id='blanket' style='background-color:white;display:none;overflow:auto; border:1px solid;padding:2px;position:absolute;top:0px;left:0px;z-index:99'><pre><code class='js' ></code></pre></div>").find("#blanket");
+            var $code = $blanket.find(".js");
+            $blanket.click(function(event) { $blanket.hide("slow"); });
+            
+            return function(call_on_show) {
+                if ("none" !== $blanket.css("display")) {
+                    $blanket.hide(0);
+                    $code.text('');
+                } else {
+                    $blanket.cssApply({
+                            top: _blanketed.position().top,
+                            left: _blanketed.position().left,
+                            width: 1 + _blanketed.width(),
+                            height: _blanketed.height()
+                    });
+                    if ("function" === typeof call_on_show) call_on_show($code);
+                    $blanket.show();
+                }
+            }
+        } ( $display ));
+
+        function code_painter() {
+            blanket_maker(function(code_) {
+                try {
+                    code_.text("/* click on this panel to edit the code */" + NL + $display.text()).chili();
+                } catch (x) {
+                    handler(x);
+                }
+            });
+        };
+        void (setTimeout(code_painter, 1));
+        //---------------------------------------------------------------------------------
+
+        $("#highlight", $toolbar).click(function(event) {
+            code_painter();
+        })
+
+        $("#eval", $toolbar).click(function(event) {
+            var rezult = null, x, txt = "";
+            try {
+                rezult = eval($display.val());
+            } catch (x) {
+                rezult = errshow(x);
+            }
+            if (rezult) {
+                $rezult.val($rezult.val() + NL + NL + rezult);
+            }
+        })
+
+        // Title
+        $rezult.val(
+           $.S.version + NL +
+           "Enhanced Attribute Selectors Version: 1.0.2, by Balazs Endresz (balazs.endresz@gmail.com)" + NL +
+           "jQuery : " + $().jquery + NL + NL +
+           "Any valid JavaScript on the left can be evaluated and result shown here" + NL +
+           "Plugin MetaSocket(tm) called: 'S()', requires one 'plug' function as an argument" + NL +
+           "Arguments to the 'plug' are one or more names used in the 'where' part of the selector" + NL +
+           "See the trivial example on the left" + NL +
+           "-----------------------------------" + NL
+        );
+
+    });
+</script>
+</html>

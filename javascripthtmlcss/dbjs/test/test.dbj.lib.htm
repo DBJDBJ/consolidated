@@ -1,0 +1,44 @@
+﻿<!DOCTYPE HTML >
+<html>
+<head>
+<title>DBJ&trade; QUNIT Tests</title>
+<link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css' />
+<link href='http://fonts.googleapis.com/css?family=Reenie+Beanie' rel='stylesheet' type='text/css' />
+<link href="qunit.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" >
+function crazyLoader() { for (var b = arguments, a = 0; a < b.length; a++) document.write('<script type="text/javascript" src="' + b[a] + '">\x3c/script>') };
+    crazyLoader(
+        "http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js",
+        "qunit.js",
+        "../dbj.lib.js",
+        "../dbj.str.js",
+        "../dbj.cond.js",
+        "test.dbj.lib.js",
+        "dbj.qunit.js"
+        );
+</script>
+</head>
+<body>
+<h1 id="qunit-header">DBJ&trade;&nbsp;JavaScript Micro Library  &quot; Foundation Mechanisms</h1>
+<h2 id="qunit-banner"></h2>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+</body>
+    <!--
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script type="text/javascript" src="qunit.js" ></script>
+<script type="text/javascript" src="../dbj.lib.js" ></script>
+<script type="text/javascript" src="test.dbj.lib.js" ></script>
+<script type="text/javascript" src="dbj.qunit.js" ></script>
+        -->
+</html>
+<!-- var crazyLoader = function () {
+        var sbegin = '<script type="text/javascript"',
+            send = '></' + 'script>',
+            args = arguments;
+
+        for (var args_idx = 0; args_idx < args.length; args_idx++) {
+            document.write(sbegin + ' src="' + args[args_idx] + send);
+        };
+    } 
+    -->

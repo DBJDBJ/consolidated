@@ -1,0 +1,241 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+<meta name="description" content="dbj MICROLIB TESTING page made with MICROLIB. Is that logical?">
+<meta name="author" content="Dusan B. Jovanovic">
+<title>dbj();&trade; testing dbj MICROLIB &amp; Utils</title>
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<style type="text/css">
+
+    caption { text-align: center;
+    }
+
+    details summary { font-size:large;
+    }
+
+    #test_button { margin:2em;
+    }
+
+/* http://codepen.io/morewry/pen/gbJvy */
+/* http://daneden.me/animate/ */
+@keyframes fadeInDown {
+	0% {
+		opacity: 0;
+		transform: translateY(-1.25em);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+.details4[open] {
+	animation-name: fadeInDown;
+  animation-duration: 1s;
+}
+
+/* resets */
+details, details summary { margin-bottom: 0.25em; line-height: 1.25; }
+
+    #header {
+        background: url('http://dbj.systems/wp-content/uploads/2016/02/dbj-scratched-aluminium-green-2048x2048.jpg');
+    }
+</style>
+</head>
+<body>
+    <div class="jumbotron" id="header">
+    </div>
+<div id="container" class="container">
+    <div class="jumbotron">
+        <h1>DBJ*JSC&trade;</h1>
+        <h3>dbj.org JavaScript Core (DBJ*JSC)</h3>
+        <p>
+            Testing page of dbj.micrlolib.js and dbj.util.js
+        </p>
+    </div>
+    <div class="page-header" >
+        <h1>Results</h1>
+    <button onclick="all_tests()" id="test_button" class="btn btn-primary">Start All Test</button>
+        <div id="all_tests_container">
+        </div>
+      </div>
+</div>
+
+<!-- jQUERY core JavaScript ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="../dbj.microlib.js"></script>
+    <script src="../dbj.utl.js"></script>
+<script  type="text/javascript">
+//<![CDATA[
+if ("undefined" == typeof dbj) {
+	alert("Whoa pardner! Where is your dbj?!");
+	debugger;
+}
+//]]>
+</script>	
+<script type="text/javascript" id="page_main_script">
+/**
+ * Testing microwork 
+*/
+	function all_tests() {
+
+		var Test = function () {
+
+			this.table = arguments[0];
+			this.context = this || arguments[1];
+
+			var THAT = this; // in case context is 'lost'
+			/**
+			*@param {object} expression if string will be evaluated otherwise just displayed
+			*/
+			this.unit = function (title, expression, comment, just_show) {
+
+				if (just_show) return THAT.sub(title, expression, comment);
+
+					var msg = [];
+
+					if (title)
+						msg.push("" + title);
+					else
+						msg.push(""+expression);
+
+				try {
+					if ("String" == roleof(expression))
+						msg.push("" + dbj.evil(expression));
+					else
+						msg.push(""+expression);
+					} catch (x) {
+						msg.push(dbj.err2str(x));
+					}
+					if (comment)
+						msg.push("" + comment);
+					else
+						msg.push("");
+
+					THAT.table.row(msg[0], msg[1], msg[2]);
+					return THAT.unit; // call streaming a'la DBJ
+			};
+			this.sub = function (s1,s2,s3) { // sub title
+				THAT.table.row(s1, s2, s3);
+				return THAT.unit; // call streaming a'la DBJ
+			}
+		};
+
+		var testing = {
+			/**
+             * dbj.microlib Numerics testing 
+             * @param {object} host element for result table to hang-off
+             * @param {string} id of the host, can be used as it is but it is prefixed with "table_"
+             * @param {string} optionsl caption for the result table. if not given default is used.
+             */
+			numerics: function (tabla) {
+
+				var test = new Test(tabla); 
+				test.unit("dbj.round(Math.PI, 2)", "dbj.round( Math.PI,2)", "Do we need this in the dbj*MICROLIB?")
+				('dbj.num ("1.1")', 'dbj.num("1.1")', "   one of those JS mind bending things for begginers. Usefull for assuring value is a number.")
+				('dbj.num ("1")")', 'dbj.num("1")', " works everywhere is any JavaScript. It does it's best to transform any value into 'number'")
+				('dbj.num (new Date())', 'dbj.num(new Date())', " transformed to number of ticks")
+				('dbj.num (new String())', 'dbj.num(new String())', " the length of the empty string ")
+				('dbj.num ("")', 'dbj.num("")', " ditto ... ")
+				('dbj.num (new Array())', 'dbj.num(new Array())', " the length of the empty array is 0")
+				('dbj.num ([])', 'dbj.num(new Array())', " the length of the empty array is 0")
+				('dbj.num ([1,2,3])', 'dbj.num([1, 2, 3])', " Explain this then!")
+				('dbj.num (function(){})', 'dbj.num(function () { })', " Not a surprise or ... ;) ")
+				('dbj.num (new Object())', 'dbj.num(new Object())', " {} has no any number property, ditto it is a NaN ")
+				('dbj.num ({ length:0})', 'dbj.num({ length: 0 })', " Eh ;) ")
+				("Other", "numerical", "stuff", true)
+				("dbj.sum([1,2,3,4,5,6,7,8,9])", 'dbj.sum([1, 2, 3, 4, 5, 6, 7, 8, 9])', "crazy implementation")
+				("dbj.avg([1,2,3,4,5,6,7,8,9])", 'dbj.avg([1, 2, 3, 4, 5, 6, 7, 8, 9])', "but working")
+				("dbj.a2s([1,2,3,4,5,6,7,8,9],'::')", "dbj.a2s([1, 2, 3, 4, 5, 6, 7, 8, 9], '::')", "pretty-er array print");
+			},
+			/**
+             * dbj.microlib 'Other' parts testing 
+             * @param {object} host element for result table to hang-off
+             * @param {string} id of the host, can be used as it is but it is prefixed with "table_"
+             * @param {string} optionsl caption for the result table. if not given default is used.
+             */
+			other: function (tabla) {
+				var test = new Test(tabla);
+				test.unit("dbj.try_calling_nicely(function () { })", null, "Removed from dbj lib");
+
+				test.unit('dbj.err2str ( new Error(0xFF,"Bang!")', dbj.err2str(new Error(0xFF, "Bang!")), "pretty print the Error object");
+				test.unit('dbj.evil ("1 + 2 ")', dbj.evil("1 + 2"), "eval in presence of 'use strict'");
+				test.unit('dbj.$("#container")', dbj.$("#container"), "querySelector");
+				test.unit('dbj.$$("div")', dbj.$("#container"), "querySelectorAll");
+				test.unit('dbj.later(this, function () { console.log("dbj.later works ok :)")}, 12 )',
+                    dbj.later(this, function () { dbj.print("dbj.later works ok :)", true); }, 12),
+                    "execute it but latter. check console for result");
+			}
+		};
+
+    
+    var default_details_class = "details4";
+
+    /**
+     * helper for dbj table making
+     */
+    function make_dbj_table(test_host_element, test_uid, column_names_array, caption) {
+    //using bootstrap every table should have class ".table" plus other class for styling
+    var bootstrap_table_classing = "table table-striped";
+    // &#9733; (black star) or the &#9734; (white star with black borders).
+    var default_caption = "<h1>&#9733;&#9733;&#9733;</h1>";
+
+    var tabla = dbj.utl.table(test_host_element, "table_" + test_uid, bootstrap_table_classing);
+
+        tabla.hdr(column_names_array)  // creates the table 
+            .caption("{0}".format(caption || default_caption));
+
+        return tabla;
+    };
+
+/**
+* details closed attribute not used ... EDGE does not understand HTML5 details yet 
+*/
+function make_detail(classes, summary_text) {
+    return jQuery(
+        '<details id="{0}" closed class="{1}"><summary>{2}</summary></details>'
+        .format(dbj.GUID(), (classes || ""), (summary_text || "") )
+    )[0];
+}
+
+/*********************************************************************************/
+    var $tests_container = $("#all_tests_container");
+
+    function add_test_then_execute(test_cb, detail_caption, table_caption) {
+
+        var details_element = make_detail(default_details_class, detail_caption);
+
+        dbj.assert(details_element);
+               $tests_container.append(details_element);
+        dbj.assert(roleof(test_cb) === "Function");
+
+        test_cb(
+            make_dbj_table(details_element, details_element.id, ["Test", "Result", "Comment"], table_caption)
+          );
+    }
+    
+    try {
+            add_test_then_execute(testing.numerics, "Numerics");
+            add_test_then_execute(testing.other,    "Other");
+
+    } catch (x) {
+        console.group("dbj MICROLIB TESTING");
+        console.error("EXCEPTION" + x + " " + ( x.stack || ""));
+        console.groupEnd();
+    }
+}
+/* */
+$(function () {
+//    dbj.print("dbj(); testing dbj");
+//    dbj.LOG.E( "dbj.utl.round(123.45678,2)" );
+
+
+});
+/* */
+    </script>
+</body>
+</html>

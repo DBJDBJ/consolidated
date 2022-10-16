@@ -1,0 +1,88 @@
+<!DOCTYPE html />
+<html>
+<head>
+<!--##########################################################################################################-->
+<!--		  Set document compatibility mode to IE8Mode                                                      -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" >
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=iso-8859-1" >
+<!--##########################################################################################################-->
+	 <HTA:APPLICATION ID="dbj_show_stopper"
+     APPLICATIONNAME="dbj_show_stopper"
+     BORDER="thin"
+     BORDERSTYLE="normal"
+     CAPTION="no"
+     ICON="dbj.ico"
+     MAXIMIZEBUTTON="yes"
+     MINIMIZEBUTTON="yes"
+     SHOWINTASKBAR="no"
+     SINGLEINSTANCE="yes"
+     SYSMENU="no"
+     VERSION="2011"
+     WINDOWSTATE="normal"
+     />
+<title>©</title>
+<style type="text/css">
+@media screen {
+@font-face {
+/*<link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css' />*/
+  font-family: 'Droid Sans';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Droid Sans'), local('DroidSans'), url('fonts/DroidSans.ttf') format('truetype');
+}
+
+@media screen {
+@font-face {
+/*<link href='http://fonts.googleapis.com/css?family=Reenie+Beanie' rel='stylesheet' type='text/css' />*/
+  font-family: 'Reenie Beanie';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Reenie Beanie'), local('ReenieBeanie'), 
+  url('fonts/ReenieBeanie.ttf') format('truetype');
+}
+}
+}</style>
+<style type="text/css" media="all" >
+    html {width:99%; height:99%;}
+body { width:99%; height:99%; margin:0px; padding:5px; border:1px solid #000;}
+.google_font {font-family:Reenie Beanie,Droid Sans; font-weight:bold;}    
+.dbj_print_line { font:12px/1.1 verdana,tahoma,arial;}
+.dbj_title_line { background-color: #6D7b8B;/* light slate gray */ margin:0px; padding:3px;}
+#close_icon { position:fixed; top:14px; right:14px; font-size:142px; z-index:999; width:72px; height:72px; 
+              text-align:center; cursor:pointer;
+              border:0px solid black; margin:0px; padding:0px; color:#000; background-color:transparent; display:none; }
+</style>
+</head>
+<body>
+<div id="close_icon" class="google_font" onclick="return window.close();" >X</div>
+<h1 class="dbj_title_line google_font" >DBJ*ShowStopper </h1>
+<h4 class="dbj_title_line google_font" >©dbj.org <script type="text/javascript">document.write((new Date(document.lastModified)).toLocaleDateString());</script></h4>
+<div id="status">
+</div>
+</body>
+<script type="text/javascript" src="dbj.microlib.js"></script>
+<script type="text/javascript">
+/*
+GPL (c) 2010 for dbj@dbj.org
+This script attempt to stop the SharePoint 2010 on the local machine.
+This script is not server friendly since it does not uses event log to report the outcome.
+*/
+    dbj.addListener("load", function (undefined) {
+        /* */
+        var revision = new Date(document.lastModified),
+            title = "DBJ*ShowStopper " + revision + "&copy; DBJ.ORG";
+
+        /* THE MAIN */
+
+        dbj.later(null, function () { "top.document.title = '" + title + "'" });
+        dbj.later(null, function () { dbj.$("#close_icon").style.display = "inline"; });
+
+        dbj.sendRequest("show_stopper.cfg", function (names) {
+            for (var L = names.length, j = 0; j < L; j++) {
+                dbj.later(dbj.wmi, dbj.wmi.stop_service, 100, names[j][0], dbj.print)
+            }
+        });
+        /* eof MAIN */
+    });
+</script>
+</html>

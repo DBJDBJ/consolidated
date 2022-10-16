@@ -1,0 +1,240 @@
+﻿<!DOCTYPE html >
+<html>
+    <head>
+        <title>JSONPATH</title>
+        <style type="text/css" media="all">
+        html { font: larger/1.2 verdana; }
+        tr,td   { padding:3px; margin:0px; }
+        #tabla { float:left; width:48%; }
+        #storeview { float:right; width:48%; }
+        #liveq  
+        {
+            float:right; width:40%; margin:10px; padding:10px; border:1px solid; 
+            height: 24px;
+            font:bolder 22px/1.0 verdana,tahoma,arial;
+        }
+            #syntaxhelper
+            {
+                float:right;
+                width: 45%;
+                border:1px solid;
+                padding:5px;margin:5px;
+                font:12px/1.2 courier new;
+            }
+            #syntaxhelper caption { font-weight:bolder; border:1px solid; padding:10px; font-size:larger;}
+        </style>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+    </head>
+    <body id="telo">
+	    <table id="tabla" >
+	    <caption>jsPath Test</caption>
+	    	<thead><tr>
+	    		<th>Code</th>
+	    		<th>Results</th></tr>
+	    	</thead>
+	    	<tbody>
+			</tbody>
+		</table>
+		<div id="storeview" ></div>
+		<input type="text" id="liveq" value='.book[?(@.title=="Moby Dick")].author' size="128" />
+        <script type="text/javascript" id="example_storages" >
+                var store = {
+                    "name": "Novelty Used Books",
+                    "address": {
+                        "street": "1234 W. Main St.",
+                        "city": "Shepherdstown",
+                        "state": "WV",
+                        "zip": "25425"
+                    },
+                    "book": [
+				      { "category": "reference",
+				          "author": "Nigel Rees",
+				          "title": "Sayings of the Century",
+				          "price": 8.95
+				      },
+				      { "category": "fiction",
+				          "author": "Evelyn Waugh",
+				          "title": "Sword of Honour",
+				          "price": 12.99
+				      },
+				      { "category": "fiction",
+				          "author": "Herman Melville",
+				          "title": "Moby Dick",
+				          "isbn": "0-553-21311-3",
+				          "price": 8.99
+				      },
+				      { "category": "fiction",
+				          "author": "J. R. R. Tolkien",
+				          "title": "The Lord of the Rings",
+				          "isbn": "0-395-19395-8",
+				          "price": 22.99
+				      }
+				    ],
+                    "bicycle": {
+                        "color": "red",
+                        "price": 19.95
+                    }
+                };
+        </script>
+        <script type="text/javascript" id="main">
+            $(document).ready(function() {
+
+                // path to the js is taken from the source of the first script found
+                // which better be a jQuery inclusion then ...
+                // and this js better be in the same folder
+                $.require("jquery.jspath.js"); // jsPath global get's made
+
+                var Q = jsPath,
+                    $tabla = $("#tabla"),
+                    update = function(path, result, recolor) {
+                    $tabla.find("tbody").prepend(
+	      			"<tr><td>" +
+	      				path + "</td><td>" + (result.length < 1 ? "NULL" : result)
+	      			+ "</td></tr>"
+	      		);
+                    if (recolor || false) {
+                        $("tr:even", $tabla[0]).css("background-color", "#bbbbff");
+                        $("tr:odd", $tabla[0]).css("background-color", "#bbbbbf");
+                    }
+                };
+
+                $("#storeview").text(JSON.stringify(store));
+
+                $("#liveq").keypress(function(event) {
+                    switch (event.keyCode) {
+                        case 13:
+                            var cmd = "Q('" + $(this).val() + "', store)";
+                            try {
+                                update(cmd, eval(cmd), true);
+                            } catch (x) {
+                                update(cmd, "Error: " + x.message, true);
+                            }
+                            break;
+                    }
+                    return true;
+                });
+
+                update("Q('.name', store)",
+	            		Q('.name', store));
+                update("Q('.address', store)",
+	            		Q('.address', store));
+                update("Q('.book[*]', store)",
+	            		Q('.book[*]', store));
+                update("Q('..title', store))",
+	            		Q('..title', store));
+                update("Q('..book[?(@.isbn)]', store)",
+	            		Q('..book[?(@.isbn)]', store), true);
+            });  // eof jQ ready
+        </script>
+<table id="syntaxhelper">
+<caption>Syntax Helper</caption>
+<tr>
+<th>XPath</th>
+<th>JSONPath</th>
+<th>Result</th>
+</tr>
+<tr>
+<td>
+/store/book/author</td>
+<td>
+.store.book[*].author</td>
+<td>
+the authors of all books in the store</td>
+</tr>
+<tr>
+<td>
+//author
+</td>
+<td>
+..author
+</td>
+<td>
+all authors</td>
+</tr>
+<tr>
+<td>
+/store/*
+</td>
+<td>
+.store.*
+</td>
+<td>
+all things in store, which are some books and a red bicycle.</td>
+</tr>
+<tr>
+<td>
+<p>
+/store//price
+</p>
+</td>
+<td>
+.store..price
+</td>
+<td>
+the price of everything in the store.</td>
+</tr>
+<tr>
+<td>
+//book[3]</td>
+<td>
+..book[2]</td>
+<td>
+the third book</td>
+</tr>
+<tr>
+<td>
+//book[last()]</td>
+<td>
+ ..book[(@.length-1)]<br />
+..book[-1:]
+</td>
+<td>
+the last book in order.</td>
+</tr>
+<tr>
+<td>
+//book[position()&lt;3]</td>
+<td>
+..book[0,1]<br />
+..book[:2]</td>
+<td>
+the first two books</td>
+</tr>
+<tr>
+<td>
+//book[isbn]</td>
+<td>
+..book[?(@.isbn)]</td>
+<td>
+filter all books with isbn number</td>
+</tr>
+<tr>
+<td>
+//book[price&lt;10]</td>
+<td>
+..book[?(@.price&lt;10)]</td>
+<td>
+filter all books cheaper than 10</td>
+</tr>
+<tr>
+<td>
+//*</td>
+<td>
+..*</td>
+<td>
+all Elements in XML document. All members of JSON structure.
+</td>
+</tr>
+</table>
+</body>
+<script type="text/javascript" id="console" >
+if ("undefined" === typeof console) {
+console = {
+telo: document.getElementById("telo"),
+log: function(msg) {
+document.body.innerHTML += "<pre>" + msg + "</pre>";
+}
+}
+}
+</script>
+</html>

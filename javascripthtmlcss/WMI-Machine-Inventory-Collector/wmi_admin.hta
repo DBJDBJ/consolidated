@@ -1,0 +1,476 @@
+﻿<html>
+	<head>
+		<!-- This allows the use of XP Visual Styles -->
+		<meta http-equiv="MSThemeCompatible" content="yes">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+		<HTA:APPLICATION ID="WMIInfo"
+			APPLICATIONNAME="WMI Info Collector Tool"
+			BORDER="yes"
+			CAPTION="yes"
+			SHOWINTASKBAR="yes"
+			SINGLEINSTANCE="yes"
+			SYSMENU="yes"
+			NAVIGABLE="no">
+
+		<title>Machine Inventory Collector App (MICA)&trade; &copy; 2018 by DBJ.Systems</title>
+
+		<link rel="stylesheet" href="styles/ui.tabs.css" type="text/css" media="print, projection, screen">
+
+		<style type="text/css" media="all" >
+		html, body { font-family: Segoe UI, Arial, Tahoma;}
+		.help_text { font-size:xx-small; }
+
+		#resultsTable { width: 100%;  }
+		#resultsTable tr td { font-size:12px; color:#AAA; width:50%; text-align:left; border:1px solid #C0C0C0; }
+
+			.ip		{	width: 35px; text-align: center; }
+			.left	{	float: left; }
+			.right	{	float: right; }
+			.div	{	font-size: 12px; }
+		</style>
+	</head>
+
+	<body>
+		<h3>Machine Inventory</h3>
+		<br />
+
+		<div id="tabContainer">
+
+			<ul>
+				<li><a href="#tab1"><span>IP Range</span></a></li>
+				<li><a href="#tab2"><span>Components</span></a></li>
+				<li><a href="#tab3"><span>Settings</span></a></li>
+				<li><a href="#tab4"><span>Run &amp; Output</span></a></li>
+				<li><a href="#tab5"><span>About</span></a></li>
+			</ul>
+
+			<div id="tab1">
+				<div>Collect info from this continuous IP ranges:</div>
+				<br />
+				<div id="range1" style="width:100%"><div class="left"><span>01.</span>
+						From
+						<input type="text" maxlength="3" class="ip" onkeyup="checkInput(this)"></input>.<input type="text" maxlength="3" class="ip" onkeyup="checkInput(this)"></input>.<input type="text" maxlength="3" class="ip" onkeyup="checkInput(this)"></input>.<input type="text" maxlength="3" class="ip" onkeyup="checkInput(this)"></input>
+						to
+						<input type="text" maxlength="3" class="ip" onkeyup="checkInput(this)"></input>.<input type="text" maxlength="3" class="ip" onkeyup="checkInput(this)"></input>.<input type="text" maxlength="3" class="ip" onkeyup="checkInput(this)"></input>.<input type="text" maxlength="3" class="ip" onkeyup="checkInput(this)"></input><span>&nbsp;&nbsp;(leave "to" part empty for a single IP address)</span></div>
+					<div class="right"><input type="button" value=" + " onclick="addRange()"></input></div>
+				</div>
+				<p class="help_text">Leave this empty for localhost results.</p>
+			</div>
+
+			<div id="tab2">
+				<div>Collect info about the following components:</div>
+				<br />
+				<div style="width:100%">
+					<table width="100%" class="div">
+						<tr style="vertical-align:top">
+							<td width="50%" id="all_hardware"><input type="checkbox" onclick="notifyHardware(this)">Hardware:</input><br />
+								<table width="100%" class="div">
+									<tr style="vertical-align:top">
+										<td width="50%">
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">Core</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="baseboard">Base board(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="processor">Processor(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="bios">BIOS</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="video">Video adapter(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="sound">Sound card(s)</input><br />
+											</fieldset>
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">Memory</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="memory">Operational memory</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="harddrive">Hard drive(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="cdrom">CD drive(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="floppy">Floppy drive(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="tape">Tape drive(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="ide">IDE controller(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="scsi">SCSI controller(s)</input><br />
+											</fieldset>
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">Peripherals</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="display">Display(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="keyboard">Keyboard</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="mouse">Pointing device(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="printer">Printer(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="pots">POTS modem</input><br />
+											</fieldset>
+										</td>
+										<td>
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">Connections</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="firewire">1394 (Firewire) controller(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="usb">USB controller(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="pcmcia">PCMCIA controller(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="serial">Serial port(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="parallel">Parallel port(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="ports">Port connectors</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="ir">IR device(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="netboard">Network adapter(s)</input><br />
+											</fieldset>
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">Cooling</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="fan">Fan(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="pipe">Heat pipe(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="refrigeration">Refrigeration device(s)</input><br />
+											</fieldset>
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">Enclosure and power</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="enclosure">System enclosure</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="battery">Battery</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="portablebattery">Portable battery</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="ups">UPS device(s)</input>
+											</fieldset>
+										</td>
+									</tr>
+								</table>
+							</td>
+							<td id="all_software"><input type="checkbox" onclick="notifySoftware(this)">Software:</input><br />
+								<table width="100%" class="div">
+									<tr style="vertical-align:top">
+										<td width="50%">
+											<input type="checkbox" name="soft_general" onclick="notifyTops()">General info</input><br />
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">Operating System</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_os">Operating System in general</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_osboot">Operating System booting</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_osrecover">Operating System recovery</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_osqfe">Operating System patches</input><br />
+											</fieldset>
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">Installed software</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_product">Product(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_codec">Codec(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_netprotocol">Network protocols</input><br />
+											</fieldset>
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">Users and Groups</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_users">User(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_groups">Group(s)</input><br />
+											</fieldset>
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">Logon</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_sessions">Logon sessions</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_profiles">Network login profiles</input><br />
+											</fieldset>
+										</td>
+										<td>
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">ODBC</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_odbcsource">Data source(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_odbcdriver">ODBC driver(s)</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_odbctranslator">ODBC translator(s)</input><br />
+											</fieldset>
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">Time</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_time">Time</input><br />
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_zone">Time zone</input><br />
+											</fieldset>
+											<fieldset>
+												<legend><input type="checkbox" checked="true" onclick="switchCategory(this)">Availability</input></legend>
+												<input type="checkbox" onclick="notifyCategory(this)" name="soft_ping">Ping info</input><br />
+											</fieldset>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<div id="tab3">
+				Administrator login:</br><input type="text" size="20" id="login"></input></br></br>
+				Password:</br><input type="password" size="20" id="password"></input></br></br>
+				Domain:</br><input type="text" size="20" id="domain"></input></br></br>
+				<input type="checkbox" id="kerberos">Use Kerberos authentication</input></br></br>
+			</div>
+
+			<div id="tab4"><input id="run_button" type="button" value="Run query" onclick="RunQuery(this)"></input>
+			<table id="resultsTable">
+			<tr>
+			<td id="left">ABCD</td>
+			<td id="right"></td>
+			</tr>
+			</table>
+			</div>
+
+			<div id="tab5"><div id="about_div">
+<pre id="about_text">
+   DBJ.Systems WMI Administrator script. Dec 7th, 2017. 3.2.0
+
+   <a href="http://www.codeproject.com/KB/scripting/wmiadmin.aspx" target="_new" >Inspired by: </a> &copy; 2006-2009 Dmitriy Khudorozhkov
+
+   Improvements &copy; 2009-2018 by <a href="https://dbj.systems" trget="_blank">DBJ.Systems </a>
+
+   This software is provided "as-is", without any express or implied warranty.
+   In no event will the author be held liable for any damages arising from the
+   use of this software.
+
+   Permission is granted to anyone to use this software for any purpose,
+   including commercial applications, and to alter it and redistribute it
+   freely, subject to the following restrictions:
+
+   1. The origin of this software must not be misrepresented; you must not
+      claim that you wrote the original software. If you use this software
+      in a product, an acknowledgment in the product documentation would be
+      appreciated but is not required.
+
+   2. Altered source versions must be plainly marked as such, and must not be
+      misrepresented as being the original software.
+
+   3. This notice may not be removed or altered from any source distribution.
+</pre>
+   </div></div>
+
+		</div>
+	</body>
+<html>
+<script type="text/javascript" src="scripts/jquery-1.7.1.js"></script>
+<script type="text/javascript" src="scripts/jquery-ui-personalized-1.6rc6.js"></script>
+<script type="text/javascript" src="scripts/jquery-checkboxes-2.0.1.js"></script>
+<script type="text/javascript" src="scripts/dbj.lib.js"></script>
+<script type="text/javascript" src="scripts/wmiadmin.js"></script>
+<script type="text/javascript">
+	/*-----------------------------------------------------------------------------------------*/
+(function (GLOBAL, undefined) {
+	/*-----------------------------------------------------------------------------------------*/
+	// jQ 1.3.2 has no toArray()
+	if (!dbj.role.isFunction(jQuery.fn.toArray))
+		jQuery.fn.toArray = function () {
+			return Array.prototype.slice.call(this, 0);
+		}
+
+	$(function () {
+		$("#tabContainer > ul").tabs();
+		$("#tab2 input").each(function () { this.checked = true; });
+	});
+
+	/* Tab 1 functions: */
+
+	GLOBAL.addRange = function (id) {
+		var tab = document.getElementById("tab1");
+		var num = tab.childNodes.length - 1;
+
+		var node = document.getElementById("range1").cloneNode(true);
+		node.firstChild.firstChild.innerText = ((num < 10) ? "0" : "") + num + ".";
+		node.lastChild.previousSibling.removeChild(node.lastChild.previousSibling.lastChild);
+		node.id = "range" + num;
+
+		tab.appendChild(node);
+
+		tab = num = node = null; // dbj added
+	}
+
+	GLOBAL.checkInput = function (input) {
+		var text = input.value;
+		text = text.replace(/[^0-9]/g, "");
+
+		if (text.length && (parseInt(text) > 255))
+			text = 255;
+
+		input.value = text;
+	}
+
+	/* Tab 2 functions: */
+
+	GLOBAL.switchCategory = function (checkbox) {
+		var check = checkbox.getAttribute("checked");
+		var next = checkbox.parentNode.nextSibling;
+
+		while (next) {
+			if (next.tagName && (next.tagName.toLowerCase() == "input"))
+				next.setAttribute("checked", check);
+
+			next = next.nextSibling;
+		}
+
+		notifyTops();
+	}
+
+	GLOBAL.notifyHardware = function (check) {
+		var checked = check.getAttribute("checked");
+		$("#all_hardware input[type=checkbox]").each(function () { this.checked = checked; });
+
+		notifyTops();
+	}
+
+	GLOBAL.notifySoftware = function (check) {
+		var checked = check.getAttribute("checked");
+		$("#all_software input[type=checkbox]").each(function () { this.checked = checked; });
+
+		notifyTops();
+	}
+
+	GLOBAL.notifyCategory = function (check) {
+		var node = check.previousSibling;
+		while (node) {
+			if (node.tagName && (node.tagName.toLowerCase() == "legend")) {
+				node = node.firstChild;
+				break;
+			}
+
+			node = node.previousSibling;
+		}
+
+		if (check.getAttribute("checked")) {
+			node.setAttribute("checked", true);
+		}
+		else {
+			// uncheck whole category:
+			var oneChecked = false;
+			var node2 = node.parentNode.nextSibling;
+
+			while (node2) {
+				if (node2.tagName && node2.getAttribute("checked")) {
+					oneChecked = true;
+					break;
+				}
+
+				node2 = node2.nextSibling;
+			}
+
+			if (!oneChecked)
+				node.setAttribute("checked", false);
+		}
+
+		notifyTops();
+	}
+
+	GLOBAL.notifyTops = function () {
+		var h = $("#all_hardware>table input[@type=checkbox]:checked");
+		var s = $("#all_software>table input[@type=checkbox]:checked");
+
+		document.getElementById("all_hardware").firstChild.setAttribute("checked", (h.length != 0));
+		document.getElementById("all_software").firstChild.setAttribute("checked", (s.length != 0));
+
+		h = s = null; // dbj added
+	}
+
+	/* Tab 4 functions: */
+
+	function OnComponentStart(cname) {
+		$("#resultsTable #right").html(cname);
+	}
+
+	function OnComponentComplete(cname) {
+		/* dummy */
+	}
+
+	function OnIPStart(ip) {
+		$("#resultsTable #left").html( util.ip2filename(ip));
+		$("#resultsTable #right").html("");
+	}
+
+	function OnIPComplete(fname) {
+		$("#resultsTable #left").html("<a href='{0}' >{1}</a>".format(fname, fname));
+		$("#resultsTable #right").html("");
+	}
+
+	function OnFinish() {
+		$("#run_button").attr("disabled", false);
+	}
+
+	function getChildInputs(div) {
+		return $(div).find("input").toArray();
+	}
+
+	function getChildCheckboxes(div) {
+		return $(div).find("input[@type=checkbox]:checked").toArray();
+	}
+
+	GLOBAL.RunQuery = function (button) {
+
+		button.setAttribute("disabled", true);
+
+		// Calculate required IPs:
+		var arrayOfIPs = [];
+
+		var tab1 = document.getElementById("tab1");
+
+		for (var len1 = tab1.childNodes.length, i = 0; i < len1; i++) {
+			var child = tab1.childNodes[i];
+			if (child.tagName && (child.tagName.toLowerCase() == "div") && child.id && (child.id.indexOf("range") != -1)) {
+				var ips = getChildInputs(child.firstChild);
+
+				var aFrom = ips[0].value;
+				var bFrom = ips[1].value;
+				var cFrom = ips[2].value;
+				var dFrom = ips[3].value;
+
+				var aTo = ips[4].value;
+				var bTo = ips[5].value;
+				var cTo = ips[6].value;
+				var dTo = ips[7].value;
+
+				if (!aFrom.length || !bFrom.length || !cFrom.length || !dFrom.length)
+					continue;
+
+				if (!aTo.length || !bTo.length || !cTo.length || !dTo.length) {
+					arrayOfIPs[arrayOfIPs.length] = aFrom + "." + bFrom + "." + cFrom + "." + dFrom;
+					continue;
+				}
+
+				var start = util.ipToLong([aFrom, bFrom, cFrom, dFrom]);
+				var finish = util.ipToLong([aTo, bTo, cTo, dTo]);
+
+				if (start > finish) {
+					var temp = start;
+					start = finish;
+					finish = temp;
+				}
+
+				for (var j = start; j <= finish; j++) {
+					var ip_ = util.longToIp(j);
+					arrayOfIPs[arrayOfIPs.length] = ip_[0] + "." + ip_[1] + "." + ip_[2] + "." + ip_[3];
+				}
+			}
+		}
+
+		var checks = getChildCheckboxes(document.getElementById("tab2"));
+
+		if (!checks || checks.length < 1) {
+			alert("No system components selected for making a inventory.");
+			button.setAttribute("disabled", false);
+			return;
+		}
+
+		var components = [];
+
+		for (var name, i = 0, len2 = checks.length; i < len2; i++) {
+			name = checks[i].name;
+			if (name && name.length)
+				components[components.length] = name;
+		}
+
+		if ( components.length < 1) {
+			alert("No system components selected for making a inventory.");
+			button.setAttribute("disabled", false);
+			return;
+		}
+
+		var username = document.getElementById("login");
+		var password = document.getElementById("password");
+		var domain = document.getElementById("domain");
+		var kerberos = document.getElementById("kerberos").checked;
+
+		if (!username.length) username = null;
+		if (!password.length) password = null;
+		if (!domain.length) domain = null;
+
+		var wmic = new WMIcollector(
+				(arrayOfIPs.length < 1 ? ["127.0.0.1"] : arrayOfIPs), /* dbj 2011-12-17 */
+				username, password, domain, kerberos, components,
+				OnComponentStart,
+				OnComponentComplete,
+				OnIPStart,
+				OnIPComplete, OnFinish);
+
+		setTimeout(function () {
+			wmic.RunQuery();
+			wmic = null; // dbj added
+		}, 100);
+	}
+	/*-----------------------------------------------------------------------------------------*/
+} (this));
+	/*-----------------------------------------------------------------------------------------*/
+</script>

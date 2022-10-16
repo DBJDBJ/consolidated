@@ -1,0 +1,302 @@
+<!--
+	(c) 2005-2007 by dbj@dbj.org. All rights reserved.
+	----------------------------------------------------
+	this htc is used as an interface to the fake modal dialogue
+	   Faking the modal dialogue is achieved with two div's. the one beneath is semitransparent and
+	   stops the user clicking on the page while the one above shows the progress bar in a fake
+	   dialogue box.
+	   
+	   Existence of the attribute DEBUG on the element to which this HTC is 
+	   attached will emit debug messages from the HTC.MSG()
+	   
+	   06.NOV.06
+	   
+	   name changed to dbj_modal_2
+	   Yes/No buttons added
+-->
+<PUBLIC:COMPONENT		NAME='dbj_modal_dialogue'		LIGHTWEIGHT='false' >
+	<PUBLIC:ATTACH		EVENT="oncontentready"			ONEVENT="READY()" />
+    <PUBLIC:ATTACH		EVENT="onpropertychange"		ONEVENT="onPropertyChange()" />
+	<PUBLIC:METHOD		NAME="modal_start"				INTERNALNAME="modal_start" />
+	<PUBLIC:METHOD		NAME="modal_progress"			INTERNALNAME="modal_progress" />
+	<PUBLIC:METHOD		NAME="modal_stop"				INTERNALNAME="modal_stop" />
+    <PUBLIC:PROPERTY	NAME="REPEATS"					VALUE="null" />
+    <PUBLIC:PROPERTY	NAME="UNLOAD_MESSAGE"			VALUE=null />
+    <PUBLIC:EVENT       NAME="onstart"     ID="onstartID"       />
+    <PUBLIC:EVENT       NAME="onstop"      ID="onstopID"        />
+    <PUBLIC:EVENT       NAME="onyes"       ID="onyesID"       />
+    <PUBLIC:EVENT       NAME="onno"        ID="onnoID"       />
+    <PUBLIC:EVENT       NAME="onprogress"  ID="onprogressID"   />
+    <PUBLIC:EVENT       NAME="ondebug"     ID="ondebugID"       />
+    
+<SCRIPT id='dbj_modal_dialogue_script_block' language="javascript" type='text/javascript' >
+//---------------------------------------------------------------------------------------------
+var HTC = new Object() ;
+HTC.ready = false ;
+// this value defines the size of a single progress bar increment
+HTC.repeats = 40 ;
+// after it reaches the end the counter is reset back to 1
+HTC.repetitions = 0 ;
+HTC.unload_message = new String() ;
+HTC.divProgressDialog = null ;
+HTC.divModal = null ;
+HTC.modalTimeout = 100 ; // the speed of progress increment
+HTC.progressing = false ;
+//-----------------------------------------------------------
+HTC.MSG = function ( msg )
+{
+	if ( element.DEBUG == null ) return ;
+	var evento = createEventObject() ;
+	evento.dbgmsg = "dbj_modal_dialogue : " + msg ;
+	ondebugID.fire( evento ) ;
+}
+//---------------------------------------------------------------------------------------------
+function READY()
+{
+	try {
+	// add internal event handlers ...
+	document.all.btnCancel.onclick = function () { modal_stop(); }
+	document.all.btnYes.onclick = function () { modal_yes(); }
+	document.all.btnNo.onclick = function () { modal_no(); }
+	//
+	document.all.btnCancel.value = "undefined" ;
+	HTC.divProgressDialog = top.document.body.appendChild( document.all.divProgressDialog ) ;
+	HTC.divModal = top.document.body.appendChild( document.all.divModal ) ;
+		HTC.ready = true ;
+		HTC.MSG("Ready!");
+	} catch ( x ) {
+		HTC.ready = false ;
+	}
+}
+//-----------------------------------------------------------
+// this is called by IE when any property is changed
+// on the element, (most likely) through scripting...
+function onPropertyChange ()
+{
+	var ename = (event.propertyName).toUpperCase() ;
+    function show ( newval ) {
+		HTC.MSG( "Property: " + ename + ", changed to : " + newval ) ;
+    }
+	
+	if ( ename == "REPEATS" )
+	{
+		HTC.repeats = parseInt(element.REPEATS) ;
+		show( HTC.repeats ) ;
+	}
+	else if ( ename == "UNLOAD_MESSAGE" )
+	{
+		HTC.unload_message = element.UNLOAD_MESSAGE ;
+		show( HTC.unload_message ) ;
+	} 
+	else if ( ename == "SPEED" )
+	{
+		HTC.modalTimeout = parseInt(element.SPEED) ;
+		show( HTC.modalTimeout ) ;
+	} else 
+	{
+	    HTC.MSG( "onPropertyChange() : unknown property name [" + ename + "]");
+	} 
+	
+	event.cancelBubble=true; 
+	event.returnValue=false;
+}
+//---------------------------------------------------------------------------------------------
+// PUBLIC:METHOD
+function modal_start( dlg_title, dlg_text_1, dlg_text_2, btn_text, timeout_value )
+{
+	if ( ! HTC.ready ) { HTC.MSG("NOT READY?"); return false; }
+	
+	timeout_value = parseInt( timeout_value ) ;
+	
+	if ( isNaN(timeout_value) ) timeout_value = 0 ;
+
+        // Add a resize handler for the window
+        top.attachEvent("onresize", resizeModal ) ;
+        // Add a warning in case anyone tries to navigate away or refresh the page
+        // while this 'dialogue' is shown and working
+        top.attachEvent("onbeforeunload", showWarning ) ;
+
+   HTC.divProgressDialog.all.btnCancel.value            = btn_text.substring(0,128) ;
+   HTC.divProgressDialog.all.progress_title.innerText   = dlg_title.substring(0,128) ;
+   HTC.title_base = HTC.divProgressDialog.all.progress_title.innerText ;
+   HTC.divProgressDialog.all.progress_text_1.innerText  = dlg_text_1.substring(0,1024) ;
+   HTC.divProgressDialog.all.progress_text_2.innerText  = dlg_text_2.substring(0,1024) ;
+   // First set up the title and text's if given by caller
+   HTC.divProgressDialog.style.display = "";
+   resizeModal();
+   HTC.divProgressDialog.all.btnCancel.focus();
+   
+   if ( 0 == timeout_value )
+   {
+        HTC.divProgressDialog.all.divProgressOuter.style.display = "none" ;
+        HTC.progressing = false ;
+        // HTC.modalTimer = top.setTimeout(modal_progress, HTC.modalTimeout);
+   } 
+   else
+   {
+        HTC.timeout_value = timeout_value ;
+        // show itself with a progress bar inside ...
+        HTC.divProgressDialog.all.divProgressOuter.style.display = "block" ;
+        HTC.progressing = true ;
+        HTC.modalTimer = top.setTimeout(modal_progress, HTC.modalTimeout);
+        // will stop after x seconds...
+        dbj_modal_dialogue_internal_timer_ = 
+        window.setInterval( stop_modal_dialogue , 1000 * 1 ) ;
+   }
+    // fire the onstart event
+    onstartID.fire() ;
+}
+
+//-------------------------------------------------------------------------
+// this is how we stop the timed modal dialogue, if it times out ...
+//
+ function stop_modal_dialogue ()
+ {
+    HTC.timeout_value -= 1 ;
+    HTC.divProgressDialog.all.progress_title.innerText = 
+                HTC.title_base + "  [" + HTC.timeout_value + "]" ;
+    if ( HTC.timeout_value > 0 ) return ;
+   if( dbj_modal_dialogue_internal_timer_ != null )
+   {
+   
+    window.clearInterval( dbj_modal_dialogue_internal_timer_ ) ;
+    modal_stop()
+   }
+    dbj_modal_dialogue_internal_timer_ = null ;
+ }
+//---------------------------------------------------------------------------------------------
+// PUBLIC:METHOD
+// Update our pseudo progress bar to number of percents user wants
+function updateProgress(nNewPercent)
+{
+  if ( ! HTC.progressing ) return ;
+   HTC.divProgressDialog.all.divProgressInner.style.width = 
+   (parseInt(HTC.divProgressDialog.all.divProgressOuter.style.width) * nNewPercent / 100)+ "px";
+   
+   var evento = createEventObject() ;
+   evento.progress = parseInt( nNewPercent );
+   onprogressID.fire( evento ) ;
+}
+
+//---------------------------------------------------------------------------------------------
+function common_internal_event_handler ()
+{
+   // if ( ! HTC.progressing ) return ;
+    
+   HTC.progressing = false ;
+   
+   if (HTC.modalTimer != null)   {
+      // Clear the timer so we don't get called back an extra time
+      top.clearTimeout(HTC.modalTimer);
+   }
+      HTC.modalTimer = null;
+    // detach event handlers
+    top.detachEvent("onresize", resizeModal ) ;
+    top.detachEvent("onbeforeunload", showWarning ) ;
+  // Hide the fake modal DIV
+   HTC.divModal.style.width = "0px";
+   HTC.divModal.style.height = "0px";
+   HTC.divProgressDialog.style.display = "none";
+   HTC.repetitions = 0;
+}
+//---------------------------------------------------------------------------------------------
+// PUBLIC:METHOD
+// this func. has to be called from the worker func. when worker proc. stops
+function modal_stop(){    common_internal_event_handler(); onstopID.fire() ; }
+function modal_yes() { modal_stop(); onyesID.fire(); }
+function modal_no () { modal_stop(); onnoID.fire(); }
+//---------------------------------------------------------------------------------------------
+// PUBLIC:METHOD
+// auto update our pseudo progress bar
+function modal_progress()
+{
+  if ( ! HTC.progressing ) return ;
+
+   if (HTC.repetitions > HTC.repeats)
+   HTC.repetitions = 1 ;
+   
+   updateProgress(100 * HTC.repetitions / HTC.repeats);
+   HTC.repetitions++;
+   
+    HTC.modalTimer = top.setTimeout(modal_progress, HTC.modalTimeout);
+
+}
+
+//---------------------------------------------------------------------------------------------
+//Warn users before they refresh the page or navigate away
+//this event handler is attached to the top.onbeforeunload sink.
+function showWarning()
+{
+	if ( 'null' == element.UNLOAD_MESSAGE ) return ;
+	if ( event )
+	{
+	    event.cancelBubble = true ;
+	    event.returnValue  = element.UNLOAD_MESSAGE; // HTC.unload_message ;
+	}
+	return true ;
+}
+
+//---------------------------------------------------------------------------------------------
+// onresize event handler
+// Resize the DIV to cover the whole body of the document
+// and fake the modality of the dialog DIV
+// by stoping the user to click on anything beneath it.
+// it is made semi transparent by using the  FILTER: alpha(opacity=75); 
+// as part of it's style
+function resizeModal()
+{
+   HTC.divModal.style.width		= top.document.body.scrollWidth		;
+   HTC.divModal.style.height	= top.document.body.scrollHeight	;
+
+   // Re-center the fake dialog DIV
+   HTC.divProgressDialog.style.left = ((top.document.body.offsetWidth - HTC.divProgressDialog.offsetWidth) / 2 );
+   HTC.divProgressDialog.style.top = ((top.document.body.offsetHeight - HTC.divProgressDialog.offsetHeight) / 2);
+}
+
+</SCRIPT>
+<HTML>
+<head>
+<style type="text/css" id="dbj_modal_2_styles" media="screen" >
+.dbj_modal_button {  }
+</style>
+</head>
+<BODY>
+		<DIV onselectstart="window.event.returnValue=false;" id="divProgressDialog" style="BORDER-RIGHT: buttonhighlight 2px outset; BORDER-TOP: buttonhighlight 2px outset; DISPLAY: none; FONT-SIZE: 8pt; Z-INDEX: 4; BORDER-LEFT: buttonhighlight 2px outset; NOWIDTH: 350px; CURSOR: default; BORDER-BOTTOM: buttonhighlight 2px outset; FONT-FAMILY: Tahoma; POSITION: absolute; BACKGROUND-COLOR: buttonface">
+			<DIV id='progress_title' style="PADDING-RIGHT: 3px; PADDING-LEFT: 3px; FONT-WEIGHT: bolder; PADDING-BOTTOM: 3px; COLOR: captiontext; PADDING-TOP: 3px; BORDER-BOTTOM: white 2px groove; BACKGROUND-COLOR: activecaption">
+				Default Caption
+			</DIV>
+			<DIV id='progress_text_1' style="PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; PADDING-TOP: 5px">
+				Default Text 1
+			</DIV>
+			<DIV id='progress_text_2' style="PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; PADDING-TOP: 5px">
+				DEfault Text 2
+			</DIV>
+			<DIV style="PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; PADDING-TOP: 5px; TEXT-ALIGN: center;">
+				<DIV id="divProgressOuter" style="BORDER-RIGHT: buttonshadow 1px solid; BORDER-TOP: buttonshadow 1px solid; BORDER-LEFT: buttonshadow 1px solid; WIDTH: 336px; BORDER-BOTTOM: buttonshadow 1px solid; HEIGHT: 15px">
+					<DIV id="divProgressInner" style="MARGIN: 0px; WIDTH: 0px; COLOR: red ; HEIGHT: 13px; BACKGROUND-COLOR: infobackground; TEXT-ALIGN: center"></DIV>
+				</DIV>
+			</DIV>
+			<DIV style="BORDER-TOP: white 2px groove; PADDING-BOTTOM: 5px; PADDING-TOP: 3px; BACKGROUND-COLOR: buttonface; TEXT-ALIGN: center">
+			        <INPUT id="btnCancel" 
+			        style="FONT-SIZE: 8pt; FONT-FAMILY: verdana,arial,Tahoma; width:30%; margin:3px;"
+			        onclick="top.alert('modal dialogue htc, btnCancel onclick event handler is not user defined.')"
+					type="button" value="Cancel" name="btnCancel" />
+			        <INPUT id="btnYes"
+			        style="FONT-SIZE: 8pt; FONT-FAMILY: verdana,arial,Tahoma; width:30%; margin:3px;"
+			        onclick="top.alert('modal dialogue htc, YES onclick event handler is not defined.')"
+					type="button" value="Yes" name="btnYes" />
+			        <INPUT id="btnNo" 
+			        style="FONT-SIZE: 8pt; FONT-FAMILY: verdana,arial,Tahoma; width:30%; margin:3px;"
+			        onclick="top.alert('modal dialogue htc, NO onclick event handler is not defined.')"
+					type="button" value="No" name="btnNo" />
+			</DIV>
+		</DIV>
+		<!-- 
+		BEGIN TRANSPARENT MODAL DIV
+		Also stops the user to click on anything bellow it.
+		-->
+		<DIV id="divModal" style="Z-INDEX: 3; FILTER: alpha(opacity=75); LEFT: 0px; POSITION: absolute; TOP: 0px; BACKGROUND-COLOR: white"
+			onclick="window.event.cancelBubble=true; window.event.returnValue=false;"></DIV>
+</BODY>
+</HTML>
+</PUBLIC:COMPONENT>

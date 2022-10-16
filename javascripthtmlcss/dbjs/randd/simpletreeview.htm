@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
+<head>
+<title>DBJ*H</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<style type="text/css">
+ body { font:small/1.5 verdana,tahoma,arial; }
+</style>
+<style type="text/css" id="simple_tree_style">
+div.tree div {
+ padding-left:16px;
+}
+div.tree div.parent div {
+ display:none;
+ cursor:default;
+}
+div.tree div.parent {
+ cursor:pointer !important;
+ background:transparent url(plus.gif) no-repeat top left;
+}
+div.tree div.expanded {
+ background:transparent url(minus.gif) no-repeat top left;
+}
+</style>
+</head>
+<body>
+<script type="text/javascript" id="dbj_simple_tree" >
+(function ($) {
+// registry of my TV's  
+// tv_id : instance
+var $R = {} ;
+function register ( tv_id ) {
+    if ( tv_id in $R ) return $R[tv_id] ;
+    var $tv = $(tv_id) ;
+    if ( $tv.length < 1 ) throw new Error(0xFF, "NOT FOUND, Simple Tree, *inside* the container by id: " + tv_id ) ;
+    return $R[tv_id] = $tv ;
+}
+     // node path is in outline numbering format NOT "folder like" path. Example:
+     // '1.2.3' is
+     // 1
+     // +--2
+     //    +--3
+     // root node path === '0' and this node does not exist
+     var last_node_visited = "0" ; 
+//
+    function click_handler( event ) {
+        var o = $(event.target) ;
+        if ( o.is("div") ) {
+		    o.children('div').toggle();
+		    o.filter('.parent').toggleClass('expanded');
+        }
+            dump_tv() ;
+            return false ;
+    }
+// create rel attribute on each element found with node path set to it    
+// example: rel="0" -- root element
+//          rel="0.1" -- first child of the root element, etc ...
+function rel_ate ( root, grp_tag )
+{
+   var att = "rel" ;
+    function nrel ( s, first_child ) {
+      if ( ! s ) return "1" ; // cludge ?
+      if ( first_child ) return s + ".1" ;
+         // next sibling ID
+      return s.replace(/\d$/, function( $0, $1, $2) { return 1 + (1*$0) ;});
+    }
+    function relate ( siblings ) {
+       if ( siblings.length < 1 ) return ;
+       siblings.each( function () {
+            var $prev = $(this).prev( grp_tag ); 
+            if ($prev.length > 0 ) {
+                // for every but first, increment previous node path ,
+                // and set it to this sibling
+                $(this).attr(att, nrel( $prev.attr(att))) ;
+            } else {
+                    // first sibling gets the node path: "<parent path>.1"
+                    $(this).attr(att, nrel( $(this).parent().attr(att), true ));
+            }
+            $(this).find("span:first").text($(this).attr("rel"));
+                relate($(this).find(grp_tag));
+       }) ;
+    }
+    relate($(root).find(grp_tag)) ;
+}
+//
+top.STV = function ( tv_id ) {
+     var $T = null ;
+     this.add = function  ( path, text, value ) {}
+     // constructor
+     if ( ! ( this instanceof top.STV ) ) throw new Error(0xFF, "STV() can not be called like a function. Retry with new STV( '#tree_container_id' )" ) ;
+     $T = register(tv_id);
+	 $T.find('div.tree div:has(div)').addClass('parent'); // Requires jQuery 1.2!
+	 /*
+	 $T.find('div.tree div').click(function() {
+		var o = $(this);
+		o.children('div').toggle();
+		o.filter('.parent').toggleClass('expanded');
+		return false;
+	});
+	*/
+	    $T.click( click_handler ) ;
+	    rel_ate( $T.find("div.tree")[0], "div" ) ;
+	   return this ;
+	}
+})(jQuery);
+</script>
+<script type="text/javascript" id="main" >
+var $info = null ;
+function dump_tv () {
+	$info.find("textarea").text( $("#tv1").html() );
+}
+$(function() {
+    $info = $("#info") ;
+    $info.css("width", "600px").css("height", "600px").css("position", "absolute").css("right", "1px")
+         .css("top", "1px").css("margin","5px").css("border","1mm solid")
+         .find("textarea").css("width", "100%").css("height","100%") ;
+	var tv1 = new STV("#tv1");
+});
+</script>
+<h3>Simple Tree Structure</h3>
+<span id="tv1">
+<div class="tree" style="padding:10px;border:1px solid; max-width:33%;">
+	<div><span>Item 1</span>
+		<div><span>Item 1.1</span></div>
+		<div><span>Item 1.2</span>
+			<div><span>Item 1.2.1</span></div>
+			<div><span>Item 1.2.2</span></div>
+			<div><span>Item 1.2.3</span></div>
+		</div>
+		<div><span>Item 1.3</span></div>
+	</div>
+	<div><span>Item 2</span>
+		<div><span>Item 2.1</span></div>
+		<div><span>Item 2.2</span>
+			<div><span>Item 2.2.1</span></div>
+			<div><span>Item 2.2.2</span></div>
+			<div><span>Item 2.2.3</span></div>
+		</div>
+		<div><span>Item 2.3</span></div>
+	</div>
+	<div><span>Item 3</span>
+		<div><span>Item 3.1</span></div>
+		<div><span>Item 3.2</span>
+			<div><span>Item 3.2.1</span></div>
+			<div><span>Item 3.2.2</span></div>
+			<div><span>Item 3.2.3</span></div>
+		</div>
+		<div><span>Item 3.3</span></div>
+	</div>
+</div>
+</span>
+<hr />
+<div id="info"><textarea></textarea></div>
+</body>
+</html>
+

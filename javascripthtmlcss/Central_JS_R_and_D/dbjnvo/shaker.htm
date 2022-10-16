@@ -1,0 +1,122 @@
+<!DOCTYPE html >
+<html>
+	<head>
+		<title>DBJ*NVO&trade; Name Value Operations Demo</title> 
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style media="all" type="text/css" > 
+    html,body { width:100%; height:100%; overflow:hidden; }
+		.dbj_shaker  
+		{
+			display:inline;
+			position:absolute;
+			z-index:0; 
+			top:auto;left:auto;right:auto;bottom:auto; 
+			cursor:hand;
+			background-color:transparent; color: black ;
+			font: 127px/1.0 arial black,verdana,tahoma;
+			padding:0px;
+			margin:0px;
+			border:0px solid;
+		}
+		div.dbjinfo  
+		{
+		    background-color:transparent; color: black ;
+			z-index:9999 ; 
+			top:auto;left:auto;right:15mm;bottom:5mm; 
+			position:absolute;
+			font: 12px/1.5 Verdana;
+			width:99mm;
+			border:0px solid;
+         }
+         
+         #zvuk, #boje { width:40mm; overflow:hidden; }
+</style>
+</head>
+<body id="telo" >
+<div class='dbjinfo' >
+&copy; 2009 by DBJ.ORG&trade;
+<h5>DBJ_NVO :: DBJ Name Value Operations jQuery&trade; plugin</h5>
+<p>
+Please look into <a href="dbj_shaker.js" target="_blank" >dbj_shaker.js</a>, to see the usage example.
+Plugin is in <a href="jquery.dbjnvo.js">jquery.dbjnvo.js</a>&nbsp;
+</p>
+<p>Single click (re)starts from the mouse click point.Orders back 'nervous' title to the mouse click point.</p>
+<p>
+<button id="zvuk" href="" >Sounds</button><button id="boje" >Colours</button>
+</p>
+</div>
+</body>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js" type="text/javascript"></script>
+<script src="../dbjsound/jquery.dbj_sound.js" type="text/javascript"></script>
+<script src="jquery.dbjnvo.js" type="text/javascript" id="dbj_incdec" ></script>
+<script src="dbj_shaker.js" type="text/javascript" id="dbj_floater_shaker" ></script>
+<script type="text/javascript" >
+    /// <reference path="jquery.dbjnvo.js" />
+	// toggle the playback changing the sound and informing the user
+	// in the same time, when sound host element is clicked
+	function sound_handler($target) {
+		function basename() {
+			return $target.attr('href').split("/").pop();
+		} ;
+		if ($.dbj_sound.playing($target)) {
+		    $.dbj_sound.stop($target);
+			$($element).html("Stopped: " + basename());
+		}
+		else {
+		    $($target).attr('href', DBJ.store.next())
+			           .html("<span style='color:red;'>Playing:</span> " + basename());
+			$.dbj_sound.loop($target);
+        }
+	};
+
+	//---------------------------------------------------------------------------------
+	function prepare_for_shaking(word, hostelement, x, y) {
+		DBJ.shaker_remove();
+		var Y = y ? y : parseInt( $(hostelement).innerHeight() / 2 ),
+		X = x ? x : 0, 
+		TOP = Y, LEFT = X,
+		$last = null ;
+		word = "string" === typeof word ? word.split("") : word;
+		jQuery.each(word, function(j, v) {
+		$last = $("<div>").attr("class", "dbj_shaker").text(v).appendTo(hostelement);
+			// TOP = Y - parseInt( $last.outerHeight() ) ;
+			$last.animate({ left: LEFT, top: TOP }, 100 );
+			LEFT += $last.outerWidth();
+		})
+		// start shaking arround anything that has a class '.dbj_shaker'
+		// after a timeout that is.
+		var tid = setTimeout(function() { clearTimeout(tid); DBJ.shaker_init(".dbj_shaker"); }, 
+		1 * 1000);
+	}
+	//---------------------------------------------------------------------------------
+	$(function () {
+
+	    var SHAKED = "DBJ.ORG™";
+	    $.dbj_sound.cache(
+		"http://dbj.org/6/sound/beat.mp3",  "http://dbj.org/6/sound/bell.mp3",
+		"http://dbj.org/6/sound/start.mp3", "http://dbj.org/6/sound/thrill.mp3"
+			);
+	    // set up the store with sound files from the cache
+	    DBJ.store.url = $.dbj_sound.cache.list;
+
+	    $(".dbjinfo").click(function (event) {
+	        var $target = $(event.target), id_ = $target.attr("id");
+	        if ($target.is("button")) {
+	            if (id_ === "boje") {
+	                DBJ.random_color = !DBJ.random_color;
+	            }
+	            if (id_ === "zvuk") {
+	                alert("sound_handler($target);");
+	            }
+	        }
+	        event.stopPropagation();
+	        return false;
+	    });
+	    //
+	    $(document.body).click(function (event) {
+	        prepare_for_shaking(SHAKED, event.target, event.pageX, event.pageY);
+	        return false;
+	    });
+	});    
+</script>
+</html>

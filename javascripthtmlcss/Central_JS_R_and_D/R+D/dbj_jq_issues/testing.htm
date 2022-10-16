@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html >
+<!-- $Revision: 1 $ $Date: 22/12/09 17:10 $ $Author: Admin $ -->
+<html>
+<head>
+<!-- Set document compatibility mode to IE8Mode  -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>jQ cache growing</title>
+<style type="text/css">
+    body { font: small/1.5 verdana,arial; }
+    li { list-style-type:decimal; }
+</style>
+<script src="../jquery.1.3.2.safe.slow.js" type="text/javascript"></script>
+<script src="../dbj.lib.js" type="text/javascript"></script>
+</head>
+<body>
+<ul id="report"></ul>
+</body>
+<script type="text/javascript">
+    function P(s_) {
+        var tid = setInterval(function(s2) {
+        // function esc(st) { return st.replace(/\</g, "&lt;").replace(/\>/g, "&gt;").replace(/\&/g, "&amp;"); }
+        while (s2 = P.Q.shift())
+            // document.writeln("<br/>" + s2);
+            // var li = $report.appendChild(document.createElement("<li>"));   li.innerHTML = esc(s_);
+            P.$root.append($('<li style="overflow-x:auto;width:90%;margin:2px; padding:5px; border:1px solid; "></li>').text(s2));
+        }, 1);
+    P.Q.push(s_);
+}
+P.$root = null;
+   P.Q = [];
+   P.E = function (exp, x) {
+       try {
+           P(exp + " ::\t" + eval(exp));
+       } catch (x) {
+           P(exp + " : INTERNAL EXCEPTION :\t" + x.message);
+       }
+   }
+   //---------------------------------------------------------------------------------------
+   jQuery(function(x) {
+       //---------------------------------------------------------------------------------------
+       P.$root = $("#report");
+
+
+       P.E("window.navigator.userAgent");
+       if (document.documentMode) P.E('"IE" + document.documentMode'); else P.E('document.compatMode');
+
+       for (var j = 0; j < 1; j++)
+           try {
+           dbj_cond_testing();
+           test_cache();
+           test_resilience_to_prototype_extending();
+           quicksortest(999);
+       } catch (Exception) {
+           P.E.call(Exception, "'Exception : ' + this.message");
+           if (Exception.stack)
+               P.E.call(Exception, "'Exception stack : ' + this.stack");
+       }
+   });
+
+    jQuery(top).bind('unload', function() {
+    delete $report;
+        if ( top.navigator.userAgent.match(/MSIE/) )
+        if ( CollectGarbage ) CollectGarbage();
+    });
+
+</script>
+<script type="text/javascript">
+    // dbj.cond testing
+    function dbj_cond_testing() {
+        P("\t\t dbj_cond_testing");
+        P('standard "switch" statement');
+        P.E('var x = switch(1) { case 3: "red"; break; case 2: "green"; break; default "blue" };');
+        P.E('dbj.cond(1, 3, "red", 2, "green", function () { return "blue";});');
+    }
+</script>
+<script type="text/javascript">
+    // testing safe and slow jQuery version ...
+    function test_resilience_to_prototype_extending() {
+        P( "\t\ttest_resilience_to_prototype_extending");
+        P.E("Object.prototype.my_abuse = function() { }");
+        P.E("Object.prototype.my_abuse2 = '!!!'");
+        P.E("Object.prototype.$ = '!!!'");
+        P.E("Object.prototype.any_method = function() { return true; }");
+        P.E("JSON.stringify(Object())");
+        P.E("JSON.stringify(new Object())");
+        P.E("JSON.stringify(Object.prototype)");
+        P.E("for ( var j in Object.prototype ){ delete Object.prototype[j]; }") ;
+        P.E("var o = new Object();o.any_method()");
+    }
+    </script>
+ <script type="text/javascript" id="test_jq_cache">
+     function test_cache() {
+         function do_test_cache() {
+             P("\t\tTest jQ cache");
+             P.E("JSON.stringify($.cache)");
+             P.E('$("#report").data("some", "data")');
+             P.E("JSON.stringify($.cache)");
+         }
+             if (!this.JSON)
+                 $.getScript("http://www.json.org/json2.js", do_test_cache);
+             else
+                 do_test_cache();
+     }
+</script>
+<script type="text/javascript" id="quicksort">
+    function quicksortest(max_) {
+        P("\t\tDBJQuicksort Test");
+        var arr = [];
+        for (var j = 0; j < max_; j++)
+            arr.push( parseInt( Math.random() * 1000)) ;
+        P("Input");
+        P(arr.toString());
+        dbj.sort(arr, 0, arr.length);
+        P("Output");
+        P(arr.toString());
+        P("Done");
+    }
+</script>
+</html>

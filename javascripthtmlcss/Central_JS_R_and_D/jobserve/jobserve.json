@@ -1,0 +1,22 @@
+﻿{
+  "feeds": [
+        { "name": "London architect contract", 
+          "link": "http://www.JobServe.com/MySearch/BE4CE32DC836A1E8.rss" },
+        { "name": "London NOT developer NOT admin", 
+          "link": "http://www.JobServe.com/MySearch/CC3E63DF1A06421F.rss" }
+  ],
+  "mail" : {
+    "body": [
+            "\nDear {0}" ,
+            "\nIn regards to the position advertised on JobServe.com " ,
+            "\n{1}" ,
+            "\nUnder the reference: '{2}'" ,
+            "\nPlease find my CV (in Word format) at: http://dbj.org/dbj_cv.doc " ,
+            "\nIf you find that my CV is not relevant, for this position, please accept my appologies." ,
+            "\n" ,
+            "\nBest Regards: Mr D.Jovanovic, MsC IT Arch" ,
+            "\nLondon, UK " ,
+            "\n{3}"
+            ]
+  }
+}

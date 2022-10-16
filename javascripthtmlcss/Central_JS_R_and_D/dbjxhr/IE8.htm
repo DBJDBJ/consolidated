@@ -1,0 +1,57 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html xmlns="http://schemas.microsoft.com/intellisense/html-401" >
+
+<head>
+<title>AJAX Map</title>
+</head>
+
+<!-- Load the Virtual Earth map control. -->
+<script src="http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6" type="text/javascript"></script>
+<script type="text/javascript">
+    var oMap = null;
+    var iZoomLevel = 0;
+    
+    function GetMap()
+    {
+        oMap = new VEMap('myMap');
+        oMap.LoadMap();
+        
+        oMap.AttachEvent("onendzoom", ZoomHandler);
+        iZoomLevel = oMap.GetZoomLevel();
+        window.location.hash = iZoomLevel;
+    }
+    
+    function ZoomHandler(e)
+    {
+        iZoomLevel = oMap.GetZoomLevel();
+
+        // The following declaration sets the hash property to a 
+        // variable containing the URL fragment to be saved. 
+        window.location.hash = iZoomLevel;
+    }
+    
+    function HashChangeHandler()
+    {
+        var hash = window.location.hash;
+        var iNewZoomLevel = hash.substr(1);
+        
+        if (iNewZoomLevel != iZoomLevel)
+        {
+            iZoomLevel = iNewZoomLevel;
+            oMap.SetZoomLevel(iNewZoomLevel);
+        }
+    }
+</script>
+<!-- Attaching the event handler to a new onhashchange event allows
+    the page to detect when the hash has changed and an AJAX 
+    navigation has occurred. -->
+<body onhashchange="HashChangeHandler();" onload="GetMap();" 
+    style="overflow: scroll; height: 100%">
+
+<div id="myMap" style="position: relative; width: 500px; 
+    height: 500px; vertical-align: middle">
+</div>
+
+</body>
+
+</html>

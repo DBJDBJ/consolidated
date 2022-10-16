@@ -1,0 +1,221 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/DTD/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<!--
+$Revision: 1 $
+$Date: 22/12/09 17:10 $
+-->
+<head>
+ <title>DBJ*AsyncResult&trade; &copy;2009-2013 by DBJ.ORG</title>
+<style type="text/css" >
+	body { font: small/1.5 verdana; }
+	.dbj_li {}
+	.dbj_rezult { background:#C0C0C0; min-width:50px; }
+	.dbj_footer { font-size:x-small; text-align:center; margin:10px; }
+	#jq_support { cursor:pointer; border:1px solid; padding:3px; }
+	#jq_support ul { width:50%; height:400px; display:none; overflow:auto; background:#c0c0c0; padding:3px; }
+	#rezult { height:400px; width:100%; overflow:auto; padding:3px; border:1px solid; }
+	#toolbar { border:1px solid; padding:3px; margin:3px; }
+	
+</style>
+</head>
+<body>
+<div id="toolbar" >
+<button id="test1btn">spawn()</button>
+<button id="test2btn">pageuid()</button></div>
+<div id="rezult" ></div>
+<hr />
+<div id="jq_support">
+<p><b>jQuery.support</b></p>
+<li style="list-style:none;"><ul>
+<li class='dbj_li' >	<b>boxModel</b>:<span class='dbj_rezult'></span> Is equal to true if the page and browser are rendering according to the W3C CSS Box Model (is currently false in IE 6 and 7 when they are in Quirks Mode). This property is null until document ready occurs.</li>
+<li class='dbj_li' >	<b>cssFloat</b>:<span class='dbj_rezult'></span> Is equal to true if style.cssFloat is used to access the current CSS float value (is currently false in IE, it uses styleFloat instead).</li>
+<li class='dbj_li' >	<b>hrefNormalized</b>:<span class='dbj_rezult'></span> Is equal to true if the browser leaves intact the results from getAttribute("href")(is currently false in IE, the URLs are normalized).</li>
+<li class='dbj_li' >	<b>htmlSerialize</b>:<span class='dbj_rezult'></span>Is equal to true if the browser properly serializes link elements when innerHTML is used (is currently false in IE).</li>
+<li class='dbj_li' >	<b>leadingWhitespace</b>:<span class='dbj_rezult'></span>Is equal to true if the browser preserves leading whitespace when innerHTML is used (is currently false in IE 6-8).</li>
+<li class='dbj_li' >	<b>noCloneEvent</b>:<span class='dbj_rezult'></span> Is equal to true if the browser does not clone event handlers when elements are cloned (is currently false in IE).</li>
+<li class='dbj_li' >	<b>objectAll</b>:<span class='dbj_rezult'></span> Is equal to true if doing getElementsByTagName("*") on an object element returns all descendant elements (is currently false in IE 7).</li>
+<li class='dbj_li' >	<b>opacity</b>:<span class='dbj_rezult'></span> Is equal to true if a browser can properly interpret the opacity style property (is currently false in IE, it uses alpha filters instead).</li>
+<li class='dbj_li' >	<b>scriptEval</b>:<span class='dbj_rezult'></span> Is equal to true if using appendChild/createTextNode to inject inline scripts executes them (is currently false in IE, it uses .text to insert executable scripts).</li>
+<li class='dbj_li' >	<b>style</b>:<span class='dbj_rezult'></span> Is equal to true if getAttribute("style") is able to return the inline style specified by an element (is currently false in IE - it uses cssText instead).</li>
+<li class='dbj_li' >    <b>tbody</b>:<span class='dbj_rezult'></span> Is equal to true if the browser allows table elements without tbody elements (is currently false in IE, which automatically inserts tbody if it is not present).</li>
+</ul></li></div>
+<hr />
+<p class='dbj_footer'>This page &copy; 2009-2013 by <a href="http://dbj.org">DBJ.ORG&trade;</a> </p>
+</body>
+<script src="http://code.jquery.com/jquery-1.9.1.min.js" type="text/javascript" id="JQ.1.9.1" ></script>
+<script src="http://dbj.org/6/dbj.lib.js" type="text/javascript"></script>
+<script type="text/javascript" id="this_page_main_script" >
+	$(function() {
+
+		$(window).error(function(msg, url, line) {
+			alert("error\n\n" + msg + "\n" + url + "\n" + line);
+		});
+
+		$('.dbj_li').each(function() {
+			var pName = $.trim($(this).find("b").text());
+			$(this).find(".dbj_rezult").text(" " + $.support[pName] + " ").append("</br>");
+		});
+
+		$("#jq_support").click(function() { $(this).find("ul").toggle(); });
+
+	});      // eof doc ready
+</script>
+
+<script type="text/javascript" id="dbj_async_result" >
+
+	// V 8 (c) 2009 by DBJ.ORG
+	// caling example
+	// 	spawn({ 'worker': w1, 'delay': 1000, 'callback': on_async_finished }, 1, 2, 3)
+    //
+	// Mandatory arguments :
+	// 1:single JSON object where
+	// worker   [mandatory] function pointer of the worker to execute asynchronously
+	// delay    [optional]  delayed execution time unit in microseconds, if null then 1.
+	// callback [optional]  called 'back' when worker is done with AsyncResult instance
+	//                      as its only argument
+	// [optional]
+	// any arguments required by a worker function
+    //
+function spawn ( )
+{
+	var AsyncResult = function(args_) {
+
+	    // preserve the current instance aka 'this' in 'that'
+	    var that = this,
+	        FP = args_[0].worker || null ,
+		    tu = parseInt(args_[0].tu || 1 ),
+		    CB = args_[0].callback || null ;
+
+		tu = (tu > spawn.maxdelay ? spawn.maxdelay : tu);
+	    // create properties on the curent instance
+		this.done = false;
+		this.retval = null;
+		this.tid = null;
+		this.callback = CB;
+		// transform arguments to array and cut the first element
+		// thus leaving arguments for FP
+		that.args = Array.prototype.slice.call(args_).slice(1);
+
+		this.toString = function() {
+			// return JSON formated object exposing private properties
+			// NOTE: this idiom exposes private properties without the need for get/set methods
+		    return JSON.stringify(that);
+		}
+		// this private method is delay executed *outside* of the context of the current instance
+		// it is executed in the context of the 'global space' aka the 'window' object
+		function doit(x) {
+			try {
+				// execute FP(args), and preserve its return value
+				that.retval = FP.apply(that, that.args);
+				// signal that execution finished ok
+				that.done = true;
+			} catch (x) {
+				// FP() caused an exception
+				that.retval = x.message; // for caller to see which one 
+				// signal that execution finished in errror
+				that.done = false;
+			}
+			// for testing purposes show the state of the AsyncResult instance
+			spawn.log("AsyncResult::doit()\n\n" + that);
+			// use clearInterval to release the timer ID
+			clearTimeout(that.tid);
+			// use the callback , if given
+			if (that.callback) {
+				var cb_tid = setTimeout(function(x) {
+				clearTimeout(cb_tid);
+					// pass 'that'/'this' to the callback
+				try { that.callback(that); } catch (x) { /* ignore callback exceptions, but log them */
+					if (spawn.log) spawn.log("AsyncResult::doit() callback exception\n\n" + x.message);
+					 }
+				}, 1);
+			}
+		}
+		// delay doit() execution , in the context of the 'window' object
+		that.tid = setTimeout(doit, tu);
+	}
+       return new AsyncResult( arguments ) ; // immediate instance return
+                                       // FP() to be delay-executed in 'tu' microseconds
+      }
+      // maximum number of seconds spwan will do
+      spawn.maxdelay = 60 * 1000; // aka one minute
+      // if null will not be used
+      // otherwise must be a function with a single string argument
+      spawn.log = function () { 
+          console.log(arguments[0]);
+      } ;
+      </script>
+<script type="text/javascript" id="async_test" >
+	$("#test1btn").click(
+function() {
+	console.log("!begin");
+	//
+	var large_image_url = "http://www.bbc.co.uk/london/images/london_map1807_large.jpg";
+	// begin 
+	function begin_async_operation(the_url, image_loaded_fun) {
+		// this is passed from AsyncResult instance that called this function
+		console.log("begin_async_operation() this == " + this);
+		// preservé this as 'that'
+		var that = this;
+		return $("<img/>")
+		     .attr("src", the_url)
+		     .load(function() { image_loaded_fun(this); })
+		/* return the actual img dom object */
+		     [0];
+	}
+	// receives AsyncResult instance
+	function end_async_operation(async_result) {
+		console.log("end_async_operation()");
+		show_test_image("spinner.gif");
+	}
+
+	// receives img object instance
+	function on_large_image_loaded(img_instance) {
+		console.log("on_large_image_loaded()");
+		show_test_image(img_instance.src);
+	}
+
+	function show_test_image(image_url) {
+	    $test_image.find("img").attr("src", image_url).attr("href", image_url);
+	}
+	
+	// prepare the place for the test images to appear
+	$("#rezult").prepend("<a id='test_image' target='_blank'><img  NOT_style='width:100px;' /></a>");
+	$test_image = $("#test_image");
+	// $test_image.remove();
+
+	console.log("Async started, spawn() returned : " +
+	spawn({ 'worker': begin_async_operation, 'delay': 1, 'callback': end_async_operation },
+	         large_image_url,
+	         on_large_image_loaded
+	         )
+	);
+});
+
+$("#test2btn").click(
+function() {
+console.log("!begin");
+for (var j = 0; j < 10; j++) {
+		console.log( j + "Page UID: : " + Guid());
+	}
+});
+</script>
+<script type="text/javascript" id="PseudoGuid" >
+    function Guid() {
+        var empty = "00000000-0000-0000-0000-000000000000",
+        four = function () {
+            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1).toUpperCase();
+        };
+        Guid = function () {
+            return (four() + four() + "-" + four() + "-" + four() + "-" +
+                    four() + "-" + four() + four() + four());
+        };
+        return Guid();
+    };
+    /*
+    Example: 
+    Guid(), returns: 3368F1CC-73DC-90CA-347F-A0284F0F676D
+    */
+</script>
+</html>
+<!--
+-->

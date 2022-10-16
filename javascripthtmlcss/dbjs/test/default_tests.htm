@@ -1,0 +1,230 @@
+﻿<!DOCTYPE HTML >
+<html>
+<head>
+<title>DBJS*(tm) QUNIT Tests</title>
+<script src="dbj.hdr.js" type="text/javascript"></script>
+<link href="http://github.com/jquery/qunit/raw/master/qunit/qunit.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+dbj.crazyLoader("http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js",
+"http://github.com/jquery/qunit/raw/master/qunit/qunit.js",
+"dbj.lib.js" ,
+"dbj.es5.js" 
+);
+</script>
+</head>
+<body>
+<h1 id="qunit-header">DBJS&trade;&nbsp;JavaScript Mechanisms</h1>
+<h2 id="qunit-banner"></h2>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+</body>
+<script type="text/javascript">
+    function call_in_loop(fp, howlong) {
+        var retval = null, j = howlong || 1000;
+        while (j--) { retval = fp(); } return retval;
+    }
+    // DBJ qunit front-end
+    (function(window, undefined) {
+        window.TEST = {
+            test: function(title, tar) {
+                if (!tar || !tar.length || (!tar[0].length)) {
+                    throw "TEST.test() second argument has to be : [[function, expected_value,loop_length],...]";
+                }
+                test(
+                  title + ", " + tar.length + " tests.",
+                  function() {
+                      expect(tar.length);
+                      for (var fun, expected, looplen, L = 0; L < tar.length;  L++) {
+                          looplen = tar[L][2] || 1;
+                          expected = tar[L][1];
+                          fun = tar[L][0];
+                          if (undefined === expected) throw "TEST.test(): expected retval not found in a input where it should be?";
+                          if ("function" !== typeof fun) throw "TEST.test(): function not found in a input where it should be?";
+                          equals(
+                             call_in_loop(function() {
+                                 return fun();
+                             }, looplen),
+                             expected,
+                             (looplen > 1 ? looplen + " x " : "") + ("" + fun)/*.replace(/^.+\{/, "").replace(/\}.*$/, "")*/ + " "
+                         );
+                      }
+                  }
+                 );
+            },
+            normalize_input: function(bad_arr) {
+                /* 
+                transform INTO this  :
+                [ [function () {}, expected, loopsize ],[function () {}, expected, loopsize ] ]
+                from this format :
+                [ [function_body_string, expected, loopsize ],[function_body_string, expected, loopsize ] ]
+                Why ? 
+                TEST.test second argument is NOT a legal JSON.
+                It is much easier to write tests in this format, but that is bad JSON since it contains functions.
+                in the future we might receive test input as a JSON  string from the server side. 
+                And bad JSON will not be accepted by JSON.parse()
+                Purpose of this method is to normalize input  from the legal JSON format
+                */
+
+                var retval = [], L = bad_arr.length, fun, expected, looplen;
+                while (L--) {
+                    fun = bad_arr[L][0];
+                    expected = bad_arr[L][1];
+                    looplen = bad_arr[L][2] || 1;
+                    if (!fun || "string" !== typeof fun) throw "TEST.normalize_input(): function source not found where it should be ?";
+                    if (!expected) throw "TEST.normalize_input(): expected retval not found where it should be ?";
+                    // transform the function source into the function
+                    // only no-argument anonimous functions are dealt with
+                    fun = new Function(fun);
+                    if (!fun || "function" !== typeof fun) throw "TEST.normalize_input(): function transformation went wrong.";
+                    retval.push(
+                         [fun, expected, looplen]
+                    );
+                }
+                return retval;
+            },
+            load: function(tests) {
+                for (var module_name in tests) {
+                    module(module_name);
+                    for (var test_name in tests[module_name]) {
+                        this.test(test_name, tests[module_name][test_name]);
+                    }
+                }
+            }
+        };
+    })(this);
+    //-------------------------------------------------------------------------------------
+    window.onload = function() {
+        //var tid = top.setTimeout(function() {
+            try {
+          //      top.clearTimeout(tid);
+                TEST.load(tests);
+            } catch (x) {
+                top.alert("ERROR! TEST.onload(): " + x + "\n\n" + x.message);
+            }
+        //}, 0);
+    };
+</script>
+<script type="text/javascript">
+    var tests = {
+        "DBJS*Mechanisms": {
+            "DBJ": [
+            [function() { return typeof dbj }, "object"],
+            [function() { return dbj.toString() }, true] /* this will fail and display dbj.toString() result */
+            ]
+        },
+        "ES5 Compatibility": {  // begin module 
+            "Array":
+                    [
+                        [function() { return [1, 2, 3].indexOf(2) }, 1],
+                        [function() { return [1, 2, 3].indexOf(9) }, -1],
+                        [function() { return [1, 1, 1].lastIndexOf(1) }, 2],
+                        [function() { return [1, 1, 1].lastIndexOf(2) }, -1],
+                        [function() { var r; [1, 2, 3].forEach(function(v, n, o) { r = v; }); return r; }, 3],
+                        [function() { return [1, 2, 3].filter(function(v, n, o) { return v > 2; }) + ""; }, "3"],
+                        [function() { return [1, 2, 3].every(function(v, n, o) { return v > 2; }); }, false],
+                        [function() { return [1, 2, 3].map(function(v, n, o) { return v + 1; }) + ""; }, "2,3,4"],
+                        [function() { return [1, 2, 3].some(function(v, n, o) { return v > 2; }); }, true],
+                        [function() { return [0, 1, 2, 3].reduce(function(a, b) { return a + b; }); }, 6]
+                    ],
+            "Array Generics":
+                    [
+                        [function() { return Array.indexOf("123", "2") }, 1],
+                        [function() { return Array.indexOf("123", "9") }, -1],
+                        [function() { return Array.lastIndexOf("111", "1") }, 2],
+                        [function() { return Array.lastIndexOf("111", "2") }, -1],
+                        [function() { var r; Array.forEach("123", function(v, n, o) { r = v; }); return r; }, "3"],
+                        [function() { return Array.filter("123", function(v, n, o) { return v === "3"; }) + ""; }, "3"]
+                    ]
+        },
+        "Services": {  // begin module "DBJS"
+            "JSON":
+                    [
+                        [function() { return dbj.json.ok_string('{a:1}') }, false],
+                        [function() { return dbj.json.nonstandard }, false],
+                        [function() { return "object" === typeof dbj.json.parse('{ "a":1 }') }, true]
+                    ],
+            "JavaScript":
+                    [
+                        [function() { var a = { p: 1 }, b = dbj.create(a); a.x = 2; return b.x === 2; }, true],
+                        [function() { return dbj.reveal([{ a: 1 }, { b: { c: 2}}], true); }, "[ { a: 1 }, { b: { c: 2 } } ]"],
+                        [function() { return dbj.isFunction(window.alert) }, true],
+                        [function() { return dbj.isNative(window.alert) }, true],
+                        [function() { return dbj.isObject(window.alert) }, false]
+                    ],
+            "HTML":
+                    [
+                       [function() { return dbj.xml.doc().load("<root />"); }, true],
+                        [function() { return dbj.decode('<div id="a" rel=\'r&l\' >'); }, "&lt;div id=&quot;a&quot; rel=&#39;r&l&#39; &gt;"]
+                    ]
+        }, // eof module "DBJS"
+        "Sync/Async calling": {
+            "1": [
+                       [function() { var r = dbj.sync(function(a, b) { return a + b; }, 1, 2); return r }, 3],
+                       [function() { dbj.async(function(a, b) { return a + b; }, 1, 2); return dbj.async.retval === undefined; }, true]
+              ]
+        },
+        "Utilities": {
+            "1": [
+                       [function() { return typeof dbj.reveal(document.location); }, "string"],
+                       [function() { return typeof dbj.GUID(); }, "string"],
+                       [function() { return typeof dbj.uid(); }, "string"],
+                       [function() { return dbj.prefix; }, "dbj"],
+                       [function() { return typeof dbj.now(); }, "number"],
+                       [function() { return dbj.cond(2, 1, "blue", 2, "red", /*default is*/"green"); }, "red"]
+                  ],
+            " dbj.forEach().": [
+                       [function() { var r = []; dbj.forEach({ a: 1, b: 2 }, function(v, n, o) { r.push(v); }); return "" + r }, "1,2"],
+                       [function() { var r = []; dbj.forEach([1, 2], function(v, n, o) { r[n] = v; }); return "" + r }, "1,2"]
+                  ],
+            " String ulitities ": [
+                [function() { return "ABCBDEB".minus("B"); }, "ACDE"],
+                [function() { return "ABCBDEB".minus("B"); }, "ACDE"],
+                [function() { return "ABCD".reverse(); }, "DCBA"],
+                [function() { return "A".lpad(3, "*"); }, "**A"],
+                [function() { return "A".rpad(3, "*"); }, "A**"],
+                [function() { return "A".cpad(3, "*"); }, "*A*"],
+                [function() { return "123456".lcut(3); }, "456"],
+                [function() { return "123456".rcut(3); }, "123"],
+                [function() { return "A".lcut(3, "*"); }, "**A"],
+                [function() { return "A".rcut(3, "*"); }, "A**"],
+                [function() { return "A".wrap("L", "R"); }, "LAR"],
+                [function() { return "123456".has("3"); }, true],
+                [function() { return "{0}{1}{2}".format(1, 2, 3); }, "123"],
+                [function() { return "{0}{1}{2}".format(0); }, "0{1}{2}"],
+                [function() { return "{99}".format("!"); }, "{99}"]
+              ],
+            "DBJ role system": [
+                [function() { return dbj.roleof([]); }, "Array"],
+                [function() { return dbj.roleof(true); }, "Boolean"],
+                [function() { return dbj.roleof(new Date()); }, "Date"],
+                [function() { return dbj.roleof(new Error(0xFF, ".")); }, "Error"],
+                [function() { return dbj.roleof(function() { }); }, "Function"],
+                [function() { return dbj.roleof(Math); }, "Math"],
+                [function() { return dbj.roleof(1); }, "Number"],
+                [function() { return dbj.roleof({}); }, "Object"],
+                [function() { return dbj.roleof(/./); }, "RegExp"],
+                [function() { return dbj.roleof(""); }, "String"],
+                [function() { return dbj.roleof(window.JSON || undefined); }, (window.JSON ? "JSON" : "undefined")],
+                [function() { return dbj.roleof(window.Arguments || undefined); }, (window.Arguments ? "Arguments" : "undefined")],
+                [function() { return dbj.roleof(undefined); }, "undefined"],
+                [function() { return dbj.roleof(null); }, "null"]
+            ],
+            "DBJ role system isXXX functions ": [
+                [function() { return dbj.role.isArray([]); }, true],
+                [function() { return dbj.role.isBoolean(1 === 1); }, true],
+                [function() { return dbj.role.isDate(new Date()); }, true],
+                [function() { return dbj.role.isError(new Error(".")); }, true],
+                [function() { return dbj.role.isFunction(Function); }, true],
+                [function() { return dbj.role.isMath(Math); }, true],
+                [function() { return dbj.role.isObject({}); }, true],
+                [function() { return dbj.role.isRegExp(/./); }, true],
+                [function() { return dbj.role.isString(""); }, true]
+            ]
+        }
+}         // eof tests
+  </script>
+</html>
+<!--------------
+ new Array, new Boolean, new Date, new Error, new Function, Math,
+	        new Number, new Object, new RegExp, new String
+--------------->	        

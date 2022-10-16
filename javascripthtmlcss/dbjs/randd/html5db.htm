@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>HTML5 database</title>
+</head>
+<body>
+<script type="text/javascript">
+var msIE = false ;
+/*@cc_on
+msIE = true;
+@*/
+/*
+On the HTML5 browser database we can use the transaction() method. 
+The transaction method takes one to three arguments: a transaction callback, an error callback, 
+and a success callback. 
+The transaction callback gets passed a SQL transaction object on which you can use the executeSQL() method. 
+This method takes from one to four arguments: a SQL statement, arguments, a SQL statement callback, 
+and a SQL statement error callback. The SQL statement callback gets passed the transaction object 
+and a SQL statement result object which gives access to the rows, last inserted ID, et cetera.
+To complete the infrastructure for the notes application we'd add the following code:
+*/
+var DB = function ( name_, version_, title_, size_ )
+{
+var db = window.openDatabase(name_, version_ || "1.0", title_ || "The Example DB", size_ || (1024 * 1));
+function renderNote(row) {
+  // renders the note somewhere
+
+}
+function reportError(source, message) {
+  // report error
+}
+
+this.renderNotes = function() {
+  db.transaction(function(tx) {
+    tx.executeSql('CREATE TABLE IF NOT EXISTS Notes(title TEXT, body TEXT)', 
+      []);
+    tx.executeSql("SELECT * FROM Notes", [], function(tx, rs) {
+      for(var i = 0; i < rs.rows.length; i++) {
+        renderNote(rs.rows[i]);
+      }
+    });
+  });
+}
+
+this.insertNote = function (title, text) {
+  db.transaction(function(tx) {
+    tx.executeSql('INSERT INTO Notes VALUES(?, ?)', [ title, text ],
+      function(tx, rs) {
+        // …
+      },
+      function(tx, error) {
+        reportError('sql', error.message);
+      });
+  });
+}
+}
+//-----------------------------------------------------------------------------------
+this.onload = function () 
+{
+    if ( msIE ) return alert("This page requires Chrome or FF browsers");
+    try {
+    var mydb = new DB("db1") ;
+    mydb.insertNote("My first note", "the note text") ;
+    mydb.renderNotes();
+    } catch(x){
+       alert(x) ;
+    }
+}
+</script>
+</body>
+</html>

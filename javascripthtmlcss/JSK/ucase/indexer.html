@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+<meta name="description" content="dbj MICROLIB INDEXER utility">
+<meta name="author" content="Dusan B. Jovanovic">
+<title>dbj();&trade; dbj MICROLIB &amp; Utils</title>
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<style>
+
+ .dbj_bg {
+        background: url('http://dbj.systems/wp-content/uploads/2016/02/dbj-scratched-aluminium-green-2048x2048.jpg');
+		color:white;
+    }
+	
+	h1,h2,h3,h4,h5 { text-align:center; }
+	
+	th { background-color: #515151; color: white; font-size:large; }
+	
+	table, tbody, thead, tr { max-width: 100%;  word-wrap: break-word; table-layout: fixed; }
+	th, td { word-wrap: break-word !important; }
+</style>
+</head>
+<body>
+    <!-- div class="jumbotron" id="header"></div -->
+<div id="container" class="container">
+    <div class="jumbotron dbj_bg">
+        <h1>DBJ*JSC UTL&trade;</h1>
+        <h3>dbj.org JavaScript Core Utilities (DBJ*JSC)</h3>
+        <h3>
+            Testing page of the dbj*UTL Indexer 
+        </h3>
+    </div>
+    <div class="page-header" >
+        <h2>Use case: produce the index of the array. Also find the most frequent value.</h2>
+		<pre>
+		Example of indexer usage for text indexing.
+		From this input: ["apple","banana","apple","orange","banana","apple"];
+		Indexer function produces this object:
+		{"apple":[0,2,5] , "banana":[1,4] , "orange":[3], "_" : ["apple",3] }
+		where "_" marks the most prevailing value calculated from the input array
+		NOTE: valueOf() and stringTo() methods are implemented to return array of strings
+		      of 'prety print' representation of this object. Caller can either immediately join
+			  this array, or use it as array as in the code here for table display, which is 
+			  more manageable to (re)view.
+		</pre>
+    <button onclick="main(); return false;" id="test_button" class="btn btn-primary">Start</button>
+        <div id="all_container">
+        </div>
+      </div>
+</div>
+</body>
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="../dbj.microlib.js"></script>
+<script src="../dbj.utl.js"></script>
+<script  type="text/javascript">
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+var usecase = {
+   input_len : 0xFFF, word_len  : 3
+};
+$(function (){
+     $("#test_button").text("Input length: {0}, word length:{1}. Start indexing.".format(usecase.input_len,usecase.word_len));
+});
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+function main () {
+try {
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/** Testing stuff */
+var 
+rndm 		= function (min,max) {	return Math.floor(Math.random()*(max-min+1)+min);  } ,
+rndchar 	= function () { return  String.fromCharCode(rndm(65, 89 )); },
+generator 	= function ( len,min,max ){  var ar = []; while (len--) ar.push(rndm(min, max)); return ar; },
+rndword 	= function( len ) {  var ar = ""; while (len--) ar = ar.concat(rndchar()); return ar; },
+rndtxt  	= function ( len, wordlen ) {  var ar = [] ; while (len--) ar.push(rndword(wordlen || 2)); return ar; }
+ ;
+var columns_hdrs =  new Array(12);
+var ga  = rndtxt(usecase.input_len,usecase.word_len); // input generation of length 0xFF
+
+for ( var j = 0; j < columns_hdrs.length ; j++ ) columns_hdrs[j] = String.fromCharCode(j + 65); 
+
+var t1 = +new Date() ;		
+var idx = dbj.utl.index(ga);  // here do the indexing
+var t2 = (+new Date()) - t1 ; // time laps in milliseconds
+
+var msg = "<h4>Indexing time ~{0} milliseconds. Array of words length: {1}. Word length: {2}</h4>".format(t2, usecase.input_len,usecase.word_len);
+
+var table = dbj.utl.make_table( 
+		document.body.all_container, 
+		dbj.GUID(), 
+		columns_hdrs , 
+		msg + "<h5>'_' property of an rezulting object (prop.name: '_')is the most frequent word, with number of occurences.</h5><h5> The rest is words with values as arrays of indexes from the input.</h5><h5>Input is shown in the table bellow.</h5>"
+	);
+
+	// idx.valueOf() is necessary since  JS can not 
+	// generate Object --> Arrys of Strings on it's own
+	// from an UDT
+	table.a2t( idx.valueOf() );
+	// show the input bellow
+	var table1 = dbj.utl.make_table( document.body.all_container, dbj.GUID(), columns_hdrs, "<h1>The Input</h1>");
+        table1.a2t( ga, true );
+/////////////////////////////////////////////////////////////////////////////////////
+} catch (x_) {
+    alert("XCEPTION\n\n" + dbj.err2str(x_));
+}
+}; // eof main 
+</script>
+</html>

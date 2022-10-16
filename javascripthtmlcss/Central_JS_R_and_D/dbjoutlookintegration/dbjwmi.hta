@@ -1,0 +1,279 @@
+<html>
+<head>
+<title>Ko i kada?&trade;&nbsp;&copy;&nbsp;2005-2009&nbsp;by&nbsp;DBJ.ORG</title>
+<meta name=vs_targetSchema content="http://schemas.microsoft.com/intellisense/ie5">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1250">
+<style>
+body {
+		font: 13px/1.5 verdana;
+		background-color:whitesmoke;
+}
+</style>
+</head>
+<body id="TELO" >
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js" type="text/javascript" id="JQ.1.3" ></script>
+<script type="text/javascript" id="dbj_lib">
+	//
+	//
+	function dbj_printline() { dbj_print("\n-----------------------------------------------------------------------"); };
+	//
+	function dbj_print(str) {
+	
+		function who_called(F, x) {
+			try {
+				var who = F.caller.toString().match(/\w+/g);
+				return who[0] + " " + who[1];
+			} catch (x) {
+				return " GLOBAL namespace ";
+			}
+		}
+
+		function inner_ () {
+			var html = new String();
+			if (null == str) {
+				$("#TELO").text("");
+			}
+			else if (str instanceof Error) {
+				html = "<hr/>" + str + (str.number & 0xFFFF) + " :: " + (str.description);
+				html += "<br/>Thrown from : " + who_called.call(this,dbj_print);
+				html = html.fontcolor("red");
+				// html = html.bold();
+			}
+			else {
+				html = str;
+			}
+			$("#TELO").append(html);
+		}
+
+		return setTimeout(inner_, 1);
+}
+</script>
+<script type="text/javascript" >
+//
+// DBJ		Created
+//--------------------------------------------------
+// eval the exp given in an async manner
+function async_eval ( exp ) {
+	var tid = window.setTimeout(function() { clearTimeout(tid); evalex.call(this,exp); }, 1);
+}
+//
+//--------------------------------------------------
+window.onload = function (x)
+{
+	var ADSI_TEST = true ;
+	try {
+
+		dbj_print("<h5>Loaded [" + (new Date()).toLocaleString() + "]<h5>");
+		if (ADSI_TEST)				
+		{
+			// debugger;
+			dbj_print( adsi_users_list() );
+		} else {
+				    var SWS = GetObject("winmgmts:");				
+				    dbj_print( show_login_profiles(SWS) ) ;
+					dbj_print("<h5>Logon Sessions<h5>");
+					dbj_print( show_Win32_LogonSession(SWS) ) ;
+					dbj_print( class_properties("Win32_LogonSession")) ;
+					// throw new Error(0xFF, "DBJ*Error") ;
+		}
+	}
+	catch (x) {
+	 dbj_print( x ) ;
+	}
+}
+//--------------------------------------------------
+//	var properties  = class_properties("Win32_NetworkLoginProfile");
+//
+//
+function class_properties ( strClass, strComputer, strNameSpace, result )
+{
+result = new Array() ;
+if ( null == strComputer) strComputer = "." ;
+if ( null == strNameSpace) strNameSpace = "root\\cimv2" ;
+if ( null == strClass) strClass = "Win32_NetworkLoginProfile" ;
+
+var objClass = GetObject(
+	"winmgmts:{impersonationLevel=impersonate}!\\\\" + strComputer + "\\" + strNameSpace + ":" + strClass
+	)
+	
+	// return objClass.Properties_ ;
+
+	for(e = new Enumerator(objClass.Properties_) ; !e.atEnd() ; e.moveNext())
+	{
+	// e.item() iz of a SWBEMProperty type
+		result.push( e.item().Name ) ;
+	}
+	return result ;
+}
+// The format of this value is yyyymmddhhmmss.mmmmmm sutc.
+//                             0..3.5.7.9.1.3
+//--------------------------------------------------
+//
+//
+function timestamp_decoder ( intime )
+{
+	if ( null == intime ) return "" ;
+	var result = new String(intime);
+		if( "*" == intime.charAt(0))
+			return "Still logged in" ;
+	var year = result.substring(0,4);
+	var month = result.substring(4,6);
+	var day = result.substring(6,8);
+	var hour = result.substring(8,10);
+	var min = result.substring(10,12) ;
+	var sec = result.substring(12,14);
+	
+	return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec ;		
+}
+//--------------------------------------------------
+//
+//
+function show_login_profiles( swbemservices, result,	x )
+{
+	result = new String() ;
+	try { swbemservices.Refresh_() ; } catch (x) {}
+	var LoginProfiles = swbemservices.ExecQuery("Select * from Win32_NetworkLoginProfile")
+	// var LoginProfiles = GetObject("winmgmts:Win32_NetworkLoginProfile") ;
+	var Profile = null ;
+	
+	try { LoginProfiles.Refresh_() ; } catch (x) {}
+
+	for(var e = new Enumerator(LoginProfiles) ; !e.atEnd() ; e.moveNext())
+	{
+		Profile = e.item();
+		if ( null == Profile.UserType ) continue ;
+		result += "<hr>" ;
+		result += "\nType :\t\t" + Profile.UserType;
+		result += "\nName :\t\t" + Profile.Name;
+		result += "\nFull Name :\t\t" + Profile.FullName;
+		result += "\nLast Logon :\t\t[" + Profile.LastLogon + "]\t" + timestamp_decoder( Profile.LastLogon );
+		result += "\nLast Logoff :\t\t[" + Profile.LastLogoff + "]\t" + timestamp_decoder( Profile.LastLogoff );
+	}
+	return "<pre>" + result + "</pre>" ;
+}
+//--------------------------------------------------
+//
+//
+function show_Win32_LogonSession ( swbemservices, result, x)
+{
+	result = new String() ;
+	try { swbemservices.Refresh_() ; } catch (x) {}
+	var LogonSessions = swbemservices.ExecQuery("Select * from Win32_LogonSession")
+	// var LogonSessions = GetObject("winmgmts:Win32_NetworkLoginProfile") ;
+	var session = null ;
+	
+	try { LogonSessions.Refresh_() ; } catch (x) {}
+
+	for(var e = new Enumerator(LogonSessions) ; !e.atEnd() ; e.moveNext())
+	{
+		session = e.item();
+		result += "<hr>" ;
+				for(e2 = new Enumerator(session.Properties_) ; !e2.atEnd() ; e2.moveNext())
+				{
+					// item is of a SWBEMProperty type
+					propty = e2.item() ;
+					if ( propty.CIMType == 101 ) // date/time
+					result += "\n" + propty.Name + " =\t\t[" +  propty + "]\t" + timestamp_decoder( propty.Value ) ;
+					else
+					result += "\n" + propty.Name + " =\t\t" + propty.Value ;
+				}
+	}
+	return "<pre>" + result + "</pre>" ;
+}
+//--------------------------------------------------
+//
+function sysinfo ()
+{
+	var ntsys = new ActiveXObject("WinNTSystemInfo") ;
+	this.user = ntsys.UserName ;
+	this.computer = ntsys.ComputerName ;
+	this.domain = ntsys.DomainName ;
+	try {
+			this.pdc = ntsys.PDC ;
+		} catch (x) {
+			this.pdc = "" ; // workgroup situation
+		}
+	ntsys = null ;
+}
+//--------------------------------------------------
+function foreach ( collection , FP )
+{
+	for ( var e = new Enumerator(collection) ;e.atEnd(); e.moveNext()){
+			FP(e.item()) ;
+		}
+}
+//--------------------------------------------------
+function foreach_property ( iads_property_list , FP )
+{
+	var arr = new VBArray( iads_property_list ) ;
+	arr = arr.toArray() ;
+	for ( var j = 0 ; j < arr.length ; j++ ){
+			FP( arr[j] ) ;
+		}
+}
+//--------------------------------------------------
+//
+//
+function get_properties ( adso, result ) 
+{
+	var schema = GetObject(adso.Schema) ;
+	
+	result = new Array() ;
+	
+	function collect( item ) {
+		result.push( "<li>" + item + " = " + adso.Get(item)  ); 
+	}
+	
+	schema.GetInfo();
+	try {
+		foreach_property(schema.MandatoryProperties, collect);
+		foreach_property(schema.OptionalProperties, collect);
+		foreach_property(schema.NamingProperties, collect) 
+	} catch (x) {dbj_print.call(this,x);}
+		
+		return result ;
+}
+//--------------------------------------------------
+//
+//
+function adsi_users_list ( result,x )
+{
+var	result = new String() ;
+var sysnfo = new sysinfo()	;
+var machine = sysnfo.computer ;
+var myUsers = evalex.call(this,'GetObject("WinNT://"' + machine + '"/users")') ;
+var member = null ;
+
+	myUsers.GetInfo() ;
+
+	dbj_print("<h5>Mandatory properties of " + evalex.call(myUsers, 'myUsers.ADsPath') + "</h5>");
+	dbj_print( get_properties( myUsers ) ) ;
+	var members = evalex.call(myUsers, 'myUsers.Members()') ;
+	var members_name = evalex.call(members, 'members.Name');
+	var members_type = evalex.call(members, 'members.ADsType');
+	dbj_print("<h5>" + evalex.call(members, 'members.Count') + " Users</h5>");
+	
+	for( var e = new Enumerator( members ) ; e.atEnd(); e.moveNext() )
+	{
+		member = e.item() ;
+		result += "<li>User : "
+		             + evalex.call(member, 'member.Name')
+		       + "[" + evalex.call(member, 'member.Class') + "]";
+	}
+	return result ;
+}
+//
+function evalex(ex) {
+	var retval = null;
+	try {
+		retval = eval("(" + ex + ")");
+	} catch (x) {
+	dbj_print.call(this,x);
+	retval = "ERROR is made by :: " + ex;
+}
+return retval;
+}
+//
+</script>
+</html>

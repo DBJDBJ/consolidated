@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html>
+<head>
+<title>DBJ*Highlight Test</title>
+<style type="text/css" title="highlight" media="all">
+    /* without this classes highlighting will not be visible */
+    .comment { color: teal;
+    }
+    .keyword { font-weight: bold;
+    }
+    .string { color: blue;
+    }
+    .html,.atribute,.value { color: green;
+    }
+</style>
+<script src="highlight.pack.js" type="text/javascript" ></script>
+<script type="text/javascript">hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+<div id="container" >
+<pre>
+<code>
+/* c comment */
+function X () 
+{
+/* c comment */
+    var a = 1, b = 'string';
+    return { a:a, b:b } ;
+// comment
+}
+/* c comment */
+</code>
+</pre>
+</div>
+</body>
+</html>

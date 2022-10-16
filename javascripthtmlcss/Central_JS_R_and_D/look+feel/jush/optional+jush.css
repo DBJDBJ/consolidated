@@ -1,0 +1,6 @@
+﻿/*
+example of some optional styling jush related
+*/
+pre.jush {font-size:9pt; background:#F0F0FF; border:dashed 1px #aaa; padding:10px;}
+pre.jush a {text-decoration:none; }
+pre.jush a:hover {text-decoration:underline; }

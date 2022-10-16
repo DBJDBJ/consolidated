@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html >
+<html>
+<head>
+<title>YQL</title>
+<style type="text/css">
+body { font:10px/1.1 courier new; }
+#error { color: Red;}
+</style>
+</head>
+<body>
+<h2>YQL</h2>
+<p id="error"></p>
+<p id="rezultat">
+</p>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript" id="JQ.1.6.2"></script>
+<script src="http://dbj.org/6/dbj.lib.js" type="text/javascript"></script>
+<script type="text/javascript">
+/*
+http://developer.yahoo.com/yql/console/
+ */
+var qrytpl = [
+/* diagnopstics, json and callback */
+"http://query.yahooapis.com/v1/public/yql?q={0}&format=json&diagnostics=true&callback=ws_results",
+/* the simple XML retval */
+"http://query.yahooapis.com/v1/public/yql?q={0}",
+"http://query.yahooapis.com/v1/public/yql?q={0}&format=json&diagnostics=true",
+/* flickr? */
+'http://query.yahooapis.com/v1/public/yql?q=SELECT * FROM flickr.photos.search WHERE text="Cat"&format=json&diagnostics=true'
+];
+
+$(function () {
+	var REZ = $("#rezultat");
+
+	jQuery.support.cors = true;
+
+	$.ajax({
+		url: qrytpl[3],
+		context: document.body,
+		cache: false,
+		success: function (retval) {
+			if (jQuery.isXMLDoc(retval))
+				REZ.text(escape(reval.xml));
+			else if ("object" === typeof retval)
+				REZ.text(JSON.stringify(retval));
+			else
+				REZ.text("" + retval);
+		},
+		error: function (jqXHR, textStatus, errorThrown) {
+			$("#error").html("{0}<br/>Status: {1}<br/>Text: {2}".format("ERROR", textStatus, errorThrown));
+		}
+	});
+
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>isNative testing version</title>
+<style type="text/css">
+    body { font:13px/1.1 verdana, tahoma, arial; }
+    .PASSED { color: Green; font-weight:bolder ; }
+    .FAILED { background-color:Red; color:Black ; }
+    #output { width: 99%; border:2px solid; }
+    td,th {border:0px solid; border-right:1px solid black ; padding-left:5px; margin:0px; }
+    tr { margin:0px; }
+ </style>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script type="text/javascript" id="andrea_giamarchi_">
+(function ( global ) {
+ global.Andrea || (global.Andrea = {} ) ;
+Andrea.isNative = function (o){
+    var r=1;
+    try{
+        Function(o)
+    }catch(e){
+        r="[object Object]".match(o)
+    };
+        return !r
+    };
+    
+Andrea.isCallable = (function(toString) {
+        // The Latest WebReflection Proposal
+        // Recently Updated with "explicit" cast
+        // thanks to abozhilov for the test case
+        var s = toString.call(toString),
+ u = typeof u;
+        return typeof this.alert === "object" ?
+ function(f) {
+     return s === toString.call(f) || (!!f && typeof f.toString == u && typeof f.valueOf == u && /^\s*\bfunction\b/.test("" + f));
+ } :
+ function(f) {
+     return s === toString.call(f);
+ }
+ ;
+})(Object.prototype.toString);
+    
+})(this);
+</script>
+<script type="text/javascript" id="dbj_code">
+(function (global) {
+ global.dbj = {} ;
+// (c) DBJ.ORG 2009-2010 
+// GPL applies
+var f_sig = function ( f ){
+// signature of a method through its string form decomposition
+// returns: [ <method name> , <method body with '~' instead of name>]
+ var name = (f+ "").match(/\w+/g)[1] ; // name
+ return [ name ,(f+ "").replace( name, "~")]; // signature
+}
+var native_signature = f_sig( Function );
+dbj.isNative = function ( f ) {
+         try {
+            var sig = f_sig(f) ; // make name,signature pair
+                return sig[1] === native_signature[1] ; // compare the signatures
+         } catch(x) {
+                return false ;
+         }
+   }
+//---------------------------------------------------------------------------
+var tos = Object.prototype.toString , s = tos.call(tos);
+    dbj.isFunction = function(f) {
+        ///<summary>
+        /// isFunction V.5
+        /// does not handle properly only one case and only in IE
+        /// var singularity = { toString: undefined, valueOf : function(){return "function";}}
+        ///</summary>
+        return s === tos.call(f);
+    }
+    /*@cc_on
+    dbj.isFunction = function(f) {
+        ///<summary>
+        /// isFunction V.5
+        /// does not handle properly only one case and only in IE
+        /// var singularity = { toString: undefined, valueOf : function(){return "function";}}
+        /// in IE, version bellow replaces version above. 
+        ///</summary>
+        try {
+            return /\bfunction\b/.test(f);
+        } catch (x) {
+            return false;
+        }
+    }
+    @*/
+//---------------------------------------------------------------------------
+// C# like string.format() method
+String.prototype.format = function() {
+   var args = arguments; 
+   return this.replace( /\{(\d|\d\d)\}/g, 
+   function ( $0 ) {
+      var idx = $0.match(/\d+/);
+      return args[idx] ? args[idx] : $0 ;
+   } );
+}
+})(this);
+</script>
+<script type="text/javascript" id="diego_perini_">
+(function (global) {
+/*
+ * isNative testing version
+ *
+ * Author: Diego Perini <diego.perini@gmail.com>
+ * Version: 0
+ *
+ * The conditional || expression:
+ *
+ *    (o.prototype && o.prototype[m] === (new o)[m])
+ *
+ * is only needed on IE browser to catch
+ * special cases on the Array prototype,
+ * not sure if this should be included
+ * just to solve those edge cases !!!
+ *
+ */
+ 
+ global.Perini || (global.Perini = {} ) ;
+ 
+// detect native callable method in host objects
+Perini.isNative = (function() {
+  var F = Function, T = 'toString', S = (F + '').replace(/Function/g, '');
+  return function (o, m) {
+    var M = o[m] ? o[m] : false, R = new RegExp(m, 'g');
+    return !!((S === (M + '').replace(R, '') && (!M[T] || F[T] === M[T])) ||
+      (o.prototype && o.prototype[m] === (new o)[m])
+    );
+  };
+})();
+})(this);
+</script>
+<script type="text/javascript">
+//-------------------------------------------------------------------------- 
+var output = null ;
+var TR = "<tr>{0}</tr>";
+var TD = "<td>{0}</td>";
+var TH = "<th>{0}</th>";
+var TD2 = "<td class='{0}'>{0}</td>";
+var TD3 = "<td title='{1}'>{0}</td>";
+var TD4 = "<td colspan='{1}'>{0}</td>";
+
+function check(opt ) {
+    ///<summary>
+    /// opt format
+    /// {
+    ///    obj    :  ... object ... ,
+    ///    name   :  ... name of the method ... ,
+    ///    m      :  ... the method .... ,
+    ///    n      :  ... true|false , do we expect it to be native ?
+    ///    c      :  ... true|false , do we expect it to be callable ?
+    /// }
+///</summary>
+  output || (output = $('#output'), 
+  output.append(   TR.format(
+       TH.format("obj") 
+     + TH.format("m_name") 
+     + TH.format("Perini.isNative(obj, m_name)", Perini.isNative +"" ) 
+     + TH.format("dbj.isNative(m_)", dbj.isNative +"") 
+     + TH.format("Andrea.isNative(m_)", Andrea.isNative +"")
+     + TH.format("&nbsp;")
+     + TH.format("dbj.isFunction(m_)", dbj.isFunction + "")
+     + TH.format("Andrea.isCallable(m_)", Andrea.isCallable + "")
+     )
+  ));
+  
+  if ( "string" === typeof opt ) {
+  // message row
+  output.append( TR.format ( TD4.format( opt, 8 ) ));
+  return ;
+  }
+  
+  output.append(
+   TR.format(
+       TD.format(opt.obj) 
+     + TD3.format(opt.name , opt.name + " : " + opt.method ) 
+     + TD2.format(retval( { f: Perini.isNative, args :[ opt.obj, opt.name ], required : opt.n } ))
+     + TD2.format(retval( { f: dbj.isNative   , args :[ opt.m             ], required : opt.n } ))
+     + TD2.format(retval({ f: Andrea.isNative, args: [opt.m], required: opt.n }))
+     + TD.format("&nbsp;")
+     + TD2.format(retval( { f: dbj.isFunction , args :[ opt.m             ], required : opt.c } ))
+     + TD2.format(retval( { f: Andrea.isCallable,args:[ opt.m             ], required : opt.c } ))
+     )
+   );
+}
+//--------------------------------------------------------------------------
+function retval(opt) {
+    ///<summary>
+    /// opt format
+    /// {
+    ///    f        : ... function to test
+    ///    args     : ... arrays of arguments for f.apply(window,opt.args) 
+    ///    required : .. required result value 
+    /// }
+    ///</summary>
+    try {
+        return (opt.required === opt.f.apply(window, opt.args)) ? "PASSED" : "FAILED" ;
+        } catch (x) {
+        return "" + x; 
+        } 
+}
+//--------------------------------------------------------------------------
+window.onload = function() {
+    function opt(o, e, m, n, c) { return { 'obj': o, 'name': e, 'm': m, 'n': n, 'c': c }; }
+
+    check("<strong>Most frequent and usual use cases</strong>");
+    check(opt(window, 'alert', window.alert, true, true));
+    check(opt(window, 'focus', window.focus, true, true));
+    check(opt(window, 'Date', Date, true, true));
+    check(opt(window, 'Array', Array, true, true));
+    check(opt(window, 'Object', Object, true, true));
+    check(opt(window, 'RegExp', RegExp, true, true));
+    check(opt(window, 'String', String, true, true));
+    check(opt(window, 'Number', Number, true, true));
+    check(opt(window, 'Boolean', Boolean, true, true));
+    check(opt(window, 'Function', Function, true, true));
+    check(opt(document, 'all', document.all, false, false));
+    check(opt(document, 'childNodes', document.childNodes, false, false));
+    check(opt(document, 'getElementById', document.getElementById, true, true));
+    check(opt(document, 'documentElement', document.documentElement, false, false));
+    check(opt(document, 'querySelectorAll', document.querySelectorAll, true, true));
+    check(opt(document.documentElement, 'children', document.documentElement.children, false, false));
+    check(opt(document.documentElement, 'getAttribute', document.documentElement.getAttribute, true, true));
+    check(opt(document.documentElement, 'hasAttribute', document.documentElement.hasAttribute, true, true));
+    check(opt(Array, 'pop', [].pop, true, true));
+    check(opt(Array, 'slice', [].slice, true, true));
+
+    // this need to be tested differently
+    /*@cc_on
+    check("<strong>IE specific tests</strong>");
+    if (XMLHttpRequest) check(opt(window, 'XMLHttpRequest', XMLHttpRequest, false, false));
+    if (ActiveXObject) check(opt(window, 'ActiveXObject', ActiveXObject, true, true));
+    @*/
+    check("<strong>Hacks made to break the tests</strong>");
+    // try to fake 
+    window.test = function() { };
+    window.test.toString = Function.toString;
+    window.test.valueOf = Function.valueOf;
+    check("<pre>" +
+    "window.test = function() { };" +
+    "\nwindow.test.toString = Function.toString;" +
+    "\nwindow.test.valueOf = Function.valueOf;" +
+    "</pre>");
+    check(opt(window, 'test', window.test, false, true));
+    // this actually yields native methods
+    HTMLDocument.prototype.open = Function;
+    check("<pre>HTMLDocument.prototype.open = Function;</pre>");
+    check(opt(document, 'open', document.open, true, true));
+    document.body.onfocus = Function;
+    check("<pre>document.body.onfocus = Function;</pre>");
+    check(opt(document.body, 'onfocus', document.body.onfocus, true, true));
+
+    var hack1 = {
+        toString: function() { return Function.toString(); },
+        valueOf: function() { return (Function.valueOf()); },
+        method: function() { return "" + Function; }
+    };
+    check(
+  "<pre>" +
+  "\nvar hack1 = { " +
+  "\ntoString : function () { return Function.toString(); }," +
+  "\nvalueOf : function()   { return Function.valueOf() ; }," +
+  "\nmethod : function ()   { return ''+Function        ; }" +
+  "\n}" +
+  "</pre>" +
+  "<br/>Passing hack1 as object."
+  );
+    check(opt(hack1, "method", hack1.method, false, true));
+    check(opt(hack1, "toString", hack1.toString, false, true));
+    check("Passing hack1 as a method. ");
+    check(opt(hack1, "hack1", hack1, false, false));
+
+    //some fancy alternate row colouring
+    var tid = window.setTimeout(function() {
+        clearTimeout(tid);
+        // alert("tr:even, found: " + output.find("tr:even").length);
+        output.find("tr:even").css("background", "#F4F4F8");
+        output.find("tr:odd").css("background", "#EFF1F1");
+    }, 10);
+}
+</script>
+</head>
+<body>
+<div id="explanation">
+<p>PASSED means the value returned matches the value expected</p>
+<p>FAILED means the value returned does not match the value expected</p>
+</div>
+<table id="output" >
+</table>
+</body>
+</html>

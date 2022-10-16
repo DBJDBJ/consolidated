@@ -1,0 +1,53 @@
+﻿/* the overlayed element */
+.dbj_overlay {
+	
+	/* must be initially hidden */
+	display:none;
+	
+	/* place overlay on top of other elements */
+	z-index:1000;
+	
+	/* styling */
+	background-color:white;
+	
+	width:675px;	
+	min-height:50%;
+	border:1px solid #666;
+	
+	/* CSS3 styling for latest browsers */
+	-moz-box-shadow:0 0 90px 5px #000;
+	-webkit-box-shadow: 0 0 90px #000;	
+}
+
+/* close button positioned on upper right corner */
+.dbj_overlay .close {
+	background-image:url(http://static.flowplayer.org/tools/img/overlay/close.png);
+	position:absolute;
+	right:-15px;
+	top:-15px;
+	cursor:pointer;
+	height:35px;
+	width:35px;
+	z-index:1001;
+}
+/* rounded corners only where supported */
+.dbj_rounded {
+  -moz-border-radius: 9px;
+  -webkit-border-radius: 9px;
+  border-radius: 9px;
+}
+
+/* styling for elements inside overlay */
+.dbj_overlay .details   
+{
+color:#000;
+width:99%;
+overflow:auto;
+margin:3px; padding:3px;
+}
+.dbj_overlay .details h3  
+{
+	color:#000;
+	margin:2px;
+}
+

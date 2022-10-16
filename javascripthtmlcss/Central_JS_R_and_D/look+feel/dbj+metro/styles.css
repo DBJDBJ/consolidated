@@ -1,0 +1,29 @@
+﻿
+body { font-family: Segoe UI; font-size: 12pt; background: #000; color: White; margin:0; overflow-y:scroll;}
+
+div.page {max-width:1000px; margin:auto; overflow:hidden; margin-bottom:100px;}
+.rightside {float:right;}
+h1 {font-size:40pt; font-weight:normal; margin:0; margin-bottom:-30px;}
+h2 {font-size:30pt; font-weight:normal; margin:0;}
+h3 {font-size:25pt; font-weight:normal; margin:0;}
+h4 {font-size:20pt; font-weight:normal; margin:0;}
+
+h1, .apptitle {margin-left:10px; margin-right:10px;}
+
+.wp-popup {display:none; margin:20px;}
+.wp-popup-container {position:absolute; top:0; left:0; width:100%; display:none;}
+
+a.wp-colored-button {display:inline-block; padding:0 15px; border:solid 4px; color:inherit !important;}
+
+
+.top-banner {text-align:right; border-bottom:dotted 1px #777; margin-bottom:10px; font-size:10pt;}
+.top-banner .theme-box,
+.top-banner .accent-box {display:inline-block; width:15px; height:15px; margin:3px; border:solid 1px #777; cursor:pointer; vertical-align:middle; }
+.top-banner .accent-box {background:#F09720;}
+
+.top-banner .theme-box[theme=dark] {background:black;}
+.top-banner .theme-box[theme=light] {background:white;}
+
+pre.jush {font-size:9pt; background:#F0F0FF; border:dashed 1px #aaa; padding:10px;}
+pre.jush a {text-decoration:none; }
+pre.jush a:hover {text-decoration:underline; }

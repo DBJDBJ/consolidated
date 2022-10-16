@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>dbj cond compare nanotest</title>
+    <style>
+        html, body {
+            background: #454343;
+            color: white;
+            font: 14px/1.5 monospace;
+        }
+
+        .logline {
+            list-style-type: none;
+        }
+
+        #wrapper {
+            overflow: auto; margin:1%;
+        }
+    </style>
+    <script src="dbj.cond.comparators.js"></script>
+</head>
+<body>
+    <div id="wrapper">
+        <h1>nanotest :: dbj cond  comparators + browser </h1>
+        <h3>
+            Copyright 2018 dbj.org
+            Licensed under the Apache License, Version 2.0 
+        </h3>
+    </div>
+    <script>
+/*
+Copyright 2018 dbj.org
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed
+on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+either express or implied.
+See the License for the specific language governing
+permissions and limitations under the License.
+*/
+
+        'use strict';
+
+        function main() {
+
+            /**
+             * https://raw.githubusercontent.com/epoberezkin/fast-deep-equal/master/index.js
+             */
+            var fast_deep_equal = function (a, b) {
+                if (a === b) return true;
+
+                var arrA = Array.isArray(a)
+                    , arrB = Array.isArray(b)
+                    , i;
+
+                if (arrA && arrB) {
+                    if (a.length != b.length) return false;
+                    for (i = 0; i < a.length; i++)
+                        if (!fast_deep_equal(a[i], b[i])) return false;
+                    return true;
+                }
+
+                if (arrA != arrB) return false;
+
+                if (a && b && typeof a === 'object' && typeof b === 'object') {
+                    var keys = Object.keys(a);
+                    if (keys.length !== Object.keys(b).length) return false;
+
+                    var dateA = a instanceof Date
+                        , dateB = b instanceof Date;
+                    if (dateA && dateB) return a.getTime() == b.getTime();
+                    if (dateA != dateB) return false;
+
+                    var regexpA = a instanceof RegExp
+                        , regexpB = b instanceof RegExp;
+                    if (regexpA && regexpB) return a.toString() == b.toString();
+                    if (regexpA != regexpB) return false;
+
+                    for (i = 0; i < keys.length; i++)
+                        if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
+
+                    for (i = 0; i < keys.length; i++)
+                        if (!fast_deep_equal(a[keys[i]], b[keys[i]])) return false;
+
+                    return true;
+                }
+
+                return false;
+            };
+
+            var cons = document.getElementById("wrapper");
+            function print() {
+                function out_(item, index) {
+                    cons.innerHTML += "<li class='logline'>" + item + "</li>";
+                }
+                var args = Array.prototype.slice.call(arguments);
+                args.forEach(out_);
+            }
+
+            function nanotest(exp) {
+                var rv = eval(exp);
+                print(exp + " --> " + rv);
+                return rv;
+            }
+            // ----------------------------------------------
+
+            print("now using arr + string eq");
+            nanotest('dbj.compare.arr([1,2],[1,2])');
+            nanotest('dbj.compare.arr([1,2],[3,2])');
+
+            print("now using arr + fast deep equal");
+            var lookee = dbj.compare.make('arr', fast_deep_equal );
+
+            nanotest('lookee([1,[2,3]],[2,3])');
+            nanotest('lookee([1,{b:42}],[{b:42},2])');
+
+            print("now using lookup + fast-deep-equal");
+            var lookee = dbj.compare.make('lookup', fast_deep_equal);
+
+            nanotest('lookee([1,[2,3]],[2,3])'); 
+            nanotest('lookee([1,{b:42}],[{b:42},2])');
+        }
+
+        try {
+            main();
+        } catch (x) {
+            document.body.innerHTML = '<h1 style="color:red;">EXCEPTION</h1>' + x.stack;
+        }
+
+    </script>
+</body>
+</html>

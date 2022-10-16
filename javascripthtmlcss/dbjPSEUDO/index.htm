@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html > 
+<html>
+<!--
+                                                                  
+  DBJ.ORG - Evolution for Solution(tm)
+                                                                  
+  Copyright 2010 - 2013 by DBJ.ORG. 
+  All Rights Reserved. GPL applies.                                             
+                                                                  
+  THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF DBJ.ORG   
+                                                                  
+  The copyright notice above does not evidence any                
+  actual or intended publication of such source code.             
+                                                                             
+-->
+<head>
+<!--##########################################################################################################-->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<!--##########################################################################################################-->
+<title>DBJ*Filter Selector&trade; &copy;2008-2013 by DBJ.ORG</title>
+<link href="http://dbj.org/4/blueprint/screen.css" rel="stylesheet" type="text/css" media="all" />
+<link href="http://dbj.org/4/blueprint/ie.css" rel="stylesheet" type="text/css" media="all" />
+    <style type="text/css">
+        body {
+            height:600px; overflow:hidden; padding:2px; margin:10px;
+            border:4px dotted red;
+            background-color:lightgray;
+            font-size: 1.1em;
+        }
+        button.dbj {            left:5px; top:5px;        }
+        input { width:50%; display:block; font-size:inherit;
+        }
+        li { list-style:none ; }
+    </style>
+</head>
+<body>
+<div id="container">
+    <button class="dbj" >
+        Click Here to Save Everything
+    </button>
+    <input value="input:dbj(css:width = 50%)" />
+</div>
+</body>
+<script src="jquery-1.9.1.js"></script>
+<script src="dbjpseudo.js"></script>
+    <script>
+        $container = $("#container");
+        $(function () {
+
+            dbj[":"][">"] = function (current, check) {
+                return parseFloat(current) > parseFloat(check);
+            }
+
+            var see_mee = $("button:dbj(css:left > 1)");
+
+            function T(expr) {
+                try {
+                    $container.append("<li>$(" + expr + ").length = " + $(expr).length + "</li>");
+                } catch(x){
+                    $container.append("<li>" + x + "</li>");
+                }
+            }
+            
+            $("input").on("keypress", function (E) {
+                if (E.ctrlKey) return;
+                if (13 !== E.charCode) return;
+                var val = $(this).val();
+                if (!!val) T(val);
+            });
+
+            $("input").on("keypress", function (E) {
+                if (!E.ctrlKey) return;
+                if (10 !== E.charCode) return;
+                var val =   $.events($(this).val());
+                if (!!val) T( console ? console.dir(val) : val );
+            });
+
+        });
+    </script>
+</html>

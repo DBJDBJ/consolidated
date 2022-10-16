@@ -1,0 +1,48 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<html> 
+ <head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>DBJ.ORG&trade;Flot Near-Time</title> 
+    <link href="http://people.iola.dk/olau/flot/examples/layout.css" rel="stylesheet" type="text/css"> 
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]--> 
+    <script language="javascript" type="text/javascript" src="http://people.iola.dk/olau/flot/jquery.js"></script> 
+    <script language="javascript" type="text/javascript" src="http://people.iola.dk/olau/flot/jquery.flot.js"></script> 
+ </head> 
+    <body> 
+    <h1 id="header">DBJ.ORG&trade;Flot Near-Time</h1> 
+	<h3 id="counter"></h3>
+ 
+    <div id="placeholder" style="width:600px;height:300px;"></div> 
+ 
+    <p>Near-Time example. The axes are automatically
+       scaled.</p> 
+ 
+<script type="text/javascript"> 
+/* */
+$(function () {
+    var flot = null , 
+		new_dataset = function ( hF_, size_ ) {
+			var d1 = [], d2 = [], size = size_ || 1400, hF = hF_ || (20 * Math.random()) ;
+				for (var i = 0; i < size; i += hF ) {
+					d1.push([i, Math.sin(i)]);
+					d2.push([i, Math.cos(i)]);
+		}
+			return [d1,d2] ;
+		},
+		maxi = 1000,  
+		$counter = $("#counter"),
+		$placeholder = $("#placeholder"),
+		tid = setInterval ( function ()  {
+				if ( maxi-- < 0 ) { clearInterval(tid); return; }
+				setTimeout( function () {
+				$counter.html( "" + maxi ) ;
+					flot = $.plot($placeholder, new_dataset());
+					flot.draw();},1);
+						
+			}, 1 ) ;
+});
+</script> 
+ 
+ </body> 
+</html> 

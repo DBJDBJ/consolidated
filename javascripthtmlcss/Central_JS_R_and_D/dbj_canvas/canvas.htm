@@ -1,0 +1,251 @@
+﻿<!DOCTYPE html>
+<html>
+   <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=9" />
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+      <title>DBJ*Canvas Test</title>
+      <style type="text/css">
+          body { font:12px/1.5 verdana,tahoma,arial; }
+      .container{float:left;position:relative;background:transparent; margin:2px; border:1px solid; padding:2px; }
+      .container canvas{position:absolute;left:0px;top:0px; }
+      .container .name{position:absolute;left:0px;bottom:0px;right:0px;
+                       height:20px;font:11px arial;line-height:20px;
+                       text-align:center;background:#eeeeee;}
+	  #toolbar { background-color:#c0c0c0; padding-left:5mm; }
+      </style>
+   </head>
+
+   <body>
+   <p id="toolbar">
+   <input type="text" id="SN_IN" value="4" title="Number of sides" />
+   <input type="text" id="DL_IN" value="10" title="Dashed line dahs length" />
+   <input type="text" id="USER_GIVEN_SIZE" value="1200" title="Side of the canvas" />
+   <input type="text" id="USER_GIVEN_SIDE" value="100" title="Polygon side length" />
+   <button id="DO_BTN" >Show</button>
+   </p>
+   <h3>DBJ*Canvas</h3>
+</body>
+<script src="http://code.jquery.com/jquery-1.6.1.js" type="text/javascript" id="JQUERY161" onload="/* alert('JQUERY 1.6.1 Loaded!') */" ></script>
+<script src="http://dbj.org/6/dbj.lib.js" type="text/javascript"></script>
+<script src="dbj.canvas.js" type="text/javascript"></script>
+<script type="text/javascript" id="__dbj_canvas_test__" >
+	(function (undefined) {
+
+		window.dbjct = {
+			print: !window.console ? function () { } :
+            function (s_) {
+            	var tid = setTimeout(function () {
+            		clearTimeout(tid);
+            		window.console.info(s_);
+            	}, 1);
+            },
+
+			before_test: function (title_) {
+				var id = escape(title_.minus("*").minus(" ").toLowerCase());
+				// remove previuous test, if any
+				$("#" + id).remove();
+				$("<div id='{0}'><hr/><p>{1}</p></div>".format(id, id)).appendTo(document.body);
+				return $("#" + id);
+			},
+			/* square shaped layout */
+			setupLayout: function (host_, new_id, size) {
+				if (!host_[0]) { throw "setupLayout() received bad host_ argument"; }
+				return canvas_unit(host_, new_id, size, size);
+			},
+			toDataUrl: function (canvas, img_mime) {
+				/*a bit safer approach*/
+				if (canvas.getContext) {
+					var ctx = canvas.getContext("2d");  // Get the context for the canvas.
+					return canvas.toDataURL(img_mime || "image/png");
+					// Get the data as (an default mime type) png image.
+				}
+			}
+		};
+		// private parts
+		var canvas_unit = (function () {
+			var counter = 0,
+                tpl = "<div class='container' id='{0}' style='width:{1}px; height:{2}px' >" +
+                      "<canvas id='{3}'></canvas>" +
+                      "<div class='name' >{4}</div></div>";
+
+			// basic example on how to download canvas as an image
+			function prepare_canvas_snapshot_download_widget(canvas_id, widget_host) {
+				function createDownloadLink(name) {
+					var a = document.createElement("a");
+					a.download = name;
+					a.id = name;
+					a.title = "download snapshot";
+					a.href = "about:blank";
+					a.appendChild(document.createTextNode(name));
+					//
+					a.onclick = function () {
+						a.href = dbjct.toDataUrl($("#"+canvas_id)[0]);
+					};
+					//
+					return document.createElement("p").appendChild(a) ;
+				}
+				// 
+				widget_host.appendChild(createDownloadLink("snapshot" + (-new Date) + ".png"));
+			}
+
+			return function (h_, id_, wid, hgt) {
+				var canvas_id = "canvas{0}".format(counter++),
+                        tmp = $(tpl.format(id_, wid, hgt + 20, canvas_id, id_)),
+                        canvas = tmp.find("canvas");
+				// canvas does not like attributes to be set on it
+				// it likes properties not attributes
+				canvas[0].width = wid;
+				canvas[0].height = hgt;
+				h_.append(tmp);
+				prepare_canvas_snapshot_download_widget(canvas_id, h_[0]);
+				return canvas;
+			}
+		} ());
+
+	} ());
+</script>
+<script type="text/javascript">
+	onload = function () {
+		
+		// composition_test(80);
+
+	};
+</script>
+<script type="text/javascript">
+
+	(function () {
+
+		function normalize(in_, dflt_, min_, max_, parser_) {
+			parser_ = parser_ || parseInt;
+			in_ = parser_(0 + in_);
+			if (0 == in_ || isNaN(in_)) in_ = dflt_;
+			if (in_ > max_) in_ = max_;
+			if (in_ < min_) in_ = min_;
+			return in_;
+		}
+
+		$("#DO_BTN").click(function () {
+			// parameter normalization goes first
+			patt_draw(
+			 normalize(USER_GIVEN_SIDE.value, 100, 10, 999),
+			 normalize(USER_GIVEN_SIZE.value, 600, 100, 1200),
+			 normalize(SN_IN.value, 4, 3, 99),
+			 normalize(DL_IN.value, 0.5, 0.1, 999, parseFloat)
+			);
+		});
+		var patt_draw = function (side_, size_, SN, DL) {
+			var test_div = dbjct.before_test("DBJ*Patterner"),
+			canvas = dbjct.setupLayout(test_div, "DBJ*Hex", size_);
+			dbjct.print("Testing : patt_draw()");
+
+			function poligon_sa_zbicama(C, R) {
+				canvas.drawPolygon({
+					sides: SN, radius: R, x: C.x, y: C.y, strokeStyle: "black", strokeWidth: 1
+				})
+                    .draw(function (ctx) {
+                    	ctx.strokeStyle = "black";
+                    	ctx.lineWidth = 1;
+                    	LAST_POINT_SET.forEach( function (P,idx) {
+                    		ctx.dashedLine(C.x, C.y, P.x, P.y, DL);
+                    		ctx.stroke();
+                    	});
+                    });
+			}
+			function run(C, a) {
+				if (a < 10) return;
+				poligon_sa_zbicama({ x: C.x, y: C.y }, a);
+				LAST_POINT_SET.forEach(function (P, idx) { 
+					poligon_sa_zbicama({ x: parseInt(P.x), y: parseInt(P.y) }, a / 2);
+					run(P, a / 2);
+				});
+			}
+
+			run({ x: parseInt(size_ / 2), y: parseInt(size_ / 2) }, side_);
+		}
+	} ());
+</script>
+<script type="text/javascript" id="__dbj_misc_tests__">
+	function test_hexadraw(cvs) {
+		var w = cvs.width(), h = cvs.height(), w2 = w / 2, h2 = h / 2;
+		function txt(x_, y_, s_) {
+			cvs.drawText({
+				fillStyle: "black",
+				font: "normal {0}pt sans-serif".format(h / 20),
+				text: s_,
+				align: "center",
+				baseline: "middle",
+				x: x_, y: y_
+			})
+		}
+		//
+		cvs.drawRect({
+			strokeStyle: "black", strokeWidth: 2,
+			x: w2, y: h2, width: w, height: h
+		})
+            .translateCanvas({ x: w2, y: h2 }).
+            drawLine({
+            	strokeStyle: "black", x1: 0, y1: 0, x2: w2, y2: 0
+            })
+            .drawLine({
+            	strokeStyle: "black", x1: 0, y1: 0, x2: 0, y2: h2
+            })
+            .drawLine({
+            	strokeStyle: "black", x1: 0, y1: 0, x2: -w2, y2: 0
+            })
+            .drawLine({
+            	strokeStyle: "black", x1: 0, y1: 0, x2: 0, y2: -h2
+            })
+            .draw(function (ctx) {
+            	var a = 100, a2 = a / 2, h = Math.sqrt((a * a) - (a2 * a2)),
+                    py = Math.cos(60) * a, pts = [];
+
+            	$.each([1 * 60, 2 * 60, 3 * 60, 4 * 60, 5 * 30, 6 * 60],
+                    function (i, v) {
+                    	pts[i] = { x: Math.sin(v) * a, y: Math.cos(v) * a, "a": v };
+                    });
+
+            	$.each(pts, function (i, P) {
+            		ctx.strokeStyle = "#000";
+            		ctx.dashedLine(0, 0, P.x, P.y, 5);
+            		ctx.stroke();
+            		txt(P.x, P.y, "" + i + ":" + P.a);
+            	});
+            });
+	}
+</script>
+<script type="text/javascript" id="__globalCompositeOperation__" >
+(function () {
+	window.composition_test = function (size_) {
+		var operation = ["source-over", "source-in", "source-out", "source-atop",
+                       "destination-over", "destination-in", "destination-out",
+                       "destination-atop", "lighter", "xor", "copy"
+                        ],
+               test_div = dbjct.before_test("Test globalCompositeOperation Canvas Support");
+		$.each(operation, function (i, id_) {
+			var canvas = dbjct.setupLayout(test_div, id_, size_ || 80);
+			dbjct.print("Testing : " + i + ": " + id_);
+			testGlobalCompositeOperation(canvas[0], id_);
+		});
+	}
+
+	function testGlobalCompositeOperation(canvas, op) {
+
+		var w = canvas.width / 3 * 2, h = canvas.height / 3 * 2;
+		var ctx = canvas.getContext("2d");
+		ctx.beginPath();
+		ctx.fillStyle = "rgba(0,152,255,1)"; // blue square
+		ctx.fillRect(0, 0, w, h);
+
+		ctx.save();
+		ctx.beginPath();
+
+		ctx.globalCompositeOperation = op;
+
+		ctx.fillStyle = "rgba(255,0,0,1)";
+		ctx.arc(w, h, w / 2, 0, Math.PI * 2, false); // red circle
+		ctx.fill();
+		ctx.restore();
+	}
+} ());
+</script>
+</html>

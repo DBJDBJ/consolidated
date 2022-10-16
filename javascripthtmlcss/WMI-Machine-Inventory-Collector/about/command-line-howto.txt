@@ -1,0 +1,57 @@
+1. Running 
+
+   [cscript] wmiadmin.js
+
+(without parameters) collects info about local computer and opens the resulting xml file in a browser.
+
+2. Running
+
+   [cscript] wmiadmin.js xxx.xxx.xxx.xxx
+
+collects info about computer who's IP address is 'xxx.xxx.xxx.xxx' and opens the resulting xml file in a browser.
+
+3. Given the 'silent' key, script runs in a 'silent mode':
+
+   [cscript] wmiadmin.js /silent xxx.xxx.xxx.xxx
+
+collects info about computer who's IP address is 'xxx.xxx.xxx.xxx' and doesn't show the resulting xml file;
+
+   [cscript] wmiadmin.js /silent
+
+collects info about local computer and doesn't show the resulting xml file.
+
+4. You can specify as much IP adresses as you wish:
+
+   [cscript] wmiadmin.js /silent xxx.xxx.xxx.xxx yyy.yyy.yyy.yyy zzz.zzz.zzz.zzz
+
+Note: for all of the above methods, target computer's OS must contain a user account
+      with username/password that match user's credentials that local system provides.
+
+5. Given the 'username' and 'password' keys, script uses given credentials instead of
+   those provided by the system:
+
+   [cscript] wmiadmin.js /username:alice /password:anywordyoulike xxx.xxx.xxx.xxx
+
+6. Given the 'domain' key, you can query a computer in a different domain; NTLM authentication is used.
+
+   [cscript] wmiadmin.js /domain:acme /username:alice /password:anywordyoulike xxx.xxx.xxx.xxx
+
+7. Given the 'auth' key, you can control the way you authenticate on the target domain.
+   If this key is equal to "kerberos", Kerberos authentication is used; otherwise, NTLM
+   authentication is used.
+
+   [cscript] wmiadmin.js /domain:acme /username:alice /password:anywordyoulike /auth:kerberos xxx.xxx.xxx.xxx
+
+8. Provided 'wmi_administrator.htm' page is a prototype of an WMI administration tool.
+   You can specify target computer's IP address, username, password and domain name
+   in the appropriate fields; hit "Start WMI query" to retrieve the WMI info.
+
+Note: before running the GUI tool, please check your browser security settings to be sure
+      that it allows creation and execution of ActiveX components.
+
+-------------------------------------------------------------------------------
+
+Requirements: - WMI installed on every computer you query;
+              - WSH installed on computer on which the script is run;
+              - 'wmiadmin.xsl' stylesheet must reside in the directory
+                            where the 'wmiadmin.js' script is located.

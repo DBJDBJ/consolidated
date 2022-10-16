@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="browser.css">
+      <style type="text/css">
+          .dbj {
+              background-image:url(dbj2_blue_32x32.png);
+              background-position:top,left;
+              background-repeat:no-repeat;
+              width:32px; height:32px; 
+          }
+          .goog {
+              background-image:url(goog_32x32.png);
+              background-position:top,left;
+              background-repeat:no-repeat;
+              width:32px; height:32px; 
+          }
+          button {
+              margin-right:3px;
+          }
+      </style>
+<script src="browser.js"></script>
+      </head>
+  <body>
+    <div id="controls">
+
+      <button id="back" title="Go Back">&#9664;</button>
+      <button id="forward" title="Go Forward">&#9654;</button>
+      <button id="home" title="Go Home" class="dbj"></button>
+      <button id="reload" title="Reload" class="goog">&nbsp;</button>
+      <form id="location-form">
+        <div id="center-column">
+          <input id="location" type="text" value="http://dbj.org/">
+        </div>
+        <input type="submit" value="Go">
+      </form>
+
+    </div>
+    <webview src="http://dbj.org/" autosize="on" ></webview>
+  </body>
+</html>

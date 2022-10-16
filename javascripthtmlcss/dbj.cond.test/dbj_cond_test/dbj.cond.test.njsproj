@@ -1,0 +1,67 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">14.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <Name>dbj.cond.test</Name>
+    <RootNamespace>dbj_cond_test</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>7d42bc72-53fa-4b55-8aea-71983f43c9f2</ProjectGuid>
+    <ProjectHome>
+    </ProjectHome>
+    <StartupFile>index.js</StartupFile>
+    <StartWebBrowser>False</StartWebBrowser>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
+    <StartWebBrowser>false</StartWebBrowser>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="index.js" />
+    <Compile Include="toolbench\dbj\dbj.cond.complex.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="dbj.nanotest.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="toolbench\dbj\dbj.cond.simplex.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="LICENSE">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="toolbench\comparators_benchmark\index.js" />
+    <Compile Include="toolbench\dbj_comparators_tests\testlist.js" />
+    <Compile Include="toolbench\dbj_comparators_tests\testrun.js" />
+    <Content Include="..\..\..\users\dusan\Downloads\dbj\dbj_shell-20170519T070912Z-001\dbj_shell\dbjtoolbar.hta">
+      <Link>dbjtoolbar.hta</Link>
+    </Content>
+    <Content Include=".eslintrc.json" />
+    <Content Include=".gitattributes" />
+    <Content Include=".gitignore" />
+    <Content Include="package.json" />
+    <Content Include="README.md" />
+    <Content Include="toolbench\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="toolbench\" />
+    <Folder Include="toolbench\comparators_benchmark\" />
+    <Folder Include="toolbench\dbj_comparators_tests\" />
+    <Folder Include="toolbench\dbj\" />
+  </ItemGroup>
+  <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
+  <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsTools.targets" />
+</Project>

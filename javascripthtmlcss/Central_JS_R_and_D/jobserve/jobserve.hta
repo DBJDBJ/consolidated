@@ -1,0 +1,354 @@
+<!DOCTYPE html >
+<html>
+<head>
+<!--##########################################################################################################-->
+<!--		  Set document compatibility mode to IE8Mode                                                      -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="content-type" content="application/html; charset=iso-8859-1" />
+<!--##########################################################################################################-->
+ <hta:application id="ohta"
+ applicationname="dbj_jobserve_micropreter"
+ border="thin"
+ borderstyle="normal"
+ caption="yes"
+ icon="dbjtamtam.ico"
+ maximizebutton="yes"
+ minimizebutton="yes"
+ showintaskbar="yes"
+ singleinstance="no"
+ sysmenu="yes"
+ version="2009"
+ windowstate="normal"
+ />
+<title>DBJ*Serve</title>
+<style type="text/css" >
+html,body { height:100%; width:100%;}
+body { font:small/1.5 verdana,tahoma,arial; overflow:auto;  }
+#main { height:100%; width:100%;  }
+ul,ol { cursor:pointer; cursor:hand; padding:3px; border:0px solid red; margin:5px; }
+li { cursor:default; }
+select { padding:1em; margin:1em; width:50%; border:1px solid; }
+</style>
+</head>
+<body>
+<select id="url"></select>
+<ul id="main"></ul>
+</body>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript" id="JQ.1.4.2" ></script>
+<script src="http://dbj.org/6/dbj.lib.js" type="text/javascript"></script>
+<script src="http://dbj.org/6/jquery.dbj.js" type="text/javascript"></script>
+<script type="text/javascript" id="dbj_lib">
+    //----------------------------------------------------------------------
+    // lib-rary
+    (function(global) {
+        global.POP = function(s, warn) {
+            var print = function(s_) {
+                s_ = s_ || ""; // dbj 2009SEP03
+                if (s_ instanceof Error) {
+                    s_ = (s_ + "   While in function ") + (global.POP.caller ? dbj.f_sig(global.POP.caller)[0] + "()" : " Global scope");
+                    s_ += "\nError Number : " + (s_.number & 0xFFFF);
+                    POP.subup(s_.fontcolor("red")/*.bold()*/);
+                }
+                else {
+                    POP.current.append("<li>" + s_.fontcolor(warn ? "#CC0000" : "#000000") + "</li>");
+                }
+            }
+            print(s);
+            return POP;
+        }
+        POP.main = $("#main");
+        POP.current = POP.main;
+        POP.reset = function() {
+            POP.main.html(""); POP.main = $("#main");
+            POP.current = POP.main;
+        }
+        POP.sub = function(counted) {
+            var markup = counted ? "<ol></ol>" : "<ul></ul>";
+            POP.current = $(markup).appendTo(POP.current);
+            return POP;
+        }
+        POP.up = function() {
+            if (POP.current[0].id !== "main")
+                POP.current = POP.current.parent();
+            return POP;
+        }
+        POP.top = function(s) {
+            if (!s) {
+                POP.current = POP.main;
+            } else {
+                var temp = POP.current;
+                POP.current = POP.main;
+                POP(s);
+                POP.current = temp;
+            }
+            return POP;
+        }
+        POP.subup = function(s) {
+            POP.sub();
+            POP(s);
+            POP.up();
+            return POP;
+        }
+
+        POP.struct = function($j, prefix) {
+            var s = [];
+            $j.find("*").each(function() { s.push(this.nodeName); });
+            return POP((prefix || "") + "<ul>" + $j[0].nodeName + "<ul>" + s.join("<br/>") + "</ul></ul>");
+        }
+
+        global.MKP = function(s) {
+            var p = s.split(":");
+            if (p.length === 2) return '"' + p[0].trim().replace(/\s/g, "_") + '":"' + p[1].trim() + '"';
+            return s;
+        }
+        //
+        var oOutlook = null;
+        $(window).unload(function() { oOutlook = null; });
+
+        global.sendOutlookEmail = function(aTo, Subject, Body, IsHtml) {
+            try {
+                oOutlook = oOutlook ? oOutlook : new ActiveXObject("Outlook.Application");
+
+                var mItem, olMailItem = 0;
+                mItem = oOutlook.CreateItem(olMailItem);
+
+                mItem.To = aTo;
+                mItem.Subject = Subject || Date().toLocaleString();
+                if (IsHtml)
+                    mItem.HTMLBody = Body;
+                else
+                    mItem.Body = Body;
+                mItem.Send();
+            } catch (x) {
+                POP(new Error(0xFF, "  Outlook usage error : " + x.message + "\n Have you started Outlook? "));
+                return false;
+            }
+            return true;
+        } //	SendOutlookEmail
+    })(this);
+</script>
+<script type="text/javascript" id="rss_object" >
+    /*
+    JobServe Item example :
+    RSS.items["JSJM/DOCMGMNT"] contains object :
+    {"Rate":"£425 per Day",
+    "Type":"Contract",
+    "Location":"London",
+    "Country":"UK",
+    "Contact":"John Melrose",
+    "Advertiser":"Xchanging - City",
+    "Email":"John.Melrose.5309D.8783A@mail.jobserve.com",
+    "Start_Date":"ASAP",
+    "Reference":"JSJM/DOCMGMNT"}
+    */
+    function RSS_(select_element_id, change_handler ){
+        var self = {
+            itemstring: function(j, item) {
+                try {
+                    if (!item)
+                        return j + ":" + JSON.stringify(self.items[j]);
+                    else
+                        return j + ":" + JSON.stringify(item);
+                } catch (x) {
+                    return "Item [" + j + "] not found";
+                }
+            },
+            // items extracted from rss feed will be kept in this object
+            items: {
+                toString: function(delim) {
+                    var s = [];
+                    for (var j in self.items) s.push(self.itemstring(j));
+                    return s.join(delim);
+                }
+            },
+            // body of a email to be sent for the item argument
+            body: function(item_link, item) {
+            return self.mail_body_template.format(
+                (item.Contact ? item.Contact.match(/\w+/g)[0] : " Madam/Sir"),
+                item_link,
+                item.Reference,
+                (new Date()).toLocaleString()
+                );
+                /*
+                return (item.Contact ? "\nDear " + item.Contact.match(/\w+/g)[0] : "\nDear Madam/Sir") +
+                  "\nIn regards to the position advertised on JobServe.com " +
+                  "\n" + item_link +
+                  "\nUnder the reference: '" + item.Reference + "'" +
+                  "\nPlease find my CV (in Word format) at: http://dbj.org/dbj_cv.doc " +
+                  "\nIf you find that my CV is not relevant, for this position, please accept my appologies." +
+                  "\n" +
+                  "\nBest Regards: Mr D.Jovanovic, MsC IT Arch" +
+                  "\nLondon, UK " + (new Date()).toLocaleString(); +
+            "\n-----------------------------------------------------------------\n\n";
+            */
+            },
+            // email all items accumulated
+            send: function() {
+                var item;
+                for (var j in self.items) {
+                    item = self.items[j];
+                    if (sendOutlookEmail(item.Email, "JobServe: " + item.Reference, self.body(j, item), false))
+                        POP("Emailed { " + self.itemstring(j) + " } ");
+                    else
+                        POP.subup(("Failed to mail:<br/>" + self.itemstring(j)).bold());
+                }
+            },
+            send_item: function(item_link, item) {
+                if (sendOutlookEmail(item.Email, "JobServe: " + item.Reference, self.body(item_link, item), false)) {
+                    POP("Emailed item[" + item.ordinal + "]<br/>{ " + self.itemstring(item_link, item) + " } ");
+                    self.items_emailed += 1;
+                }
+                else {
+                    POP.subup(("Failed to mail [" + item.ordinal + "]:<br/>" + self.itemstring(item_link, item)).bold());
+                }
+            },
+            report: function() {
+                var msg = ("Sent : " + self.items_emailed + " emails, for: " + self.number_of_items + ", items parsed");
+                POP.top(msg.bold());
+                alert(msg + "\n\nNow switch to Outlook and check for duplicates etc, before sending all the email generated.");
+            },
+            reset: function() {
+                self.items_emailed = 0;
+                self.number_of_items = 0;
+            },
+            items_emailed: 0,
+            number_of_items: 0,
+            item_selector: "item",
+            data_file: "jobserve.json",
+            /* Keeping the feeds urls in external json file */
+            url: null,
+            $url: null, /* select element of url's wrapped in jQuery */
+            mail_body_template: null
+        };
+        /* ---------------------------------------------------------------------------- */
+        // take the configuration JSON and setup self up by deata from it
+        jQuery.ajax({
+            async: false, // default: true
+            type: "GET",
+            url: self.data_file, // url,
+            data: null, // data,
+            dataType: "json",
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+            var e = new Error(0xFFFF, "Configuration JSON file [ " + self.data_file + " ], has a problem :" + textStatus);
+                POP(e);
+                throw e;
+            },
+            success: function(data) {
+                POP("Configuration from: " + self.data_file + ", loaded<br/>" +
+                    JSON.stringify(data).replace(/\,/g, ",<br/>"));
+                
+                // mail.body is array of strings where each element is one line of the text
+                self.mail_body_template = data.mail.body.join("") ;
+                self.url = data.feeds;
+                // populate select box with data feeds from JSON configuration
+                self.$url = $("#" + select_element_id);
+                self.$url.append("<option id='nulloption' value='0' selected >Select the feed.</option>");
+                for (var j in self.url) {
+                    self.$url.append("<option title='" + self.url[j].link + "' value='" + self.url[j].link + "' >" + self.url[j].name + "</option>");
+                }
+                self.$url.change(change_handler);
+            }
+        });
+      /* ---------------------------------------------------------------------------- */
+             return self ;
+      /* ---------------------------------------------------------------------------- */
+} // eof RSS_()
+</script>
+<script type="text/javascript">
+    $(function() {
+        document.title += "(tm) (c)" + (new Date()).getFullYear() + " by DBJ.ORG";
+        var $body = $(document.body);
+        //---------------------------------------------------------------
+
+        var rss_url_change = function() {
+            var val = "", name = "", $this = null;
+            $("select option:selected").each(function() {
+                $this = $(this);
+                val = $this.attr("value");
+                name = $this.text();
+                if ('0' === val) return;
+                if (confirm("Process the JobServe(tm) feed: '" + name +
+                   "' ?\n\nBefore pressing OK, and if not already, start your Outlook now." +
+                   "\nBe sure Outlook is configured NOT to send each email as it is generated." +
+                   "\nYou want to check them quickly, before pressing the SEND button." +
+                   "\nIt is NOT a good idea to spam agents and/or agencies with emails.")) {
+                    $body.css("cursor", "wait");
+
+                    var tid = window.setTimeout(function() {
+                        window.clearTimeout(tid); tid = null;
+                        POP.reset();
+                        rss.reset();
+                        start(val);
+                    }, 1);
+                }
+            });
+            return false;
+        };
+
+        var rss = new RSS_("url", rss_url_change);
+        //---------------------------------------------------------------
+        jQuery.fn.take = function(what, cb) {
+            (cb || function(v) { alert(v); })(this[what || "jquery"]);
+            return this;
+        }
+        function record_number_of_items_found(count) {
+            rss.number_of_items = count;
+            POP.top("Found : " + rss.number_of_items + ", items in the RSS feed");
+        }
+        //---------------------------------------------------------------
+        function start(url_) {
+            try {
+                $.get(url_, function(data) {
+                    $js = $(data);
+                    rss.title = $js.find("title:first").text(), counter = 1;
+                    POP(rss.title.bold()).sub(true);
+                    // if title contains 'Error' no items will be in the data
+                    $js.find(rss.item_selector).take("length", record_number_of_items_found)
+                  .each(function() {
+                      var that = this;
+                      item_proc(counter++, that);
+                  });
+                    // rss.send();
+                    POP.top("Finished Parsing.\nNow processing entries and generating emails in the Outlook 'outbox'.");
+                });
+            } finally {
+                $body.css("cursor", "default");
+            }
+        }
+        // each item contains: title,link,description,guid,pubDate
+        function item_proc(ordinal, item) {
+            var s = [],
+            // transform <description> xml into the html <div>
+            $description = $("<div>" + ($($(item).find("description"))[0].text) + "</div>"),
+            $table = $description.find("table"),
+            link = ($(item).find("link")[0].text);
+            //
+            $table.find("tr").each(function() {
+                if (this.innerText.length > 1)
+                    s.push(MKP(this.innerText));
+            });
+            s = s.join(",");
+            s = "{" + s.replace(/^.,/, "") + "}";
+            try {
+                item = JSON.parse(s);
+                item["ordinal"] = ordinal;
+
+                if (item["Email"] === undefined)
+                    POP("Email Not found in:<br/>" + s, true );
+                else if (link === undefined)
+                    POP("&lt;link/&gt; Not found in:<br/>" + s, true );
+                else {
+                    dbj.later(function() {
+                        rss.send_item(link, item);
+                        // this is  a signal that the whole rss has been processed
+                        // ie all items have been sent
+                        if (ordinal === rss.number_of_items) rss.report();
+                    });
+                }
+            } catch (x) {
+                POP(x);
+            }
+        }
+    });    // eof window.onload()
+</script>
+</html>

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FunctionAppDBJ": {
+      "commandName": "Project",
+      "commandLineArgs": "{ \r\n  \"name\" : \"Ian William\", \r\n  \"number\" : 42\r\n}"
+    }
+  }
+}

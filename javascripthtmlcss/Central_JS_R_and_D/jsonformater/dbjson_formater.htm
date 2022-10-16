@@ -1,0 +1,471 @@
+﻿<!DOCTYPE html > 
+<html> 
+<!--- inspired by http://www.bodurov.com ---->
+<head> 
+<title>DBJSON&trade Formatter $Revision: 3 $ $Date: 20/05/10 17:52 $</title> 
+<meta name="description" content="DBJSON JSON Formatter" /> 
+<meta name="keywords" content="Json, Printer, Colorer, Format, Color, Collapsible" /> 
+<style type="text/css" media="all"> 
+*{
+	font-family: Verdana, Tahoma, Arial;
+}
+.Canvas
+{
+	font: 10pt Georgia;
+	background-color:#ECECEC;
+	color:#000000;
+	border:solid 1px #CECECE;
+}
+.ObjectBrace
+{
+	color:#00AA00;
+	font-weight:bold;
+}
+.ArrayBrace
+{
+	color:#0033FF;
+	font-weight:bold;
+}
+.PropertyName
+{
+	color:#CC0000;
+	font-weight:bold;
+}
+.String
+{
+	color:#007777;
+}
+.Number
+{
+	color:#AA00AA;
+}
+.Boolean
+{
+  color:#0000FF;
+}
+.Function
+{
+  color:#AA6633;
+  text-decoration:italic;
+}
+.Null
+{
+  color:#0000FF;
+}
+.Comma
+{
+  color:#000000;
+  font-weight:bold;
+}
+PRE.CodeContainer{
+  margin-top:0px;
+  margin-bottom:0px;
+}
+PRE.CodeContainer img{
+  cursor:pointer;
+  border:none;
+  margin-bottom:-1px;
+}
+#CollapsibleViewDetail a{
+  padding-left:10px;
+}
+#ControlsRow{
+  white-space:nowrap;
+  font: 11px Georgia;
+}
+#TabSizeHolder{
+  padding-left:10px;
+  padding-right:10px;
+}
+#HeaderTitle{
+  text-align:right;
+  font-size:11px;
+}
+#HeaderSubTitle{
+  margin-bottom:2px;
+  margin-top:0px
+}
+#RawJson{
+  width:99%;
+  height:130px;
+}
+A.OtherToolsLink { color:#555;text-decoration:none; }
+A.OtherToolsLink:hover { text-decoration:underline; }
+</style> 
+</head> 
+<body> 
+<div id="HeaderTitle"> DBJson&trade; Copyright (c) 2010 by DBJ.ORG (inspired by www.bodurov.com)</div> 
+<h3 id="HeaderSubTitle">Collapsible JSON Formatter</h3> 
+<div>Enter your JSON here:</div> 
+<textarea id="RawJson">
+{
+        "DBJS*Mechanisms": {
+            "DBJ": [
+            ["function() { return typeof dbj }, 'object'"],["function() { return dbj.toString() }, true"]
+            ]
+        },
+        "ES5 Compatibility": {
+            "Array":[
+                        ["function() { return [1, 2, 3].indexOf(2) }, 1"],
+                        ["function() { return [1, 2, 3].indexOf(9) }, -1"],
+                        ["function() { return [1, 1, 1].lastIndexOf(1) }, 2"],
+                        ["function() { return [1, 1, 1].lastIndexOf(2) }, -1"],
+                        ["function() { var r; [1, 2, 3].forEach(function(v, n, o) { r = v; }); return r; }, 3"],
+                        ["function() { return [1, 2, 3].filter(function(v, n, o) { return v > 2; }) + ''; }, '3'"],
+                        ["function() { return [1, 2, 3].every(function(v, n, o) { return v > 2; }); }, false"],
+                        ["function() { return [1, 2, 3].map(function(v, n, o) { return v + 1; }) + ''; }, '2,3,4'"],
+                        ["function() { return [1, 2, 3].some(function(v, n, o) { return v > 2; }); }, true"],
+                        ["function() { return [0, 1, 2, 3].reduce(function(a, b) { return a + b; }); }, 6"]
+                    ]
+        }
+}
+</textarea> 
+<div id="ControlsRow"> 
+  <button onclick="dbjson.Process()" >Format</button> 
+  <span id="TabSizeHolder"> 
+    tab size: 
+    <select id="TabSize" onchange="dbjson.TabSizeChanged()"> 
+      <option value="1">1</option> 
+      <option value="2">2</option> 
+      <option value="3" selected="selected" >3</option> 
+      <option value="4">4</option> 
+      <option value="5">5</option> 
+      <option value="6">6</option> 
+    </select> 
+  </span> 
+  <label for="QuoteKeys"> 
+    <input type="checkbox" id="QuoteKeys" onclick="dbjson.QuoteKeysClicked()" checked /> 
+    Keys in Quotes
+  </label>&nbsp; 
+  <a href="javascript:void(0);" onclick="dbjson.SelectAllClicked()">select all</a> 
+  &nbsp;
+  <span id="CollapsibleViewHolder" > 
+      <label for="CollapsibleView"> 
+        <input type="checkbox" id="CollapsibleView" onclick="dbjson.CollapsibleViewClicked()" checked /> 
+        Collapsible View
+      </label> 
+  </span> 
+  <hr />
+  <span id="CollapsibleViewDetail"> 
+    <button  onclick="dbjson.ExpandAllClicked()">expand all</button> 
+    <button  onclick="dbjson.CollapseAllClicked()">collapse all</button> 
+    <button  onclick="dbjson.CollapseLevel(3)">level 2+</button> 
+    <button  onclick="dbjson.CollapseLevel(4)">level 3+</button> 
+    <button  onclick="dbjson.CollapseLevel(5)">level 4+</button> 
+    <button  onclick="dbjson.CollapseLevel(6)">level 5+</button> 
+    <button  onclick="dbjson.CollapseLevel(7)">level 6+</button> 
+    <button  onclick="dbjson.CollapseLevel(8)">level 7+</button> 
+    <button  onclick="dbjson.CollapseLevel(9)">level 8+</button> 
+  </span> 
+</div> 
+<div id="Canvas" class="Canvas"></div> 
+<script src="http://code.jquery.com/jquery-1.4.2.min.js" type="text/javascript" id="JQUERY142" onload="alert('JQUERY142 Loaded!')"  ></script>
+<script type="text/javascript" id="global_javascript_extensions" >
+    (function() {
+    // (c) 2010 by DBJ.ORG
+    // "{0}{1}".format("A","B") --> "AB"
+    if ("function" !== typeof String.format)
+        String.prototype.format = function() {
+            var args = arguments;
+            return this.replace(/\{(\d|\d\d)\}/g, function($0) {
+                var idx = 1 * $0.match(/\d+/)[0]; return args[idx] !== undefined ? args[idx] : (args[idx] === "" ? "" : $0);
+            }
+     );
+        }
+} ())
+</script>
+<script type="text/javascript" >
+
+//-------------------------------------------------------------------------
+    (function($, undefined) {
+        //-------------------------------------------------------------------------
+        window.dbjson = { toString: function() { return "DBJSON Formater $Revision: 3 $ $Date: 20/05/10 17:52 $" } };
+        var dbj = {
+            terror: function(m_, callback) {
+                alert(m_ = "DBJSON Error:\n{0}".format(m_));
+                if (callback) { try { callback() } finally { } }
+                else throw m_;
+            },
+            assert: function(bolval, m_) {
+                bolval = typeof bolval === "boolean" ? bolval : false;
+                if (!bolval) terror(m_ || " No message?");
+            }
+        };
+        //-------------------------------------------------------------------------
+        // we need tabs as spaces and not CSS margin-left 
+        // in order to retain format when copying and pasting the code
+        var SINGLE_TAB = "  ",
+            TAB = SINGLE_TAB,
+            ImgCollapsed = "Collapsed.gif",
+            ImgExpanded = "Expanded.gif",
+            QuoteKeys = true,
+            $Canvas = $("#Canvas"),
+            $RawJson = $("#RawJson"),
+            $body = $(window.document.body),
+            STR_EMPTY = "",
+            IsCollapsible = false,
+            $id = function(id) { return $body.find("#" + id)[0] || (dbj.terror("dom object by id:{0}, not found?".format(id))); },
+            IsArray = function(obj) { return $.isArray(obj); };
+
+        dbjson.Process = function() {
+            SetTab();
+            IsCollapsible = $id("CollapsibleView").checked;
+            var json = $.trim($RawJson.val());
+            if (!json) return;
+            try {
+                var obj = $.parseJSON(json),
+                    html = ProcessObject(obj, 0, false, false, false);
+                $Canvas.html("<pre class='CodeContainer'>{0}</pre>".format(html));
+            } catch (e) {
+                dbj.terror(
+            "JSON is not well formated. {0}\n\nThis is strict JSON formater\nPlease conform to JSON syntax as descibed on www.json.org".format(e.message ? "Error:" + e.message : " "),
+            function() { $Canvas.html(STR_EMPTY); }
+            );
+            }
+        }
+        function ProcessObject(obj, indent, addComma, isArray, isPropertyContent) {
+            dbj.assert(!!obj, "ProcessObject(), obj arg is undefined ?");
+            var html = STR_EMPTY,
+            comma = (addComma) ? "<span class='Comma'>,</span> " : "",
+            type = typeof obj,
+            clpsHtml = "";
+            if (IsArray(obj)) {
+                if (obj.length == 0) {
+                    html += GetRow(indent, "<span class='ArrayBrace'>[ ]</span>" + comma, isPropertyContent);
+                } else {
+                    clpsHtml = IsCollapsible ? "<span><img src=\"" + ImgExpanded + "\" onclick=\"dbjson.ExpImgClicked(this)\" /></span><span class='collapsible'>" : "";
+                    html += GetRow(indent, "<span class='ArrayBrace'>[</span>" + clpsHtml, isPropertyContent);
+                    for (var i = 0; i < obj.length; i++) {
+                        html += ProcessObject(obj[i], indent + 1, i < (obj.length - 1), true, false);
+                    }
+                    clpsHtml = IsCollapsible ? "</span>" : "";
+                    html += GetRow(indent, clpsHtml + "<span class='ArrayBrace'>]</span>" + comma);
+                }
+            } else if (type == 'object' && obj == null) {
+                html += FormatLiteral("null", "", comma, indent, isArray, "Null");
+            } else if (type == 'object') {
+                var numProps = 0;
+                for (var prop in obj) numProps++;
+                if (numProps == 0) {
+                    html += GetRow(indent, "<span class='ObjectBrace'>{ }</span>" + comma, isPropertyContent);
+                } else {
+                    clpsHtml = IsCollapsible ? "<span><img src=\"" + ImgExpanded + "\" onclick=\"ExpImgClicked(this)\" /></span><span class='collapsible'>" : "";
+                    html += GetRow(indent, "<span class='ObjectBrace'>{</span>" + clpsHtml, isPropertyContent);
+                    var j = 0;
+                    for (var prop in obj) {
+                        var quote = window.QuoteKeys ? "\"" : "";
+                        html += GetRow(indent + 1, "<span class='PropertyName'>" + quote + prop + quote + "</span>: " + ProcessObject(obj[prop], indent + 1, ++j < numProps, false, true));
+                    }
+                    clpsHtml = IsCollapsible ? "</span>" : "";
+                    html += GetRow(indent, clpsHtml + "<span class='ObjectBrace'>}</span>" + comma);
+                }
+            } else if (type == 'number') {
+                html += FormatLiteral(obj, "", comma, indent, isArray, "Number");
+            } else if (type == 'boolean') {
+                html += FormatLiteral(obj, "", comma, indent, isArray, "Boolean");
+            } else if (type == 'function') {
+                obj = FormatFunction(indent, obj);
+                html += FormatLiteral(obj, "", comma, indent, isArray, "Function");
+            } else if (type == 'undefined') {
+                html += FormatLiteral("undefined", "", comma, indent, isArray, "Null");
+            } else {
+                html += FormatLiteral(obj.toString().split("\\").join("\\\\").split('"').join('\\"'), "\"", comma, indent, isArray, "String");
+            }
+            return html;
+        }
+        function FormatLiteral(literal, quote, comma, indent, isArray, style) {
+            if (typeof literal == 'string')
+                literal = literal.split("<").join("&lt;").split(">").join("&gt;");
+            var str = "<span class='" + style + "'>" + quote + literal + quote + comma + "</span>";
+            if (isArray) str = GetRow(indent, str);
+            return str;
+        }
+        //
+        dbj.quick_mul = function( seed , num ) { while(num--) seed += seed; return seed;} ;
+        //
+        function FormatFunction(indent, obj) {
+            var funcStrArray = obj.toString().split("\n"), str = "";
+                if (funcStrArray.length < 1) return str;
+            var tabs = dbj.quick_mul(TAB,indent);
+                str = funcStrArray[0] + "\n";
+            for (var i = 1, L = funcStrArray.length; i < L;  i++) {
+                str += tabs + funcStrArray[i] + "\n";
+            }
+            return str;
+        }
+        function GetRow(indent, data, isPropertyContent) {
+            var tabs = isPropertyContent ? "" :
+            dbj.quick_mul( TAB, indent );
+            if (data != null && data.length > 0 && data.charAt(data.length - 1) != "\n")
+                data = data + "\n";
+            return tabs + data;
+        }
+
+        dbjson.CollapsibleViewClicked = function() {
+
+            $("#CollapsibleViewDetail").css("visibility",
+             $("#CollapsibleView:checked").val() ? "visible" : "hidden"
+             );
+
+            Process();
+        }
+
+        dbjson.QuoteKeysClicked = function() {
+            var QuoteKeys = $("#QuoteKeys:checked").val() !== null;
+            Process();
+        }
+
+        dbjson.CollapseAllClicked = function() {
+            EnsureIsPopulated();
+            /*
+            TraverseChildren($id("Canvas"), function(element) {
+            if (element.className == 'collapsible') {
+            MakeContentVisible(element, false);
+            }
+            }, 0);
+            */
+            $Canvas.find(".collapsible").hide("slow");
+        }
+        dbjson.ExpandAllClicked = function() {
+            EnsureIsPopulated();
+            /*
+            TraverseChildren($id("Canvas"), function(element) {
+            if (element.className == 'collapsible') {
+            MakeContentVisible(element, true);
+            }
+            }, 0);
+            */
+            $Canvas.find(".collapsible").show("slow");
+        }
+        function MakeContentVisible(element, visible) {
+            var img = element.previousSibling.firstChild;
+            if (!!img.tagName && img.tagName.toLowerCase() == "img") {
+                element.style.display = visible ? 'inline' : 'none';
+                element.previousSibling.firstChild.src = visible ? ImgExpanded : ImgCollapsed;
+            }
+        }
+        function TraverseChildren(element, func, depth) {
+            for (var i = 0, L = element.childNodes.length; i < L; i++) {
+                TraverseChildren(element.childNodes[i], func, depth + 1);
+            }
+            func(element, depth);
+        }
+        dbjson.ExpImgClicked = function(img) {
+            var container = img.parentNode.nextSibling;
+            if (!container) return;
+            var disp = "none";
+            var src = ImgCollapsed;
+            if (container.style.display == "none") {
+                disp = "inline";
+                src = ImgExpanded;
+            }
+            container.style.display = disp;
+            img.src = src;
+        }
+
+        dbjson.CollapseLevel = function(level) {
+            EnsureIsPopulated();
+            /*
+            TraverseChildren($id("Canvas"), function(element, depth) {
+            if (element.className == 'collapsible') {
+            if (depth >= level) {
+            MakeContentVisible(element, false);
+            } else {
+            MakeContentVisible(element, true);
+            }
+            }
+            }, 0);
+            */
+            var depth = level + 1;
+            $Canvas.find(".collapsible").each(function() {
+                MakeContentVisible(this, depth >= level ? false : true);
+            });
+        }
+        /*function TabSizeChanged() { Process(); }*/
+        function SetTab() {
+            var select;
+            if (select = $("#TabSize option:selected")[0]) {
+                TAB = MultiplyString(parseInt(select.value), SINGLE_TAB);
+            }
+        }
+        function EnsureIsPopulated() {
+            if ($Canvas.html() === STR_EMPTY) Process();
+        }
+        function MultiplyString(num, str) {
+            var sb = [];
+            while (num--) { sb.push(str); }
+            return sb.join(STR_EMPTY);
+        }
+        /*
+        function SelectAllClicked() {
+
+            if (!!document.selection && !!document.selection.empty) {
+        document.selection.empty();
+        } else if (window.getSelection) {
+        var sel = window.getSelection();
+        if (sel.removeAllRanges) {
+        window.getSelection().removeAllRanges();
+        }
+        }
+
+            var range =
+        (!!document.body && !!document.body.createTextRange)
+        ? document.body.createTextRange()
+        : document.createRange();
+
+            if (!!range.selectNode)
+        range.selectNode($id("Canvas"));
+        else if (range.moveToElementText)
+        range.moveToElementText($id("Canvas"));
+
+            if (!!range.select)
+        range.select($id("Canvas"));
+        else
+        window.getSelection().addRange(range);
+        }
+        */
+        //--------------------------------------------------------------------------------------
+    } (jQuery));
+</script> 
+<script type="text/javascript">
+
+    window.onload = function() {
+/*
+    var version = getSilverlightVersion();
+    if (version) { __utmSetVar(version); }
+*/
+}
+/* 
+function getSilverlightVersion() {
+    var version = 'No Silverlight';
+    var container = null;
+    try {
+        var control = null;
+        if (window.ActiveXObject) {
+            control = new ActiveXObject('AgControl.AgControl');
+        }
+        else {
+            if (navigator.plugins['Silverlight Plug-In']) {
+                container = document.createElement('div');
+                document.body.appendChild(container);
+                container.innerHTML= '<embed type="application/x-silverlight" src="data:," />';
+                control = container.childNodes[0];
+            }
+        }
+        if (control) {
+            if (control.isVersionSupported('4.0')) { version = 'Silverlight/4.0'; }
+            else if (control.isVersionSupported('3.0')) { version = 'Silverlight/3.0'; }
+            else if (control.isVersionSupported('2.0')) { version = 'Silverlight/2.0'; }
+            else if (control.isVersionSupported('1.0')) { version = 'Silverlight/1.0'; }
+        }
+    }
+    catch (e) { }
+    if (container) {
+        document.body.removeChild(container);
+    }
+    return version;
+}
+*/
+</script> 
+</body> 
+</html> 

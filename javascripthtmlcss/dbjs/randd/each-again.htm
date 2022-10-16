@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<title>DBJ*Each Research</title>
+<script src="../dbj.hdr.js" type="text/javascript"></script>
+<style type="text/css" media="all">
+  html,body { height:100%; width:100%; font:10px/1.5 verdana, monospace; }
+  article, aside, figure, footer, header, hgroup,
+  menu, nav, section { display: block; }
+  hr {height:3mm;}
+  label, input, button { width: 20mm; margin:2px; padding:2px; border:1px dotted #ccc; }
+  input[type="radio"] { max-width:5mm; }
+  #konsole { float:right; border: 1px dotted; padding:2mm; width:69%; overflow:auto; }
+  #frm { float:left; width:29%; }
+
+    table.result { border:solid 1px #C0C0C0; font: inherit; width:99%; }
+    table.result td { border:solid 1px  #C0C0C0; }
+    table.result th { border:solid 1px  #C0C0C0; font-weight:bold; background-color:#cccccc; }
+    table.result caption { font-weight:bold; }
+
+</style>
+</head>
+<body>
+<div id="frm" >
+<label >Input size<input id="OBJECT_SIZE" value="10" /></label><br />
+<label >Arguments<input id="ARGUMENTS" value="" /></label><br />
+<label >Loop length<input id="LOOP_LENGTH" value="10" /></label><br />
+<label >Number of runs<input id="NUMBER_OF_RUNS" value="10" /></label><br />
+<button onclick="main(true)" >Test Object</button><br />
+<button onclick="main(false)" >Test Array</button>
+</div>
+<p id="konsole" onclick="return document.getElementById('konsole').innerText='';" ></p>
+</body>
+<script type="text/javascript" >
+//////////////////////////////////////////////////////////////////////////////////
+    dbj.crazyLoader("dbj.each.js", "../dbj.es5.js");
+//////////////////////////////////////////////////////////////////////////////////
+    window.onload = function() {
+    window.tabla = dbj.table(document.getElementById('konsole'), null, "result")
+        .caption (
+        document.title = "DBJ*Each-Again&trade; " + (document.lastModified || "")
+        ).hdr(['Name','Total','Average']);
+    }
+</script>
+<script type="text/javascript" id="a_little_local_library">
+    var     make_object = function(size) { var o = { "size": size }; while (size--) { o[size] = size; }; return o; },
+    make_array = function(size) { var a = []; while (size--) { a[size] = size; }; return a; };
+</script>
+<script type="text/javascript">
+    //----------------------------------------------------------------------------------------------
+    function TestingObject(vals, object_iteration) {
+
+        dbj.summa.rst();
+
+        function Score(callback, timeToRun) {
+            //higher is better
+            var start = (new Date()).getTime(), time = 0, score = 0;
+            timeToRun = timeToRun || 1000;
+            while (((new Date()).getTime() - start) < timeToRun) {
+                callback();
+                score++;
+            }
+            return score;
+        }
+        function test(callback, use_objects, obj_siz, loop_siz, args) {
+            var o = use_objects ? make_object(obj_siz) : make_array(obj_siz),
+           cb = function() { /* null-fun */ };
+            try {
+                return Score(function() { callback(o, cb, [args]); }, loop_siz);
+            } catch (x) {
+                tabla.err("test():" + x);
+                return -1; //  fun() has failed 
+            }
+        }
+        return function test_this(label, test_fun) {
+            dbj.later(function() {
+                var j = vals.NUMBER_OF_RUNS - 0;
+                while (j--) {
+                    dbj.summa.add(label,
+                     test(test_fun, object_iteration, vals.OBJECT_SIZE - 0, vals.LOOP_LENGTH - 0, vals.ARGUMENTS)
+                );
+                }
+                tabla.row([label, dbj.summa.sum(label), dbj.round(dbj.summa.avg(label), 2)]);
+            });
+            return test_this;
+        }
+    }
+    //
+    function main(object_iteration) {
+    //
+    var ARGUMENTS = "ARGUMENTS",
+        LOOP_LENGTH = "LOOP_LENGTH",
+        OBJECT_SIZE = "OBJECT_SIZE", 
+        NUMBER_OF_RUNS = "NUMBER_OF_RUNS",
+        vals = dbj.harvester("frm",
+        {   ARGUMENTS: null,
+            TYPE: "object",
+            OBJECT_SIZE: 1e1,
+            LOOP_LENGTH: 1e1, 
+            NUMBER_OF_RUNS: 1e1 });
+
+    tabla.err("Starting ", vals[NUMBER_OF_RUNS], " runs. With input type:", object_iteration ? " as object" : " as array",
+    ", object size:", vals[OBJECT_SIZE], " , loop length: ", vals[LOOP_LENGTH]);
+
+     TestingObject( vals, object_iteration )
+    ("jQuery",jQuery.each)
+    ("dbj.forEach", dbj.forEach)
+    ("dbj_es5", each_es5)
+    ("dbj_FT_each", optimized_each)
+    ("each140", each140)
+    ("each126", each126)
+    ("optimized_each", optimized_each);
+    //----------------------------------------------------------------------------------------------
+}
+</script>
+</html>

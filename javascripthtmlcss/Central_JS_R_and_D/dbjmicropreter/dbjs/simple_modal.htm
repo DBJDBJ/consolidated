@@ -1,0 +1,195 @@
+<!DOCTYPE html> 
+<html>
+<!--
+    (c) 2005-2007-2014 by dbj@dbj.org. All rights reserved.
+    ----------------------------------------------------
+-->
+<head>
+<title>modal box</title>
+<style type="text/css" id="dbj_modal_2_styles" media="screen" >
+    #lean_overlay {
+        position: fixed;
+        z-index: 10000;
+        top: 0px;
+        left: 0px;
+        height: 100%;
+        width: 100%;
+        background: #000;
+        display: none;
+    }
+
+    .modal_close {
+        background: red;
+        cursor:default ;
+    }
+
+</style>
+</head>
+<body>
+    <button id="dugme" href="#DBJMODALUX">Click Me</button>
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <!--<script src="jquery.simplemodal.1.4.4.min.js" type="text/javascript" id="SMPLML141"></script>-->
+    <script>
+        $(function () {
+            $("#dugme").on("click",
+                    function () {
+                            dbjMODAL("SET", "TITLE", "Jupi!")("SET", "TXT1", "Zdravo")("SET", "TXT2", "Svete");
+                        $("#dugme").leanModal({
+                            top: 100,
+                            closeButton: ".modal_close"
+                        });
+                    }
+            );
+        });
+    </script>
+
+    <div onselectstart="window.event.returnValue=false;" id="DBJMODALUX" style="BORDER-RIGHT: buttonhighlight 2px outset; BORDER-TOP: buttonhighlight 2px outset; DISPLAY: none; FONT-SIZE: 8pt; Z-INDEX: 4; BORDER-LEFT: buttonhighlight 2px outset; NOWIDTH: 350px; CURSOR: default; BORDER-BOTTOM: buttonhighlight 2px outset; FONT-FAMILY: Tahoma; POSITION: absolute; BACKGROUND-COLOR: buttonface">
+        <div id='DBJMODALUX_TITLE' style="PADDING-RIGHT: 3px; PADDING-LEFT: 3px; FONT-WEIGHT: bolder; PADDING-BOTTOM: 3px; COLOR: captiontext; PADDING-TOP: 3px; BORDER-BOTTOM: white 2px groove; BACKGROUND-COLOR: activecaption">
+            Default Caption
+        </div>
+        <div id='DBJMODALUX_TEXT_1' style="PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; PADDING-TOP: 5px">
+            Default Text 1
+        </div>
+        <div id='DBJMODALUX_TEXT_2' style="PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; PADDING-TOP: 5px">
+            DEfault Text 2
+        </div>
+        <div style="PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; PADDING-TOP: 5px; TEXT-ALIGN: center;">
+            <div id="DBJMODALUX_divProgressOuter" style="BORDER-RIGHT: buttonshadow 1px solid; BORDER-TOP: buttonshadow 1px solid; BORDER-LEFT: buttonshadow 1px solid; WIDTH: 336px; BORDER-BOTTOM: buttonshadow 1px solid; HEIGHT: 15px">
+                <div id="DBJMODALUX_divProgressInner" style="MARGIN: 0px; WIDTH: 0px; COLOR: red ; HEIGHT: 13px; BACKGROUND-COLOR: infobackground; TEXT-ALIGN: center"></div>
+            </div>
+        </div>
+        <div style="BORDER-TOP: white 2px groove; PADDING-BOTTOM: 5px; PADDING-TOP: 3px; BACKGROUND-COLOR: buttonface; TEXT-ALIGN: center">
+            <input id="DBJMODALUX_btnCancel"
+                   style="FONT-SIZE: 8pt; FONT-FAMILY: verdana,arial,Tahoma; width:30%; margin:3px;"
+                   onclick="top.alert('modal dialogue DBJ, btnCancel onclick event handler is not user defined.')"
+                   type="button" value="Cancel" name="btnCancel" />
+            <input id="DBJMODALUX_btnYes"
+                   style="FONT-SIZE: 8pt; FONT-FAMILY: verdana,arial,Tahoma; width:30%; margin:3px;"
+                   onclick="top.alert('modal dialogue DBJ, for button \'YES\' onclick event handler is not defined.')"
+                   type="button" value="Yes" name="btnYes" />
+            <input id="DBJMODALUX_btnNo"
+                   style="FONT-SIZE: 8pt; FONT-FAMILY: verdana,arial,Tahoma; width:30%; margin:3px;"
+                   onclick="top.alert('modal dialogue DBJ, for button \'NO\' onclick event handler is not defined.')"
+                   type="button" value="No" name="btnNo" />
+        </div>
+    </div>
+    <script>
+        var dbjMODAL = (function () {
+            var def_options = {
+                title: "dbjMODALUX", text1: "", text2: "", prgrs: null, cancel: null, yes: ["OK", null], no: null
+            },
+            NULLFUN = function () { },
+            /* command grammar */
+            commands = {
+                "SET": {  /*for this verb */
+                    "TITLE":    [ title_set, [""]], /*noun can be "TITLE" and it must be followed by a single string */
+                    "TXT1":     [ txt1_set,  [""]],
+                    "TXT2":     [ txt2_set,  [""]],
+                    "PROGRESS": [ prog_set,  [0,100,     NULLFUN ]], /* must be followed by minval, maxval and ticker function */
+                    "CANCEL":   [ canc_set,  ["Cancel",  NULLFUN ]],
+                    "YES":      [ ok_set,    ["Ok",      NULLFUN ]],
+                    "NO":       [ no_set,    ["No",      NULLFUN ]]
+                },
+                "GET": {  /*for this verb */
+                    "TITLE":    [ title_get ] , /*noun can be "TITLE" and the rest of args will be ignored */
+                    "TXT1":     [ txt1_get  ] ,
+                    "TXT2":     [ txt2_get  ] ,
+                    "PROGRESS": [ progress_get, ["MINVAL","MAXVAL", "TICKER" ]], /* must be followed by minval, maxval and ticker function */
+                    "CANCEL":   [ canc_get,    ["LABEL", "CALLBACK"]],
+                    "YES":      [ yes_get,     ["LABEL", "CALLBACK"]],
+                    "NO":       [ no_get,      ["LABEL", "CALLBACK"]]
+                },
+                "POP": {
+                    "INFO":     [ pop_info ],
+                    "WARN":     [ pop_warn ],
+                    "ERR" :     [ pop_err  ]
+                }
+            };
+
+            $DBJMODALUX = $("#DBJMODALUX") ;
+
+            function check(v, errmsg) { if (!v) throw "check failed for {0} {1}".format(v, errmsg || ""); }
+
+            function title_set(opts, v_) { $("#DBJMODALUX_TITLE", $DBJMODALUX[0]).text(opts.title = v_ ); }
+            function txt1_set(opts, v_)  { $("#DBJMODALUX_TEXT_1", $DBJMODALUX[0]).text(opts.text1 = v_ ); }
+            function txt2_set(opts, v_)  { $("#DBJMODALUX_TEXT_2", $DBJMODALUX[0]).text(opts.text2 = v_ ); }
+            function prog_set(opts, min_, max_, ticker_) {
+                if (!min_) {
+                    // remove the progress bar ux
+                    $("#DBJMODALUX_divProgressOuter", $DBJMODALUX[0]).hide();
+                    opts.prgrs = null;
+                } else {
+                 // show progress bar ux and set values
+                    $("#DBJMODALUX_divProgressOuter", $DBJMODALUX[0]).show();
+                    check(max_); check(ticker_); opts.prgrs = [min_, max_, ticker_];
+                }
+            }
+            function canc_set(opts, label_, callback_)   { check(label_); check(callback_); opts.cancel = [ label_, callback_ ];  }
+            function ok_set(opts, label_, callback_)     { check(label_); check(callback_); opts.yes = [label_, callback_]; }
+            function no_set(opts, label_, callback_)     { check(label_); check(callback_); opts.no = [label_, callback_]; }
+
+            function title_get(opts) { return opts.title; }
+            function txt1_get(opts) { return opts.text1; }
+            function txt2_get(opts) { return opts.text2; }
+            function progress_get(opts) { return opts.prgrs; }
+            function canc_get(opts) { return opts.cancel; }
+            function yes_get(opts) { return opts.yes; }
+            function no_get(opts) { return opts.no; }
+
+            function pop_info  () { }
+            function pop_warn () { }
+            function pop_err() { }
+
+
+            return function ( ) {
+                var options = def_options,
+                    ARGS = Array.prototype.slice.call(arguments);
+                try {
+                    if (ARGS.length < 2) throw "At least two arguments are required";
+                    if (ARGS[0] in commands) {
+                        if (ARGS[1] in commands[ARGS[0]]) {
+                            var proc_fun = commands[ARGS[0]][ARGS[1]][0];
+                            // ok here I assume I am rock solid and what i have is indeeed a function
+                            ARGS.shift(); ARGS[0] = options;
+                            proc_fun.apply(this, ARGS);
+                        } else 
+                            throw "Unknown argument {0} for command {1} ?".format(ARGS[1], ARGS[0]);
+                    } else
+                        throw "Unknown command :{0} ?".format(ARGS[0]);
+                } catch (x) {
+                    alert(x.message);
+                }
+
+                return dbjMODAL; // call stream
+            } ;
+        }()); // dbjMODAL
+    </script>
+    <script>
+        // leanModal v1.1 by Ray Stone - http://finelysliced.com.au
+        // Dual licensed under the MIT and GPL
+        (function ($) {
+            $.fn.extend({
+                leanModal: function (options) {
+                    var defaults = { top: 100, overlay: 0.5, closeButton: null }; var overlay = $("<div id='lean_overlay'></div>"); $("body").append(overlay); options = $.extend(defaults, options); return this.each(function () {
+                        var o = options; $(this).click(function (e) {
+                            var modal_id = $(this).attr("href"); $("#lean_overlay").click(function () { close_modal(modal_id) }); $(o.closeButton).click(function () { close_modal(modal_id) }); var modal_height = $(modal_id).outerHeight(); var modal_width = $(modal_id).outerWidth();
+                            $("#lean_overlay").css({ "display": "block", opacity: 0 }); $("#lean_overlay").fadeTo(200, o.overlay); $(modal_id).css({ "display": "block", "position": "fixed", "opacity": 0, "z-index": 11000, "left": 50 + "%", "margin-left": -(modal_width / 2) + "px", "top": o.top + "px" }); $(modal_id).fadeTo(200, 1); e.preventDefault()
+                        })
+                    }); function close_modal(modal_id) { $("#lean_overlay").fadeOut(200); $(modal_id).css({ "display": "none" }) }
+                }
+            })
+        })(jQuery);
+    </script>
+    <script id="__dbj_microlib__">
+        if ("function" !== typeof String.format)
+            String.prototype.format = function () {
+                var args = arguments;
+                return this.replace(/\{(\d|\d\d)\}/g, function ($0) {
+                    var idx = 1 * $0.match(/\d+/)[0]; return args[idx] !== undefined ? args[idx] : (args[idx] === "" ? "" : $0);
+                }
+                    );
+            };
+    </script>
+</body>
+</html>

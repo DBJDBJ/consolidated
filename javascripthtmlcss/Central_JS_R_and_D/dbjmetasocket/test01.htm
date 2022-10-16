@@ -1,0 +1,207 @@
+<!DOCTYPE>
+<html>
+<!--
+//-----------------------------------------------------------------------------
+//                                                                  
+//  DBJ.ORG - Solution Evolution(tm)
+//                                                                  
+//  Copyright © 2010 by DBJ.ORG. 
+//  All Rights Reserved. GPL applies.                                             
+//                                                                  
+//  THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF DBJ.ORG   
+//                                                                  
+//  The copyright notice above does not evidence any                
+//  actual or intended publication of such source code.             
+//                                                                             
+//-----------------------------------------------------------------------------
+-->
+<head>
+<!--##########################################################################################################-->
+<!--		  Set document compatibility mode to IE8Mode                                                      -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=iso-8859-1" />
+<!--##########################################################################################################-->
+<title>DBJ&trade; CallStream Tests</title>
+<style type="text/css">
+.specimen { position:absolute; right:10px; bottom:10px; width:150px; height:150px; border:2px solid; z-index:99;
+            padding:3px;
+            background-color:transparent; } 
+</style>
+<link href="http://github.com/jquery/qunit/raw/master/qunit/qunit.css" rel="stylesheet" type="text/css" />
+<script  type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script  type="text/javascript" src="http://github.com/jquery/qunit/raw/master/qunit/qunit.js"></script>
+<script  type="text/javascript" src="http://dbj.org/6/dbj.lib.js"></script>
+<script  type="text/javascript" src="http://dbj.org/6/dbj.es5.js"></script>
+<script src="jquery.moreSelectors.js" type="text/javascript"></script>
+<script src="jquery.metasocket.js" type="text/javascript"></script>
+</head>
+<body>
+<h1 id="qunit-header">DBJ&trade;&nbsp;CallStream Examples</h1>
+<h2 id="qunit-banner"></h2>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+<button id="specimen" class="specimen">SPECIMEN</button>
+</body>
+<script type="text/javascript">
+    function call_in_loop(fp, howlong) {
+        var retval = null, j = howlong || 1000;
+        while (j--) { retval = fp(); } return retval;
+    }
+    // DBJ qunit front-end
+    (function(window, undefined) {
+        window.TEST = {
+            test: function(title, tar) {
+                if (!tar || !tar.length || (!tar[0].length)) {
+                    throw "TEST.test() second argument has to be : [[function, expected_value,loop_length],...]";
+                }
+                test(
+                  title + ", " + tar.length + " tests.",
+                  function() {
+                      expect(tar.length);
+                      for (var fun, expected, looplen, L = 0; L < tar.length;  L++) {
+                          looplen = tar[L][2] || 1;
+                          expected = tar[L][1];
+                          fun = tar[L][0];
+                          if (undefined === expected) throw "TEST.test(): expected retval not found in a input where it should be?";
+                          if ("function" !== typeof fun) throw "TEST.test(): function not found in a input where it should be?";
+                          equals(
+                             call_in_loop(function() {
+                                 return fun();
+                             }, looplen),
+                             expected,
+                             (looplen > 1 ? looplen + " x " : "") + ("" + fun)/*.replace(/^.+\{/, "").replace(/\}.*$/, "")*/ + " "
+                         );
+                      }
+                  }
+                 );
+            },
+            normalize_input: function(bad_arr) {
+                /* 
+                transform INTO this  :
+                [ [function () {}, expected, loopsize ],[function () {}, expected, loopsize ] ]
+                from this format :
+                [ [function_body_string, expected, loopsize ],[function_body_string, expected, loopsize ] ]
+                Why ? 
+                TEST.test second argument is NOT a legal JSON.
+                It is much easier to write tests in this format, but that is bad JSON since it contains functions.
+                in the future we might receive test input as a JSON  string from the server side. 
+                And bad JSON will not be accepted by JSON.parse()
+                Purpose of this method is to normalize input  from the legal JSON format
+                */
+
+                var retval = [], L = bad_arr.length, fun, expected, looplen;
+                while (L--) {
+                    fun = bad_arr[L][0];
+                    expected = bad_arr[L][1];
+                    looplen = bad_arr[L][2] || 1;
+                    if (!fun || "string" !== typeof fun) throw "TEST.normalize_input(): function source not found where it should be ?";
+                    if (!expected) throw "TEST.normalize_input(): expected retval not found where it should be ?";
+                    // transform the function source into the function
+                    // only no-argument anonimous functions are dealt with
+                    fun = new Function(fun);
+                    if (!fun || "function" !== typeof fun) throw "TEST.normalize_input(): function transformation went wrong.";
+                    retval.push(
+                         [fun, expected, looplen]
+                    );
+                }
+                return retval;
+            },
+            load: function(tests) {
+                for (var module_name in tests) {
+                    module(module_name);
+                    for (var test_name in tests[module_name]) {
+                        this.test(test_name, tests[module_name][test_name]);
+                    }
+                }
+            }
+        };
+    })(this);
+    //-------------------------------------------------------------------------------------
+</script>
+
+<script type="text/javascript">
+window.onload = function() {
+            try {
+                TEST.load(tests);
+            } catch (x) {
+                top.alert("ERROR! TEST.onload(): " + x + "\n\n" + x.message);
+            }
+}
+</script>
+<script type="text/javascript">
+    var tests = {
+        "DBJ*Mechanisms": {
+            "DBJ": [
+            [function() { return typeof dbj }, "object"],
+            [function() { return dbj + "" }, true]
+            /* this will fail and display dbj.toString() result */
+        ]
+        },
+        "MetaSocket(tm)": {  // begin module
+        "$('[id][~bottom][~width!=auto][~height!=auto]', document.body).S(collector('bottom', 'width', 'height'));":
+        [
+            [function() { return test_meta_socket("specimen"); }, []]
+        ]
+        }
+} // eof tests
+</script>
+<script type="text/javascript" >
+(function() {
+
+    function who_called(F, x) {
+        try {
+            var who = F.caller.toString().match(/\w+/g);
+            return who[0] + " " + who[1];
+        } catch (x) {
+            return " GLOBAL namespace ";
+        }
+    }
+    function errshow(errobj) {
+        return "EXCEPTION: " + errobj.name + " " +
+               ", number : " + (errobj.number & 0xFFFF) +
+               ", description : " + errobj.description +
+               (errobj.stack ? "\n\n" + errobj.stack : "\n")
+                + ", from: " + who_called(errshow);
+    }
+
+    window.test_meta_socket = function(element_id) {
+        try {
+            /* Object to store things from dom elements */
+            var result = {};
+            /* Object to collect things from a single dom element */
+            function collector() {
+                var names = arguments;
+                /* the "plug" method called by MetaSocket for each element from the current jQuery stack */
+                return function(P) {
+                    /* parameter 'P' contains names and values for a single element, as mentioned in one or more '[]' 
+                    in the current selector. MetaSocket is making it for every element from the jQuery stack.
+                    object 'this', is instance of the single element, from the jQuery 'stack' */
+                    var id = this.tagName + (this.id ? "#" + this.id : "");
+                    result[id] || (result[id] = {});
+                    for (var j = 0, l = names.length, what; j < l; j++) {
+                        if (P[what = names[j]]) {
+                            /* 'what'is a single css property or attribute, mentioned in the selector */
+                            result[id][what] = P[what].value;
+                        }
+                    }
+                    return false; /* signal to MetaSocket NOT to change the state of 'this' element */
+                }
+            }
+            /* select all elements having attribute "id" and "bottom" and "width!=auto" and "height!=auto" 
+            what is not mentioned in '[]' brackets will not be sent to the plug function */
+            $('[id][~bottom][~width!=auto][~height!=auto]', document.body).S(collector('bottom', 'width', 'height'));
+            /* give to MetaSocket, one plugin function, which is a collector for three css properties we are interested in */
+
+            if (window.JSON) {
+                var result;
+                alert(result = JSON.stringify(result));
+                return result;
+            }
+        } catch (x) {
+            alert(errshow(x));
+        }
+        return [];
+    }
+} ());
+ </script>
+</html>       

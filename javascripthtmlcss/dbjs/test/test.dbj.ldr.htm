@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>TEST.DBJ.LDR.JS</title>
+<link href="http://dbj.org/4/blueprint/screen.css" rel="stylesheet" type="text/css" media="screen" />
+<!--[if IE]>
+<link href="http://dbj.org/4/fblight/fbl.css" rel="stylesheet" type="text/css" />
+<script src="http://dbj.org/4/fblight/fbl.js" type="text/javascript"></script>
+<script type="text/javascript" >
+    if (window.firebug) {
+        firebug.env.debug = false;    // open minimized
+        firebug.env.detectFirebug;  // do not initialize if Firebug is active
+    }
+    if (!window.JSON) {
+        document.write('<s' + 'cript src=\'http://dbj.org/4/json2.js\' type=\'text/javascript\' ></' + 'script>');
+    }
+ </script>
+<![endif]-->
+<style type="text/css" media="all" >
+    a.dbjA { display:block; margin:5mm; padding:5mm; border:1px dashed #CCC; font:14px/1.1 verdana; width:20%; }
+</style>
+</head>
+<body>
+<div id="container">
+<a class="dbjA"  href="http://www3.clustrmaps.com/user/9feac3e1">
+<img src="http://www3.clustrmaps.com/stats/maps-no_clusters/dbj.org-thumb.jpg" alt="Locations of visitors to this page" />
+</a>
+<a class="dbjA"   href="default_tests.htm" >A</a>
+<a class="dbjA"  href="test.dbj.ldr.htm" >B</a>
+</div>
+</body>
+<script type="text/javascript">
+    window.MAIN = function() {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        var livetip_style = "position: absolute;background-color: #ccc;padding: 4px;border: 2px solid #ccc;border-radius: 4px;-webkit-border-radius: 4px;  -moz-border-radius: 4px;";
+        var $liveTip = $('<div id="livetip" style="' + livetip_style + '"></div>').hide().appendTo('body');
+        var tipTitle = '',
+    showTip,
+    delay = 100;
+
+        $('#container').bind('mouseover mouseout mousemove', function(event) {
+            var $link = $(event.target).closest('a');
+            if (!$link.length) { return; }
+            var link = $link[0];
+            dbj.cond(
+        event.type,
+        'mouseover', function() {
+            showTip = window.setTimeout(function() {
+                $link.data('tipActive', true);
+                tipTitle = link.innerHTML
+                link.title = '';
+                $liveTip
+        .html('<div>' + tipTitle + '</div><div>' + link.href + '</div>')
+        .show()
+        .css({
+            top: event.pageY + 1,left: event.pageX + 1
+        });
+
+            }, delay);
+        }
+        , 'mouseout', function() {
+            if ($link.data('tipActive')) {
+                $link.removeData('tipActive');
+                $liveTip.hide();
+                link.title = tipTitle || link.title;
+            } else {
+                window.clearTimeout(showTip);
+            }
+        }
+        , 'mousemove' && $link.data('tipActive'), function() {
+            $liveTip.css({
+                top: event.pageY + 1,left: event.pageX + 1
+            });
+        }
+        , /*else*/function() { /* do nothing */ }
+        )();
+        });
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    };
+</script>
+<script src="../dbj.ldr.js" type="text/javascript" _CFG_="../dbj.lib.cfg" _ONREADY_="MAIN" ></script>
+
+</html>

@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+	<!-- Online here: http://ejohn.org/files/bugs/isObjectLiteral/ -->
+	<title>isObjectLiteral</title>
+	<style type="text/css" >
+	    body { font: 13px/1.1 verdana; }
+	li { background: green; margin-top:1%; padding:1%; } li.false { background: red; }
+	iframe { display: none; }
+	#tt { width:99%; }
+	#tt td, th { width:30%; }
+	#tt caption { padding:1%; }
+	</style>
+	<script type="text/javascript" >
+	    // Function serialization is not permitted
+	    // Because it does not work across all browsers
+	    Function.prototype.toString = function() { };
+	    /*
+	    Of course this little number breaks the whole tower of cards :
+	    Object.prototype.toString = function() { };
+	    */
+	</script>
+    <script src="http://code.jquery.com/jquery-nightly.js" type="text/javascript"></script>
+    <script src="../lib/dbj/dbj.lib.js" type="text/javascript"></script>
+</head>
+<body>
+<table id="tt">
+<caption><h2>isObjectLiteral()</h2></caption>
+<tr>
+<th>Question</th><th>Robert K.</th><th>'Final' Solution</th>
+</tr>
+<tr>
+<td><ol id="question"></ol></td><td><ol id="results"></ol></td><td><ol id="dbj_results"></ol></td>
+</tr>
+</table>
+<script type="text/javascript" id="testing_micro_work_">
+    var results_ = document.getElementById("results"),
+        dbj_results_ = document.getElementById("dbj_results"),
+        questions_ = document.getElementById("question");
+
+    function log(msg, a, b) {
+    // a : argument for function to be tested
+        // b: requested value for test to pass
+        var result_ = isObjectLiteral(a) ;
+        var pass =  result_ === b; 
+
+        questions_.innerHTML += "<li class='" + pass + "'>" + msg + "</li>";
+
+        results_.innerHTML += "<li class='" + pass + "'>" + explain(result_,b) + "</li>";
+
+        dbjlog(msg, a, b);
+    }
+
+    function dbjlog(m, a, b) {
+        var result_ = final_solution(a);
+        var pass = result_ === b; 
+        dbj_results_.innerHTML += "<li class='" + pass + "'>" + explain(result_, b) + "</li>";
+    }
+
+    function explain(result_, request_) {
+        return "Result was: " + result_ + ". It should be: " + request_;
+    }
+</script>
+<script type="text/javascript" >
+    var toString = Object.prototype.toString;
+    var hasOwnProp = Object.prototype.hasOwnProperty;
+
+
+    function isObjectLiteral(obj) {
+        if (toString.call(obj) !== "[object Object]")
+            return false;
+
+        //own properties are iterated first (in IE?),
+        //so to speed up, we can test last one if it is not owned
+        var key;
+        for (key in obj) { }
+        return !key || hasOwnProp.call(obj, key);
+    }
+    function final_solution(obj) {
+        if (dbj.isObject(obj)) {
+        // yes, but is it literal ?
+            var key;
+            for (key in obj) { }
+            return !key || Object.prototype.hasOwnProperty.call(obj, key);
+        }
+        return false ;
+    }
+    /*  
+    function isObjectLiteral(obj) {
+    // Implement me!
+    // return false;
+    // Other Solutions:
+    // Uses function serialization which doesn't work in all browsers
+    //return /^function Object/.test( obj.constructor );
+    // Doesn't work with object from other windows
+    //return Object.prototype.toString.call(obj) === "[object Object]";
+    }
+    */
+//-----------------------------------------------------------------------
+
+// Function serialization is not permitted
+// Because it does not work across all browsers
+    Function.prototype.toString = function() { };
+
+    // The use case that we want to match
+    log("Is '{}' an object literall? ({})", {}, true);
+
+    // Instantiated objects shouldn't be matched
+    log("Is intrinsic object an literal? (new Date)", new Date, false);
+
+    var fn = function() { };
+
+    // Empty Functions shouldn't be matched
+    log("Is function () {},  an object literal? (function () {})", function() { }, false);
+
+    // Makes the function a little more realistic
+    // (and harder to detect, incidentally)
+    fn.prototype = { someMethod: function() { } };
+
+    // Functions shouldn't be matched
+    log("Is function an object literal? (fn)", fn, false);
+
+    // Again, instantiated objects shouldn't be matched
+    log("Is new-ed function an object literal? (new fn)", new fn, false);
+
+    // Again, instantiated objects shouldn't be matched
+    log("If in IE, is dom method an 'object' ? (window.open)", window.open, false);
+
+    /* Note:
+    * The restriction against instantiated functions is
+    * due to the fact that this method will be used for
+    * deep-cloning an object. Instantiated objects will
+    * just have their reference copied over, whereas
+    * plain objects will need to be completely cloned.
+    */
+    window.top.iframeDone = function(otherObject) {
+        // Objects from other windows should be matched
+        log("Object from iframe ? (new otherObject)", new otherObject, true);
+    }
+
+    var iframe = document.createElement("iframe");
+    document.body.appendChild(iframe);
+
+    var doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write("<body onload='window.top.iframeDone(Object);'>");
+    doc.close();
+
+    //-----------------------------------------------------------------------
+</script>
+
+</body>
+</html>

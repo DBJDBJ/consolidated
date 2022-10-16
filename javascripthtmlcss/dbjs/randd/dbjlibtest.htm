@@ -1,0 +1,252 @@
+﻿<!DOCTYPE html >
+<!-- $Revision: 2 $ $Date: 11/01/10 17:05 $ $Author: Admin $ -->
+<html>
+<head>
+<!-- Set document compatibility mode to IE8Mode  -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>dbj*lib TESTS</title>
+<style type="text/css">
+    body { font: smaller/1.5 verdana,arial; }
+    li { list-style-type:decimal; }
+    form { border:1px solid; margin:12px; padding:2px; width:33%; float:left; }
+    form input[type="text"] { overflow:auto; border:1px solid red; max-width:98%; min-height:3em; }
+    .test_title { width:100; font-size:14px; background-color: #c0c0c0; font-weight:bolder; }
+    .result { font:12px/1.1 verdana,tahoma,arial; padding:5px; height:200px; width:97%; overflow:auto; border:1px solid; }
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js" type="text/javascript" id="JQ.1.3" ></script>
+<script src="http://dbj.org/6/dbj.lib.js" type="text/javascript"></script>
+<script src="http://dbj.org/6/dbj.uriparse.js" type="text/javascript"></script>
+<script src="http://dbj.org/6/dbj.heap.js" type="text/javascript"></script>
+</head>
+<body>
+
+
+<script type="text/javascript" id="date_time_validation" >
+//<!-- Original:  Ronnie T. Moore -->
+//<!-- Web Site:  The JavaScript Source -->
+//<!-- The JavaScript Source!! http://javascript.internet.com -->
+function isValidDate(dateStr) {
+// Date validation function courtesty of 
+// Sandeep V. Tamhankar (stamhankar@hotmail.com) -->
+
+// Checks for the following valid date formats:
+// MM/DD/YY   MM/DD/YYYY   MM-DD-YY   MM-DD-YYYY
+
+var datePat = /^(\d{1,2})(\/|-)(\d{1,2})\2(\d{4})$/; // requires 4 digit year
+
+var matchArray = dateStr.match(datePat); // is the format ok?
+if (matchArray == null) {
+alert(dateStr + " Date is not in a valid format.")
+return false;
+}
+var month = matchArray[1]; // parse date into variables
+var day = matchArray[3];
+var year = matchArray[4];
+
+if (month < 1 || month > 12) { // check month range
+alert("Month must be between 1 and 12.");
+return false;
+}
+if (day < 1 || day > 31) {
+alert("Day must be between 1 and 31.");
+return false;
+}
+if ((month==4 || month==6 || month==9 || month==11) && day==31) {
+alert("Month "+month+" doesn't have 31 days!")
+return false;
+}
+if (month == 2) { // check for february 29th
+var isleap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+if (day>29 || (day==29 && !isleap)) {
+alert("February " + year + " doesn't have " + day + " days!");
+return false;
+   }
+}
+return true;
+}
+
+function isValidTime(timeStr) {
+// Time validation function courtesty of 
+// Sandeep V. Tamhankar (stamhankar@hotmail.com) -->
+
+// Checks if time is in HH:MM:SS AM/PM format.
+// The seconds and AM/PM are optional.
+
+var timePat = /^(\d{1,2}):(\d{2})(:(\d{2}))?(\s?(AM|am|PM|pm))?$/;
+
+var matchArray = timeStr.match(timePat);
+if (matchArray == null) {
+alert("Time is not in a valid format.");
+return false;
+}
+var hour = matchArray[1];
+var minute = matchArray[2];
+var second = matchArray[4];
+var ampm = matchArray[6];
+
+if (second=="") { second = null; }
+if (ampm=="") { ampm = null }
+
+if (hour < 0  || hour > 23) {
+alert("Hour must be between 0 and 23 ");
+return false;
+}
+
+/*
+if (hour <= 12 && ampm == null) {
+if (confirm("Please indicate which time format you are using.  OK = Standard Time, CANCEL = Military Time")) {
+alert("You must specify AM or PM.");
+return false;
+   }
+}
+if  (hour > 12 && ampm != null) {
+alert("You can't specify AM or PM for military time.");
+return false;
+}
+*/
+
+if (minute < 0 || minute > 59) {
+alert ("Minute must be between 0 and 59.");
+return false;
+}
+if (second != null && (second < 0 || second > 59)) {
+alert ("Second must be between 0 and 59.");
+return false;
+}
+return true;
+}
+
+function dateDiff(dateform) {
+var date1 = new Date(), date2 = new Date();
+
+if (isValidDate(dateform.firstdate.value) && isValidTime(dateform.firsttime.value)) { // Validates first date 
+date1temp = new Date(dateform.firstdate.value + " " + dateform.firsttime.value);
+date1.setTime(date1temp.getTime());
+}
+else return false; // otherwise exits
+
+if (isValidDate(dateform.seconddate.value) && isValidTime(dateform.secondtime.value)) { // Validates second date 
+date2temp = new Date(dateform.seconddate.value + " " + dateform.secondtime.value);
+date2.setTime(date2temp.getTime());
+}
+else return false; // otherwise exits
+
+var dd = dbj.date_diff(date1, date2);
+
+dateform.difference.value = dd.weeks + " weeks, " + dd.days + " days, " + dd.hours + " hours, " + dd.mins + " minutes, and " + dd.secs + " seconds" + ", approx:" + dd.approx_years + " years";
+
+return false; // form should never submit, returns false
+}
+</script>
+<h2><i>DBJ*Lib</i> Tests</h2>
+<form id="test_datediff" onsubmit="return dateDiff(this);" action="about:blank">
+<div class="test_title">Date Diff</div>
+<div id="formdiv" >
+<p>First Date:</p>   
+Date: <input type="text" name="firstdate" value="07/03/1959" size=10 maxlength=10>  (MM/DD/YYYY format)
+<br />
+Time: <input type="text" name="firsttime" value="00:00:00" size=10 maxlength=10>  (HH:MM:SS format)
+<p>Second Date:</p>  
+Date: <input type="text" name="seconddate" value="07/03/2009" size=10 maxlength=10>  (MM/DD/YYYY format)
+<br />
+Time: <input type="text" name="secondtime" value="00:00:00" size=10 maxlength=10>  (HH:MM:SS format)
+<p>
+<input type="submit" value="The Difference" />
+</p>
+<p>
+Date Difference:
+</p>
+<input type="text" name="difference" value="" size="60" />
+</div>
+<p>
+<font face="arial, helvetica" size="-2">Initial JavaScripts provided<br>
+by <a href="http://javascriptsource.com">The JavaScript Source</a></font>
+</p>
+</form>
+<form id="test_uri_parse" onsubmit="return uri_parse_test(this);" action="about:blank">
+<!--
+test_uri_parse
+-->
+<script type="text/javascript" >
+    function uri_parse_test(the_form) {
+        try {
+            test_uri_parse.parsed_uri.value = dbj.jsonize(dbj.parseUri(test_uri_parse.uri_to_test));
+        } catch (x) {
+            test_uri_parse.parsed_uri.value = "ERROR: " + x.message;
+        }
+        return false;
+    }
+</script>
+<div class="test_title">Uri Parse</div>
+<div id="Div1" >
+<p>First Date:</p>   
+<p>
+URI: <input type="text" name="uri_to_test" value="http://user@password:host:13/query/string?param1=12#bookmark" size="80" maxlength="255" />
+</p>
+<p>
+<input type="submit" value="Parse" />
+</p>
+<p>
+Parsed URI
+</p>
+<input type="text" name="parsed_uri" value="" size="80" />
+</div>
+</form>
+<form id="testing_dbj.isWhat_type_system" onsubmit="return is_what_test(this);" action="about:blank">
+<!--
+testing dbj.isWhat type system
+-->
+<script type="text/javascript" >
+    function is_what_test(the_form) {
+        try {
+            $(the_form).find(".result")
+            .html("dbj.TYPENAMES " + JSON.stringify(dbj.TYPENAMES) + 
+                        dbj.typename.test());            
+        } catch (x) {
+            $(the_form).find(".result").text("ERROR: " + x.message);
+        }
+        return false;
+    }
+</script>
+<div class="test_title">DBJ*isWhat type discovery system</div>
+<div class="result" >
+</div>
+<p>
+<input type="submit" value="Test" />
+</p>
+</form>
+<form id="dbj_heap" onsubmit="return dbj_heap_test(this);" action="about:blank">
+<!--
+testing dbj.heap
+-->
+<script type="text/javascript" >
+    function dbj_heap_test(the_form) {
+        try {
+            $(the_form).find(".result").each(function() {
+                var $this = $(this);
+                var retval = eval($this.text());
+                retval = "/*\n" + retval + "\n*/";
+                $this.text($this.text() + retval);
+            });
+        } catch (x) {
+            $(the_form).find(".result").text("ERROR: " + x.message);
+        }
+        return false;
+    }
+</script>
+<div class="test_title">DBJ*Heap</div>
+<pre>
+<div class="result" >
+var heap = new dbj.heap();
+heap.swalow([9,8,Error(),6,NaN,4,3,2,1]); 
+alert(heap.pop());
+heap.push(13);
+alert(heap.pop()) ;
+</div>
+</pre>
+<p>
+<input type="submit" value="Test" />
+</p>
+</form>
+</body>
+</html>

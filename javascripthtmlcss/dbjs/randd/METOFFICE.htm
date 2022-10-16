@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head><title>DBJ*MetOffice</title></head>
+<!---- for IE use FireBug Light ----->
+<!--[if IE]>
+<link href="http://dbj.org/4/fblight/fbl.css" rel="stylesheet" type="text/css" />
+<script src="http://dbj.org/4/fblight/fbl.js" type="text/javascript"></script>
+<script type="text/javascript" >
+    if (window.firebug) {
+        firebug.env.debug = false;    // open minimized
+        firebug.env.detectFirebug;  // do not initialize if Firebug is active
+    }
+ </script>
+<![endif]-->
+<body>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"> </script>
+
+<script type="text/javascript" >
+    // DBJ: NOTE: These should not be globals. Cleanest solution will be to send them as url arguments to
+    // servers ide components, asp or php page or REST end point ...
+/*
+moDays=5; 
+moColourScheme="default"; 
+moFSSI=3779; 
+moDomain="www.metoffice.gov.uk"; 
+moMapDisplay="none"; 
+moMapsRequired=""; 
+moTemperatureUnits="C"; 
+moSpeedUnits="K"; 
+moShowWind="false"; 
+*/
+</script >
+
+<script type="text/javascript" id="met-office-widget-loader" >
+    /*
+    ------------------------------------------------------------------------------------------------
+    what is in here is done instead of 
+    src="http://www.metoffice.gov.uk/public/pws/components/yoursite/loader.js"
+    this is required to build iframe loader which will contain met office html widget
+    I had to change it here since it was an sub-standard javascript
+    which created global variables etc ...
+    Also the whole concept is wrong, since it would be mutch cleaner to do a single call to 
+    some server side component with was global variables as arguments, for example :
+    
+    <iframe src="metoffice.gov.uk/widget?{moDays:5,moColourScheme:"default",moFSSI:3779,moMapDisplay:"none",moMapsRequired:"",moTemperatureUnits:"C":moSpeedUnits:"K",moShowWind:"false"} ></iframe>
+    
+    */
+    (function() { // DBJ: added closure
+        /*
+        move from global space to here 
+        */
+        var moDays = 5,
+    moColourScheme = "default",
+    moFSSI = 3779,
+    moDomain = "www.metoffice.gov.uk",
+    moMapDisplay = "none",
+    moMapsRequired = "",
+    moTemperatureUnits = "C",
+    moSpeedUnits = "K",
+    moShowWind = "false";
+        /*
+        */
+        var moListStyle = "vertical", iwmandp, ihmandp, ihbmandp, ihmiddle = 0, iwmiddle = 0, iheight, iwidth, mapSize, iadheight, multipleMaps;
+        // DBJ: removed multiple 'var'-s above
+        try {
+            if (typeof (moListStyle) == "undefined" || typeof (moDays) == "undefined" || typeof (moColourScheme) == "undefined" || typeof (moFSSI) == "undefined" || typeof (moDomain) == "undefined" || typeof (moMapDisplay) == "undefined" || typeof (moMapsRequired) == "undefined" || typeof (moTemperatureUnits) == "undefined" || typeof (moSpeedUnits) == "undefined" || typeof (moShowWind) == "undefined") {
+                throw ("Parameters missing in loader");
+            }
+            if (moListStyle !== "horizontal" && moListStyle !== "vertical") {
+                throw ("Invalid orientation in loader");
+            }
+            if (typeof (moDays) != "number" || Math.floor(moDays) != moDays || moDays < 1 || moDays > 5) {
+                throw ("Invalid days in loader");
+            }
+            if (moColourScheme !== "default" && moColourScheme !== "green" && moColourScheme !== "blue" && moColourScheme !== "yellow") {
+                throw ("Invalid colour scheme in loader");
+            }
+            if (typeof (moFSSI) != "number" || Math.floor(moFSSI) != moFSSI || moFSSI < 1) {
+                throw ("Invalid FSSI in loader");
+            }
+            if (moMapDisplay !== "side" && moMapDisplay !== "bottom" && moMapDisplay !== "none") {
+                throw ("Invalid map display position in loader");
+            }
+            if (typeof (moMapsRequired) != "string") {
+                throw ("Invalid map list in loader");
+            }
+            if (moTemperatureUnits !== "C" && moTemperatureUnits !== "F") {
+                throw ("Invalid temperature units in loader");
+            }
+            if (moSpeedUnits !== "M" && moSpeedUnits !== "K" && moSpeedUnits !== "N") {
+                throw ("Invalid speed units in loader");
+            }
+            if (moShowWind !== "true" && moShowWind !== "false") {
+                throw ("Invalid wind display flag in loader");
+            }
+
+            iwmandp = 26; // margins and padding width
+            ihmandp = 13 + 18 + 7 + 22 + 5 + 8 + 5; // margins, padding, static text on height
+            iadheight = 32;
+            ihbmandp = (10 + 15 + 10 + 13 + iadheight); // padding + copyright + more detail + bottom margin and padding + advert
+            if (moListStyle === "horizontal") {
+                // days stacked next to each other 
+                iwmiddle += (moDays * 50); // amount for n days next to each other
+                iwmiddle = (iwmiddle < 159 ? 159 : iwmiddle); //
+                ihmiddle += 130; 			// amount for static single height of a block of daily data
+            } else {
+                // days stacked on top of each other 
+                ihmiddle += (moDays * 38); // amount for n days on top of one other
+                iwmiddle += 182; 			// amount for a single width of a block of daily data.
+            }
+            multipleMaps = (moMapsRequired.split(",").length > 1);
+            if (moMapDisplay == "side") {
+                iwmap = 10 + 150 + ((multipleMaps) ? 19 : 10); // width allocated for map = spacing + map + 2 x 11px controls (if more than one map)
+                ihmap = 150 + 22 + 15 + 20 + 31; // height allocated formap = height of map + title + subtitle + spacing + warning gif;
+                iheight = Math.max(ihmandp + ihmiddle - iadheight + 10, ihmap); // height is then changed to use minimum space possible
+                iwidth = iwmandp + iwmiddle + iwmap; 		// width is fixed: margins + the weather space + the map space
+            } else if (moMapDisplay == "bottom") {
+                iwmap = 150 + ((multipleMaps) ? 24 : 0); // width allocated for map = 150 + 2 x 11px controls (if more than one map)
+                ihmap = 150 + 22 + 15 + 10; // height of map + title + subtitle + spacing;
+                iheight = ihmandp + ihmiddle + ihmap; 		// height is fixed: margins, etc. + weather space + map
+                iwidth = iwmandp + Math.max(iwmiddle, iwmap); // width is changed to use minimum space possible.  
+            } else {
+                // if no maps shown, height and width are both = margins, borders + the space allocated to weather.   
+                iheight = ihmandp + ihmiddle;
+                iwidth = iwmandp + iwmiddle;
+            }
+            iheight += ihbmandp; // always need to add the bottom margin and border space.   
+            var iframeURL = "http://" + moDomain + "/public/pws/components/yoursite/component.html?cp=" + escape(top.document.location.href) + "&moListStyle=" + moListStyle + "&moDays=" + moDays + "&moColourScheme=" + moColourScheme + "&moFSSI=" + moFSSI + "&moDomain=" + moDomain + "&h=" + iheight + "&w=" + iwidth + "&moMapDisplay=" + moMapDisplay + "&moMapsRequired=" + moMapsRequired + "&moTemperatureUnits=" + moTemperatureUnits + "&moSpeedUnits=" + moSpeedUnits + "&moShowWind=" + moShowWind;
+
+        }
+        catch (error) {
+            // DBJ: NOTE: error message is not used ?
+            var iheight = 300, iwidth = 250; // DBJ removed multiple 'var'-s here
+            var iframeURL = "http://" + moDomain + "/public/pws/components/yoursite/error.html?cp=" + escape(top.document.location.href) + "&h=" + iheight + "&w=" + iwidth;
+            // DBJ : added , for browser where console is defined
+            if (top.console) {
+                top.console.error("MetOffice Web Widget Error : " + error + "" );
+            }
+        }
+        var iframe = "<iframe id=\"mowxpane\" scrolling=\"no\" height=\"" + iheight + "\" frameborder=\"0\" width=\"" + iwidth + "\" vspace=\"0\" style=\"left: 0pt; position: absolute; top: 0pt;\" src=\"" + iframeURL + "\" name=\"mowxpane\" marginwidth=\"0\" marginheight=\"0\" hspace=\"0\" allowtransparency=\"true\">" +
+	"</iframe>";
+        // DBJ: above was wrapped (twice) in the <ins></ins> which is removed, leaving just iframe
+        // if (typeof (moNoScript) === "undefined") { // DBJ: removed this line, it will not be executed anyway if javascript is barred
+        document.write(iframe);
+        // }
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    })();   // DBJ: added EOF closure
+
+ </script>
+<script type="text/javascript" >
+// everything is in an iframe id="mowxpane"
+// elements whose background color is set to black are
+// #mainWrapper
+// #mainContainer
+// #logo
+// element whose color is set to #fff or white are :
+// body
+// #mainContainer
+// #location
+// #date
+// #moredetail
+// #copyright
+//-----------------------------------------------------------------
+    $(function() {
+        try {
+            //
+            $(window).error(function(msg, url, line) {
+                console.error("DBJ*Error" + msg + " : " + msg + " : " + url + " : " + line);
+            });
+            //
+            var $moframe = $("iframe#mowxpane", document.body),
+            $main = $moframe.contents().find("#mainContainer");
+            console.log("#mowxpane is OK");
+        } catch (x) {
+            console.error(x + "");
+        }
+    });         // $ ready
+
+</script>
+</body>
+</html>
+<!-------------
+/* metOffice web widget CSS */
+/* principal styles*/
+
+img {border:0;}
+
+body{
+	color:#fff;
+}
+
+#mainWrapper {
+	padding:0;
+	border: 3px solid Gray;
+	background-color:black;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	overflow:hidden;
+}
+
+#mainWrapper.default {
+	border-color:Gray;
+}
+#mainWrapper.red {
+	border-color:red;
+}
+#mainWrapper.green {
+	border-color:#ccff33;
+}
+#mainWrapper.blue {
+	border-color:#031f73;
+}
+#mainWrapper.yellow {
+	border-color:#ffff66;
+}
+
+#mainContainer {
+	color:white;
+	background-color:black;
+	overflow:hidden;
+	font-family:arial;
+	font-size:8pt;
+	font-weight:bold;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	padding:8px; 
+}
+
+#logo {
+	background-color:black;
+	height:25px;
+	width:120px;
+}  
+
+#warning {
+	display:inline;
+	position:absolute;
+	right:10;
+	top: 5;
+	width:100px;
+	height:31px;
+}
+#warning img {}
+
+#mainWrapper.msie #warning {
+	right:3;
+	top: 2;
+}
+
+#location {
+	clear:both;
+	color:#fff;
+	font-size:18px;
+	overflow:hidden;
+}
+#location span {white-space:nowrap;}
+#date {color:white;white-space:nowrap;}
+#content {
+	padding-top:10px;
+}
+
+#icon {padding-top:0;}
+
+#days {float:left;boarder:1px solid peachpuff;}
+
+#bigfooter {
+	clear:both;
+}
+
+#footer {
+	float:right;
+	text-align:right;
+}
+
+#moredetail {}
+#moredetail a {color:white;text-decoration:underline;}
+#moredetail a:hover {text-decoration:underline;}
+
+#copyright {
+	text-align:right;
+	font-size: 7pt;
+}
+#copyright a {color:white;text-decoration:underline;}
+#copyright a:hover {text-decoration:underline;}
+
+#advert {
+	height:32px;
+	width:180px;
+	clear:right;
+	display:inline-block;
+	margin-top:5px;
+}
+
+#advert.active {
+	border:1px solid silver;
+}
+
+#nonmap {
+	overflow:none;
+}
+#nonmap.side {
+	float:left;
+}
+
+/* map positioning */
+#maps {
+}
+
+.imageholder {
+	height:150px;
+}
+
+#maps.none {
+	display:none;
+}
+
+#maps.side {
+	position:fixed!inherit;
+	left:200;
+	top:80;
+	width:170;
+}
+#maps.bottom {
+	clear: both;
+	height:195px;
+	padding-left:5px;
+}
+
+#maps .nav {
+	cursor:pointer;
+}
+#maps.side .nav {
+	position:absolute;
+	top:168px;
+	left:124px;
+}
+
+#maps.side .nav.previous {
+	margin-right:1px;
+	left:199px;
+}
+#maps.side .nav.next {
+	margin-left:1px;
+	left:359px;
+}
+
+#maps.bottom .nav {
+	width:11px;
+}
+
+#maps.bottom .nav.previous {
+	float:left;
+	display:inline;
+	margin-right:1px;
+}
+#maps.bottom .nav.next {
+	display:inline;
+}
+
+#maps.bottom .nav span {
+	position:relative;
+	top:88;
+}
+
+#maps.bottom .nav.inactiveNav span {
+	visibility:hidden;
+}
+
+#maps.side .mapContainer {
+	position:absolute;
+	top: 80px;
+	left: 210;
+}
+
+#maps.bottom #mapContainerGroup {
+	display:inline;
+	float:left;
+	width:150px;
+	overflow:hidden;
+	boarder:1px solid red;
+	height:185px;
+}
+
+.mapContainer {
+	display:none;
+	width:150px;
+	height:185px;
+}
+
+.mapContainer.current {
+	display:inline;
+}
+
+.mapContainer img {
+}
+.mapContainer img.background {
+	z-index:100;
+}
+.mapContainer img.middle {
+	position: relative;
+	top:-150;
+	z-index:101;
+}
+.mapContainer img.foreground {
+	position: relative;
+	top:-300;
+	z-index:102;
+}
+
+.mapContainer h2 {
+	padding:0;
+	margin:0;
+	margin-bottom:0px;
+	font-size:8pt;
+}
+.mapContainer h3 {
+	padding:0;
+	margin:0;
+	margin-bottom:5px;
+	font-size:7pt;
+}
+
+
+/* day divs */
+.horizontal .day {float:left;display:inline;margin-top:0;}
+.vertical .day {margin:0;margin-top:6px;}
+
+/* day dls */
+.horizontal .day dl {padding:0;margin:0;}
+.vertical .day dl {clear:both;padding:0;margin:0;display:inline-block;}
+
+/* day dts */
+dt {display:none;}
+
+
+/* general day dds */
+.day dd {
+	font-size:11pt;
+	padding:0;
+	text-align:center;
+}
+
+.day dd.wind {
+	margin:0;
+	height:42px;
+	width:42px;
+	overflow:hidden;
+}
+.day dd.wind img {
+	display:inline;
+	height:40px;
+	width:40px;
+}
+.day dd.wind label {
+	padding-top:3px;
+	font-size:9pt;
+	display:inline-block;
+	color:black;
+	position:relative;
+	top:-30px;
+}
+
+/* mods day dds in vertical or horizontal modes */
+.horizontal .day dd {display:block;margin:0;margin-right:7px;margin-bottom:4px;}
+.vertical .day dd {display:inline;margin:0;float:left;margin-right:3px;height:42px;width:42px;margin-bottom:-10px;}
+
+.vertical .day dd.date {text-align:left;}
+.vertical .day dd.weather {height:24px;}
+.vertical .day dd.weather img{position:relative;top:-8;margin:0;}
+.vertical .day dd.wind {position:relative; top:-10;}
+
+dd.date.displayPeriodnight {
+	font-size:100%;
+	position:relative;
+	top:3px;
+}
+
+
+------------------->

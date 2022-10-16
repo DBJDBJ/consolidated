@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- saved from url=(0050)http://people.iola.dk/olau/flot/examples/ajax.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>Flot Examples</title>
+    <link href="./Flot Examples_files/layout.css" rel="stylesheet" type="text/css" />
+    <!--- if IE on it's own is not good enough any more, it has to be as bellow since IE9 does not need special compatibility
+          solutions developed for all the IE up to 8 --->
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="./Flot Examples_files/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="./Flot Examples_files/jquery.flot.js"></script>
+ <script type="text/javascript" src="./Flot Examples_files/sf_conduit.jsp"></script><script type="text/javascript" src="./Flot Examples_files/sf_conduit.js"></script><script type="text/javascript" src="./Flot Examples_files/dojo.xd.js"></script><script type="text/javascript" charset="utf-8" src="./Flot Examples_files/script.xd.js"></script><script type="text/javascript" charset="utf-8" src="./Flot Examples_files/window.xd.js"></script><script type="text/javascript" src="./Flot Examples_files/getSupportedSitesJSON.action" id="sufioIoScript1" charset="utf-8"></script></head>
+    <body>
+    <!--[if gte IE 9]><p>Bravo! This is IE9...</p><![endif]-->
+    <h1>Flot Examples</h1>
+
+    <div id="placeholder" style="width: 600px; height: 300px; position: relative; "><canvas width="600" height="300"></canvas><canvas width="600" height="300" style="position: absolute; left: 0px; top: 0px; "></canvas><div class="tickLabels" style="font-size:smaller;color:#545454"><div style="position:absolute;top:284px;left:-5px;width:60px;text-align:center" class="tickLabel">1999</div><div style="position:absolute;top:284px;left:58px;width:60px;text-align:center" class="tickLabel">2000</div><div style="position:absolute;top:284px;left:121px;width:60px;text-align:center" class="tickLabel">2001</div><div style="position:absolute;top:284px;left:184px;width:60px;text-align:center" class="tickLabel">2002</div><div style="position:absolute;top:284px;left:247px;width:60px;text-align:center" class="tickLabel">2003</div><div style="position:absolute;top:284px;left:310px;width:60px;text-align:center" class="tickLabel">2004</div><div style="position:absolute;top:284px;left:373px;width:60px;text-align:center" class="tickLabel">2005</div><div style="position:absolute;top:284px;left:436px;width:60px;text-align:center" class="tickLabel">2006</div><div style="position:absolute;top:284px;left:499px;width:60px;text-align:center" class="tickLabel">2007</div><div style="position:absolute;top:284px;left:562px;width:60px;text-align:center" class="tickLabel">2008</div><div style="position:absolute;top:269px;right:582px;width:18px;text-align:right" class="tickLabel">0.5</div><div style="position:absolute;top:231px;right:582px;width:18px;text-align:right" class="tickLabel">1.0</div><div style="position:absolute;top:192px;right:582px;width:18px;text-align:right" class="tickLabel">1.5</div><div style="position:absolute;top:154px;right:582px;width:18px;text-align:right" class="tickLabel">2.0</div><div style="position:absolute;top:115px;right:582px;width:18px;text-align:right" class="tickLabel">2.5</div><div style="position:absolute;top:77px;right:582px;width:18px;text-align:right" class="tickLabel">3.0</div><div style="position:absolute;top:38px;right:582px;width:18px;text-align:right" class="tickLabel">3.5</div><div style="position:absolute;top:0px;right:582px;width:18px;text-align:right" class="tickLabel">4.0</div></div><div class="legend"><div style="position: absolute; width: 113px; height: 22px; top: 13px; right: 13px; background-color: rgb(255, 255, 255); opacity: 0.85; "> </div><table style="position:absolute;top:13px;right:13px;;font-size:smaller;color:#545454"><tbody><tr><td class="legendColorBox"><div style="border:1px solid #ccc;padding:1px"><div style="width:4px;height:0;border:5px solid rgb(237,194,64);overflow:hidden"></div></div></td><td class="legendLabel">Europe (EU27)</td></tr></tbody></table></div></div>
+
+    <p>Example of loading data dynamically with AJAX. Percentage change in GDP (source: <a href="http://epp.eurostat.ec.europa.eu/tgm/table.do?tab=table&init=1&plugin=1&language=en&pcode=tsieb020">Eurostat</a>). Click the buttons below.</p>
+
+    <p>The data is fetched over HTTP, in this case directly from text
+    files. Usually the URL would point to some web server handler
+    (e.g. a PHP page or Java/.NET/Python/Ruby on Rails handler) that
+    extracts it from a database and serializes it to JSON.</p>
+
+    <p>
+      <input class="fetchSeries" type="button" value="First dataset"> -
+      <a href="http://people.iola.dk/olau/flot/examples/data-eu-gdp-growth.json">data</a> -
+      <span>Fetched Europe (EU27), first point: (1999, 3)</span>
+    </p>
+
+    <p>
+      <input class="fetchSeries" type="button" value="Second dataset"> -
+      <a href="http://people.iola.dk/olau/flot/examples/data-japan-gdp-growth.json">data</a> -
+      <span>Fetched Japan, first point: (1999, -0.1)</span>
+    </p>
+
+    <p>
+      <input class="fetchSeries" type="button" value="Third dataset"> -
+      <a href="http://people.iola.dk/olau/flot/examples/data-usa-gdp-growth.json">data</a> -
+      <span>Fetched USA, first point: (1999, 4.4)</span>
+    </p>
+
+    <p>If you combine AJAX with setTimeout, you can poll the server
+       for new data.</p>
+
+    <p>
+      <input class="dataUpdate" type="button" value="Poll for data">
+    </p>
+</button>
+<script id="source" language="javascript" type="text/javascript">
+$(function () {
+    var options = {
+        lines: { show: true },
+        points: { show: true },
+        xaxis: { tickDecimals: 0, tickSize: 1 }
+    };
+    var data = [];
+    var placeholder = $("#placeholder");
+    
+    $.plot(placeholder, data, options);
+
+    
+    // fetch one series, adding to what we got
+    var alreadyFetched = {};
+    
+    $("input.fetchSeries").click(function () {
+        var button = $(this);
+        
+        // find the URL in the link right next to us 
+        var dataurl = button.siblings('a').attr('href');
+
+        // then fetch the data with jQuery
+        function onDataReceived(series) {
+            // extract the first coordinate pair so you can see that
+            // data is now an ordinary Javascript object
+            var firstcoordinate = '(' + series.data[0][0] + ', ' + series.data[0][1] + ')';
+
+            button.siblings('span').text('Fetched ' + series.label + ', first point: ' + firstcoordinate);
+
+            // let's add it to our current data
+            if (!alreadyFetched[series.label]) {
+                alreadyFetched[series.label] = true;
+                data.push(series);
+            }
+            
+            // and plot all we got
+            $.plot(placeholder, data, options);
+         }
+        
+        $.ajax({
+            url: dataurl,
+            method: 'GET',
+            dataType: 'json',
+            success: onDataReceived
+        });
+    });
+
+
+    // initiate a recurring data update
+    $("input.dataUpdate").click(function () {
+        // reset data
+        data = [];
+        alreadyFetched = {};
+        
+        $.plot(placeholder, data, options);
+
+        var iteration = 0;
+        
+        function fetchData() {
+            ++iteration;
+
+            function onDataReceived(series) {
+                // we get all the data in one go, if we only got partial
+                // data, we could merge it with what we already got
+                data = [ series ];
+                
+                $.plot($("#placeholder"), data, options);
+            }
+        
+            $.ajax({
+                // usually, we'll just call the same URL, a script
+                // connected to a database, but in this case we only
+                // have static example files so we need to modify the
+                // URL
+                url: "data-eu-gdp-growth-" + iteration + ".json",
+                method: 'GET',
+                dataType: 'json',
+                success: onDataReceived
+            });
+            
+            if (iteration < 5)
+                setTimeout(fetchData, 1000);
+            else {
+                data = [];
+                alreadyFetched = {};
+            }
+        }
+
+        setTimeout(fetchData, 1000);
+    });
+});
+</script>
+</html>

@@ -1,0 +1,24 @@
+{
+  "license": "Apache-2.0",
+  "private": false,
+  "name": "dbj.cond.comparators",
+  "version": "2.0.0",
+  "description": "deep dbj.cond.comparators 'arr' and 'lookup'. Can be used with dbj.cond",
+  "main": "dbj.cond.comparators.js",
+  "author": {
+    "name": "dbj.org"
+  },
+  "keywords": [
+    "equal",
+    "comparator",
+    "if",
+    "else",
+    "switch",
+    "LISP"
+  ],
+  "analyze": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DBJDBJ/dbj.cond.comparators"
+  }
+}

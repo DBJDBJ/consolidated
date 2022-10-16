@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html />
+<html> 
+<head>
+      <meta http-equiv="X-UA-Compatible" content="edge" />
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>HTML5 Canvas pie menu demo</title>
+<style type="text/css">
+    body { font: 12px/1.1 verdana,tahoma,arial; }
+    h1,h2,h3 { color:Navy; }
+    div#area {width:500; height:500; background-color:#c0c0c0; margin:5px;}
+    pre#help { width:50%; }
+</style>
+</head>
+<body>
+<h2>Click anywhere in the grey area</h2>
+
+<ul id="piemenu" style="visibility:hidden; position: absolute; right:-1">
+  <li id="item1"><img src="demo/1.png" /></li>
+  <li id="item2"><img src="demo/2.png" /></li>
+  <li id="item3"><img src="demo/3.png" /></li>
+  <li id="item4"><img src="demo/1.png" /></li>
+  <li id="item5"><img src="demo/2.png" /></li>
+  <li id="item6"><img src="demo/3.png" /></li>
+</ul>
+<div id="area" ></div>
+
+<pre id="help">
+Basic usage
+===========
+
+Have an UL whose list items contain IMG elements with the icons you want on the menu:
+<code>
+     &lt;ul id="Ul1"&gt;
+      &lt;li id="entry-1"&gt;&lt;img src="demo/1.png"&gt;&lt;/li&gt;
+      &lt;li id="entry-2"&gt;&lt;img src="demo/2.png"&gt;&lt;/li&gt;
+      &lt;li id="entry-3"&gt;&lt;img src="demo/3.png"&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+</code>
+
+Then, when the pie menu should pop up, use:
+<code>
+    $('#piemenu').pieMenu({top: 200, left: 400},
+                          {onSelection: function(selectedElt) { alert(selectedElt.attr('id'); }});
+</code>
+As you might have guessed, the first object is a position spec for where the pie menu should  up: coordinates specify the center of the radial menu, so if you use the current mouse coords,
+the "close" area is placed below the pointer.
+
+Options
+=======
+
+ - onSelection: a callback function that is passed the selected LI element.
+
+### Style
+ - selectedColor: CSS color spec string for the color of the currently highlighted element.
+ - backgroundColor: CSS color spec string for the slice/center circle backgrounds.
+ - globalAlpha: a float number specifying the menu's opacity.
+
+### CSS
+ - className: The new &lt;canvas&gt; element's .className.
+ - elementStyle: A property list passed to new &lt;canvas&gt; element's .css jQuery method.
+
+### Radial menu proportions
+ - closeRadius: Size of the center "X" circle
+ - closePadding: Number of pixels that the choice slices are offset from the "close" circle.
+ - closeSymbolSize: radius of the "X" lines of the close symbol
+ - outerPadding: number of pixels that are added to the radius of the choice slices.
+
+IE compatibility
+================
+
+I've tested this with excanvas.js on IE7 and IE8. Both work, as should IE6. 
+See the [excanvas site](http://excanvas.sourceforge.net/) for details on integrating it in your project.
+</pre>
+</body>
+</html>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+<script type="text/javascript" src="jquery.piemenu.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('#area').click(function (e) {
+            $('#piemenu').pieMenu({ left: e.pageX, top: e.pageY },
+      {
+          elementStyle: { position: 'absolute' },
+          onSelection: function (item) { alert(item.attr('id') + ' was clicked!'); }
+      });
+        });
+    });
+</script>

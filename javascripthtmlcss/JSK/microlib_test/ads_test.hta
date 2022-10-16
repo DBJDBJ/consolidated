@@ -1,0 +1,162 @@
+<!-- DOCTYPE html -->
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script id="dbj_microlib" type="text/javascript" >
+        //--------------------------------------
+		var dbjmlsrc =[
+		"../dbj.microlib.min.js",
+		"http://raw.githubusercontent.com/DBJDBJ/JSK/master/dbj.microlib.js"
+		],
+		dbjmlsrcidx = 0 ;
+		
+		$(function (undefined) {
+
+		
+			$.getScript( dbjmlsrc[dbjmlsrcidx])
+			  .done(function( script, textStatus ) {
+			  	printf.element = ($("#cons")[0]); // initor
+			  	var msg = "\nLoaded:\t{0}\nStatus:\t{1}\ntypeof dbj == {2}".format(
+					dbjmlsrc[dbjmlsrcidx],textStatus,typeof dbj
+				);
+			     // alert( msg );
+				printf( msg ).flush();
+				
+				if ( "undefined" != typeof(dbj) ) dbj_microlib_loaded();
+			  })
+			  .fail(function( jqxhr, settings, exception ) {
+			  	printf.element = ($("#cons")[0]); // initor
+			  	var msg = "ERROR on loading\n\nLoaded:\t{0}\nStatus:\t{1}\ntypeof dbj == {2}".format(
+					dbjmlsrc[dbjmlsrcidx], textStatus, typeof dbj
+				);
+				printf( msg ).flush();
+			});
+			
+			// print_buffer_flush();
+		});
+
+</script>		  
+<head>
+    <title>Testing dbj.micrlib.js is HTA (show AD schema of local admin)</title>
+	<meta charset="utf-8" />
+	<HTA:APPLICATION
+          APPLICATIONNAME="dbj_hta_test"
+          ID="dbj_hta_test"
+          VERSION="0.1"
+          BORDER="dialog"
+          ICON="favicon.ico"
+          SCROLL="auto"
+          SCROLLFLAT="yes"
+          CONTEXTMENU="no"/>
+</head>
+<body>
+    <div id="cons">
+
+    </div>
+    <script type="text/javascript">
+	;(function () {
+        //-------------------------------------------------------------------------------------------
+        var global_prop_counter = 0
+        var ad_sema = null;
+
+        //-------------------------------------------------------------------------------------------
+//      function    printf(msg_) { print_buffer_ += "\n" + msg_; }
+        //--------------------------------------
+		dbj_microlib_loaded  =  function () {
+		try {
+				show_schema_of_local_admin();
+			} catch (x) {
+				alert( "Uncaught Exception: " + dbj.err2str(x) ) ;
+			}
+		}
+        //--------------------------------------
+        //
+        var basic_net_info = function () {
+            var network = new ActiveXObject("Wscript.Network");
+            return basic_net_info = {
+                'computer'  : network.ComputerName,
+                'domain'    : network.UserDomain,
+                'user'      : network.UserName
+            };
+        }
+        //-------------------------------------------------------------------------------------------
+        var show_schema_of_local_admin = function () {
+            adOBJ = GetObject("WinNT://./admin,user");
+            ad_sema = GetObject(adOBJ.Schema);
+            //printf("Props of adOBJ") ;
+            //base_props( adOBJ ) ;
+            printf("Attributes of " + adOBJ.AdsPath + " Schema");
+            //base_props( ad_sema ) ;
+            printf("Mandatory attributes:");
+            foreach(ad_sema.MandatoryProperties, enumProperties)
+            printf("\nOptional attributes:");
+            foreach(ad_sema.OptionalProperties, enumProperties)
+            printf().flush();
+        }
+        //-------------------------------------------------------------------------------------------
+        var enumProperties = function (strAttribute, x) {
+            global_prop_counter += 1
+            try {
+//                var objAttribute = ad_sema.GetObject("Property", strAttribute)
+//                printf(" (Syntax: " + objAttribute.Syntax + ")")
+//                printf(objAttribute.MultiValued ? " Multivalued" : " Single-valued");
+
+                adOBJ.GetInfoEx(strAttribute, 0);
+                printf(global_prop_counter + "\t" + strAttribute + " :: " + adOBJ[strAttribute]);
+
+            } catch (x) {
+                      printf("EXCEPTION in enumProperties():\t" + dbj.err2str(x) );
+            }
+        }
+        //-------------------------------------------------------------------------------------------
+        var base_props = function (ad_object, x) {
+            try {
+                printf(
+                    "\nBase Properties : " +
+                    "\nName\t:\t" + ad_object.Name +
+                    "\nClass\t:\t" + ad_object.Class +
+                    "\nAD Path\t:\t" + ad_object.AdsPath
+                    );
+            } catch (x) {
+                   printf("EXCEPTION in base_props():\t" + dbj.err2str(x) );
+            }
+        }
+        //-------------------------------------------------------------------------------------------
+        var foreach = function (collection, FP, x) {
+            function try_call(FP, arg, x) {
+                try {
+                    FP(arg);
+                } catch (x) {
+                    printf("EXCEPTION in try_call():\t" + dbj.err2str(x) );
+                }
+            }
+
+            try {
+                if ("undefined" != typeof (collection.toArray)) {
+                    var arr = collection.toArray();
+                    for (var j = 0 ; j < arr.length; j++) {
+
+                        try_call(FP, arr[j]);
+                    }
+                }
+                else {
+                    for (var E = new Enumerator(collection) ; !E.atEnd() ; E.moveNext()) {
+                        try_call(FP, E.item());
+                    }
+                }
+            } catch (x) {
+                                  printf("EXCEPTION in foreach():\t" + dbj.err2str(x) );
+                try {
+                    if ((collection != null) && (typeof (collection.constructor) != "undefined"))
+                        printf("\nCollection argument is\t:\t" + collection.constructor);
+                    else
+                        printf("\nCollection argument is\t:\tNULL");
+                } catch (x) { }
+            }
+        }
+        //-------------------------------------------------------------------------------------------
+        // 
+        //-------------------------------------------------------------------------------------------
+}());
+    </script>
+</body>
+</html>

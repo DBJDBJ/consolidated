@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>DBJ*Tweet</title>
+<style type="text/css">
+div.twit {
+    font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Verdana, Tahoma, sans-serif;
+    width: 320px;
+}
+div.twit h3,
+div.twit h4 {
+    margin: 0;
+    padding: 0;
+}
+div.twit h3 {
+    font-size: 10pt;
+    color: blue;
+}
+div.twit h4 {
+    font-size: 7pt;
+    font-weight: normal;
+    text-align: right;
+    color: #999;
+}
+div.twit span {
+    font-size: 8pt;
+}
+</style>
+</head>
+<body>
+<!--
+script type="text/javascript" src="http://vice-versa.googlecode.com/svn/trunk/build/vice-versa.min.js"></script
+-->
+<script type="text/javascript">
+    //-----------------------------------------------------------
+    function addIntoList(info, container) {
+    var div = document.createElement('<div class="twit"></div>'),
+        h3  = div.appendChild(document.createElement("h3")),
+        span= div.appendChild(document.createElement("span")),
+        h4  = div.appendChild(document.createElement("h4"))
+    ;
+    h3.innerText = info.user.screen_name;
+    h4.innerText = info.created_at.substring(0, 19);
+    span.innerHTML = info.text.replace(/([a-zA-Z]+:\/\/[^\s]+)/g, '<a href="$1">$1</a>');
+    container.insertBefore(div, container.firstChild);
+};
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+onload = function() {
+var json_required =
+{ user: { screen_name: "info.user.screen_name" },
+    created_at: (new Date()).toLocaleString(),
+    text: "tweeter check"
+};
+addIntoList(json_required, document.body);
+    var xhr = new XMLHttpRequest;
+    xhr.open(
+        "GET", "proxy.php?url=" +
+        "http://twitter.com/statuses/friends_timeline.json" + "?_=" + Math.random(),
+        false,
+        "YOURNAME",
+        "YOURPASS"
+    );
+    xhr.send(null);
+    if(199 < xhr.status && xhr.status < 400){
+        document.body.innerHTML = "";
+        for(var
+            list = Function("return " + xhr.responseText)().reverse(),
+            length = list.length,
+            i = 0;
+            i < length; ++i
+        )
+            addIntoList(list[i], document.body);
+    };
+    setTimeout(onload, 10000); // again after 10 seconds
+};
+</script>
+</body>
+</html>

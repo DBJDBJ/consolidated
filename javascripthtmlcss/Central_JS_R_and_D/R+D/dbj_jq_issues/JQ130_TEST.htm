@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/DTD/strict.dtd">
+<html>
+<head>
+<title>JQ130</title>
+<style type="text/css" >
+	body { font: small/1.5 verdana; }
+	.dbj_footer { font-size:x-small; text-align:center; margin:10px; border-top:1px solid; }
+	p { visibility:hidden ; }
+</style>
+</head>
+<body>
+<h3>jQuery 1.3&trade; Very Quick Test Page</h3>
+<h3>Testing: $(document.body).append(&quot;&lt;p id='&quot; + the_id + &quot;' &gt;&quot;)</h3>
+<h5>NOTE 1: single quotes are surrounding id value above.</h5>
+<h5>NOTE 2: P elements are hidden deliberately.</h5>
+<div id="rezult"></div>
+<div class='dbj_footer'>This page &copy; 2009 by <a href="http://dbj.org">DBJ.ORG&trade;</a> </div>
+</body>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js" type="text/javascript" id="JQ.1.3" ></script>
+<script type="text/javascript" id="this_page_main_script" >
+
+	function decode(H) { // dirty 
+		if (H != null)
+			return H.replace(/[\<,\>]/g, function(ch) {
+				if (ch == '<') return "&lt;";
+				if (ch == '>') return "&gt;";
+				return ch;
+			});
+		else
+			return "undefined";
+	}
+
+	// http://groups.google.com/group/jquery-en/msg/62a2e93f55119d48?pli=1
+	jQuery.fn.outer = function() {
+		return $($('<div></div>').html(this.clone())).html();
+	} 
+
+	function test_jq_id_handling(the_id) {
+
+		$(document.body).append("<p id='" + the_id + "' >This is P with ID: " + the_id + "</p>");
+
+		$("#rezult")
+		.append(
+		"<hr/>original ID: '" + the_id + "'<br/>jQ made element with ID: " +
+		decode($(document.body).find(":last").outer())
+		)
+	}
+
+
+	$(function() {
+
+	$(window).error(function(msg, url, line) {
+		alert("error\n\n" + msg + "\n" + url + "\n" + line );
+	});
+
+	test_jq_id_handling(" MYID WITH SPACES ARROUND ") ;
+	test_jq_id_handling("MYID WITH SPACES");
+	test_jq_id_handling("MYID");
+	test_jq_id_handling("MYID WITH SPACES AND\" DOUBLE QUOTE INSIDE IT");
+	test_jq_id_handling("MYID WITH SPACES AND\' SINGLE QUOTE INSIDE IT");
+
+	});    // eof doc ready
+</script>
+</html>

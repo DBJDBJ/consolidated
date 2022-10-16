@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="pragma" content="no-cache" />
+<meta http-equiv="expires" content="0" />
+    <title>DBJ&trade;CodeMirror&trade;Console</title>
+    <style type="text/css" media="screen">
+    html,html body {
+        height:100%; min-height:100%;
+        margin:0px; padding:0px;
+        overflow:hidden;
+    }
+    div.container {height:100%;min-height: 100%;}
+    /*apply to IE */
+    div.newcontainer {height: 100%;}
+
+    /* apply to all but IE */
+    html>body div.newcontainer {height: auto;min-height: 100%;}
+
+    html,body { color:#000000; background-color:#C0C0C0; 
+                font: 12px/1.1 verdana,tahoma,arial; 
+                }
+
+    #editor_area { min-height:100%; height:100%; background:white; color:Black;}
+    
+    /* for IE6 */
+    * html #editor_area { height:100% }
+    
+    .footer { font-size:8px;}
+
+    div.border {border: 1px solid black;padding: 3px;}
+    div.toolbar { margin:3px; padding: 3px; border:3px inset #ffffff; }
+    div.toolbar input { margin-left:3px; }
+</style>
+</head>
+<body>
+<div class="container border">
+<div class="newcontainer" >
+<div id="editor_area" ></div>
+<p class="footer">Powered by <a href="cm/index.html">CodeMirror&trade;</a></p>
+</div>
+<div style="clear:both;height:0;"></div>
+</div>
+</body>
+<script src="cm/js/codemirror.js" type="text/javascript"></script>
+<script _CFG_ = "jquery.json" _PATH_="../lib/" src="../lib/dbj/dbj.ldr.js" type="text/javascript"></script>
+<script src="dbj.mirrorframe.js" type="text/javascript"></script>
+<script type="text/javascript" id="this_page_main_script" >
+    $(function() {
+        var dbj_log = function() {
+            if (!top.window.console || !top.window.console.log) {
+                $(document.body).prepend(("<ul><li>" + [].join.call(arguments, '') + "</ul></li>").replace(/\n/g, "<br/>"));
+            } else {
+                top.window.console.log([].join.call(arguments, ''));
+            }
+            return false;
+        }
+
+        $(document.body).error(function(msg, url, line) {
+            return dbj_log("Error\n" + msg + "\n" + url + "\n" + line);
+        });
+
+            var require = function(jsFile, callback) {
+                if (typeof jsFile !== "string") {
+                    return dbj_log("First $.require() argument must be a single string");
+                }
+                if (typeof callback !== "function") {
+                    return dbj_log("Second $.require() argument must be a function");
+                }
+                var retval = null;
+                $.ajax({
+                    type: "GET",
+                    url: jsFile,
+                    success: callback,
+                    dataType: "text",
+                    cache: false,
+                    async: false,
+                    error: function(xhr, textStatus, errorThrown) {
+                        // typically only one of textStatus or errorThrown 
+                        // will have info
+                        // this; -- the options for this ajax request
+                        dbj_log("\nError occured while trying to ajax url: " + this.url + (textStatus ? "\nStatus message: " + textStatus : "") + (errorThrown ? "\nError message: " + errorThrown : ""));
+                    }
+                });
+                return retval;
+            };
+
+        function start_code_mirror(content_) {
+            var editor = new MirrorFrame(
+            "editor_area"
+            , {
+                content: content_,
+                parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
+                stylesheet: "cm/css/jscolors.css",
+                path: "cm/js/",
+                autoMatchParens: true,
+                // DBJ additions from here
+                log: function(s) { dbj_log(s); }
+            });
+        }
+        var dumsy_clumsy = $.require("" + $.query.get("cn"), start_code_mirror);
+    });
+// eof doc ready
+</script>
+</html>
+<!--
+<object width="480" height="390">
+<param name="movie" value="http://www.xtranormal.com/players/jwplayer.swf"></param>
+<param name="allowFullScreen" value="true"></param>
+<param name="allowscriptaccess" value="always"></param>
+<param name="flashvars"value="height=390&amp;width=480&amp;file=http://newvideos.xtranormal.com/standard/7673c9a6-8b71-11de-a3cd-003048d6740d_16_standard_medium-flv.flv&amp;image=http://newvideos.xtranormal.com/standard/7673c9a6-8b71-11de-a3cd-003048d6740d_16_standard_poster.jpg&amp;link=http://www.xtranormal.com/watch?e=20090817183120635&amp;searchbar=false&amp;autostart=false"/>
+<embed src="http://www.xtranormal.com/players/jwplayer.swf" width="480" height="390" allowscriptaccess="always" allowfullscreen="true" flashvars="height=390&amp;width=480&amp;file=http://newvideos.xtranormal.com/standard/7673c9a6-8b71-11de-a3cd-003048d6740d_16_standard_medium-flv.flv&amp;image=http://newvideos.xtranormal.com/standard/7673c9a6-8b71-11de-a3cd-003048d6740d_16_standard_poster.jpg&amp;link=http://www.xtranormal.com/watch?e=20090817183120635&amp;searchbar=false&amp;autostart=false">
+</embed>
+</object>
+-->
