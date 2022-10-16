@@ -3,19 +3,15 @@
 NOTE: virtual environment is not source controlled. It has to be recreated on each virgin install. Here is how.
 
 - [Python glossary](#python-glossary)
-  - [Installing Python3](#installing-python3)
-- [How to use the command line](#how-to-use-the-command-line)
-- [What is pip and what are wheels](#what-is-pip-and-what-are-wheels)
-- [What are nightly wheels](#what-are-nightly-wheels)
-- [Using pip](#using-pip)
-- [Setup terminal and pip](#setup-terminal-and-pip)
-  - [Create virtual environment](#create-virtual-environment)
-- [Install Kivy](#install-kivy)
-- [Optionaly install Kivy’s dependencies](#optionaly-install-kivys-dependencies)
-## Python glossary
-Here we explain how to install Python packages, how to use the command line and what wheels are.
+  - [What is pip and what are wheels](#what-is-pip-and-what-are-wheels)
+  - [What are nightly wheels](#what-are-nightly-wheels)
+  - [Using pip](#using-pip)
+  - [Setup terminal and pip](#setup-terminal-and-pip)
+    - [Create virtual environment](#create-virtual-environment)
+  - [Install Kivy](#install-kivy)
+  - [Optionaly install Kivy’s dependencies](#optionaly-install-kivys-dependencies)
 
-### Installing Python3
+### Installing Python
 
 > WIN10: just type 'python3' from a command line for a first time installation.
 
@@ -23,7 +19,7 @@ You need an existing installation of Python. Multiple versions of Python can be 
 
 Once Python is installed, open the console and make sure Python3 is available by typing `python --version`.
 
-> PATH: If Python is not on your PATH, it is warmly recommended to use [Rapid Environment Editor](https://www.rapidee.com/en/about) and do that, and various other wonderfull things using that excellent tool.
+> PATH: If Python is not on your PATH, it is warmly recommended to use [Rapid Environment Editor](https://www.rapidee.com/en/about) . Do that, and various other wonderfull things using that excellent tool.
 
 ## How to use the command line
 To execute any of the pip or wheel commands given here, you need a command line (here also called console, terminal, shell or bash, where the last two refer to Linux style command lines) and Python must be on the PATH.
@@ -34,9 +30,10 @@ Alternative Linux style command lines on Windows that we recommend are Git for W
 
 Note, the default Windows command line can still be used, even if a bash terminal is installed.
 
-To temporarily add your Python installation to the PATH, simply open your command line and then use the cd command to change the current directory to where python is installed, e.g. cd C:\Python37.
+If you have installed Python using the default options, then the path to Python will most likely already be permanently on your PATH variable. There is an option in the installer which lets you do that, and it is enabled by default.
 
-If you have installed Python using the default options, then the path to Python will already be permanently on your PATH variable. There is an option in the installer which lets you do that, and it is enabled by default.
+# Python glossary
+Here we explain how to install Python packages, how to use the command line and what wheels are.
 
 ## What is pip and what are wheels
 In Python, packages such as e.g. Kivy can be installed with the python package manager, named **pip** (“python install package”).
