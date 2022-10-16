@@ -1,5 +1,5 @@
 
-## Modern Arena AKS Demo Architecture
+## Modern AKS Demo Architecture
 
  [Simpler App based on Azure Kubernetes Service (AKS)](https://docs.microsoft.com/en-us/azure/architecture/reference-architectures/containers/aks-microservices/aks-microservices)
 
