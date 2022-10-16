@@ -1,10 +1,12 @@
+> &copy;2022 by dbj@dbj.org CC BY SA 4.0
+>
+> WORK IN PROGRESS
+---
 <!-- For compiling and printing to pdf use VS Code extension: 
 https://marketplace.visualstudio.com/items?itemName=yzane.markdown-pdf -->
 
-<h1>Modern FA Logging infrastructure</h1>
+<h1>Modern Azure Hosted Solutions Logging infrastructure</h1>
 <h2>Introduction</h2>
-
-Version: 0.2.20220407 -- WORK IN PROGRESS
 
 - [Key Assumptions](#key-assumptions)
 - [Azure Kubernetes Service](#azure-kubernetes-service)
@@ -16,46 +18,33 @@ Version: 0.2.20220407 -- WORK IN PROGRESS
   - [Without FluentBit](#without-fluentbit)
 - [Syslog](#syslog)
 
-<div class="page"/>
 
 # Key Assumptions
-:[key_assumptions](./key_assumptions.md)
-
-<div class="page"/>
+[key_assumptions](./key_assumptions.md)
 
 # Azure Kubernetes Service
-:[aks](./aks.md)
-
-<div class="page"/>
+[aks](./aks.md)
 
 # Amazon Elastic Kubernetes Service
-:[eks](./aws.md)
-
-<div class="page"/>
+[eks](./aws.md)
 
 # Elastic Search
 
-:[elk](./elk.md)
+[elk](./elk.md)
 
 ## FluentBit and ELK
 
-:[fek](./fek.md)
-
-<div class="page"/>
+[fek](./fek.md)
 
 ## Using Logstash
 
-:[logstash](./logstash.md)
-
-<div class="page"/>
+[logstash](./logstash.md)
 
 # Splunk
 
 ## Without FluentBit
 
-:[splunk](./splunk.md)
-
-<div class="page"/>
+[splunk](./splunk.md)
 
 # Syslog
-:[syslog](./syslog.md)
+[syslog](./syslog.md)
