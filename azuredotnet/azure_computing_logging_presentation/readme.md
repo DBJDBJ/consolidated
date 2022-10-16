@@ -10,14 +10,13 @@ https://marketplace.visualstudio.com/items?itemName=yzane.markdown-pdf -->
 
 - [Introduction](#introduction)
 - [Key Assumptions](#key-assumptions)
+- [Syslog](#syslog)
 - [Azure Kubernetes Service](#azure-kubernetes-service)
 - [Amazon Elastic Kubernetes Service](#amazon-elastic-kubernetes-service)
 - [Elastic Search](#elastic-search)
   - [FluentBit and ELK](#fluentbit-and-elk)
   - [Using Logstash](#using-logstash)
 - [Splunk](#splunk)
-  - [Without FluentBit](#without-fluentbit)
-- [Syslog](#syslog)
 
 # Introduction
 
@@ -25,32 +24,19 @@ For Cloud Native Solutions, logging and monitroing is criticaly important. [Impl
 
 This is a short analysis on the state of logging technologies circa 2022Q3. In the context of Azure/AWS hosting.
 
-# Key Assumptions
-[key_assumptions](./key_assumptions.md)
+# [Key Assumptions](./key_assumptions.md)
 
-# Azure Kubernetes Service
-[aks](./aks.md)
+# [Syslog](./syslog.md)
 
-# Amazon Elastic Kubernetes Service
-[eks](./aws.md)
+# [Azure Kubernetes Service](./aks.md)
 
-# Elastic Search
+# [Amazon Elastic Kubernetes Service](./aws.md)
 
-[elk](./elk.md)
+# [Elastic Search](./elk.md)
 
-## FluentBit and ELK
+## [FluentBit and ELK](./fek.md)
 
-[fek](./fek.md)
+## [Using Logstash](./logstash.md)
 
-## Using Logstash
+# [Splunk](./splunk.md)
 
-[logstash](./logstash.md)
-
-# Splunk
-
-## Without FluentBit
-
-[splunk](./splunk.md)
-
-# Syslog
-[syslog](./syslog.md)
